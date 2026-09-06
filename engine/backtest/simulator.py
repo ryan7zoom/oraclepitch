@@ -441,6 +441,40 @@ def _cli_main():
     # "UNRESOLVED GAP" section.
     report = run_backtest(all_matches, odds_provider=odds_provider)
 
+    logger.info(f"Running match outcome calibration check on {len(all_matches)} matches...")
+    outcome_calibration = {}
+    if len(all_matches) >= 60:
+        try:
+            outcome_calibration = _run_match_outcome_calibration_check(all_matches)
+        except Exception as e:
+            logger.error(f"Match outcome calibration check failed: {e}")
+    else:
+        logger.warning(
+            f"Only {len(all_matches)} matches - skipping match outcome "
+            f"calibration check (needs more data for a meaningful result)."
+        )
+
+    outcome_section_lines = [
+        "",
+        "Match outcome model calibration (raw Dixon-Coles predictions vs "
+        "actual outcomes, no odds/staking involved - see this check "
+        "specifically to distinguish 'model is overconfident' from "
+        "'staking/thresholds are the problem' when betting ROI is negative):",
+    ]
+    if outcome_calibration:
+        for outcome in ("home_win", "draw", "away_win"):
+            predicted, actual, n = outcome_calibration[outcome]
+            if n == 0:
+                outcome_section_lines.append(f"  {outcome}: no predictions made")
+            else:
+                gap = predicted - actual
+                outcome_section_lines.append(
+                    f"  {outcome}: predicted={predicted:.1%}  actual={actual:.1%}  "
+                    f"gap={gap:+.1%}  n={n}"
+                )
+    else:
+        outcome_section_lines.append("  (skipped - insufficient match data)")
+
     logger.info(f"Running corners calibration check on {len(all_corners_rows)} rows with corners data...")
     corners_calibration = {}
     if len(all_corners_rows) >= 60:  # need enough for a meaningful min_training_matches window
@@ -488,12 +522,101 @@ def _cli_main():
         "check (predicted probability vs actual frequency) is reported "
         "below instead of a betting ROI.\n"
         "\n" + report.summary() + "\n"
+        + "\n".join(outcome_section_lines) + "\n"
         + "\n".join(corners_section_lines)
     )
     with open(report_path, "w") as f:
         f.write(report_text)
     logger.info(f"Report written to {report_path}")
     print(report_text)
+
+
+def _run_match_outcome_calibration_check(historical_matches, min_training_matches=50, refit_every_n_matches=10):
+    """Standalone calibration check for the Dixon-Coles match outcome
+    model, checking raw predicted probabilities against actual outcomes
+    - completely independent of odds, staking, or Kelly criterion.
+
+    WHY THIS EXISTS: a real backtest run (2,748 bets across 5 seasons)
+    showed a positive average "edge" (model probability minus
+    bookmaker-implied probability) on every single selection
+    (home_win, draw, away_win, over_2.5) - meaning the model believed
+    it had a genuine edge on every bet - yet still lost money overall
+    (-6.5% ROI, 100% max drawdown at one point). That specific
+    combination (consistent believed edge + consistent losses) is a
+    classic signature of the model's probabilities being systematically
+    too confident, rather than just unlucky variance on a few bets -
+    but the betting-layer numbers alone can't distinguish "model is
+    miscalibrated" from "staking/thresholds are the problem" since both
+    run through the same Kelly-staked bets. This function isolates the
+    model's calibration by comparing its RAW predictions to actual
+    outcomes, with no odds or staking involved at all.
+
+    Uses the same no-lookahead discipline as run_backtest(): predictions
+    for match i are made using a model fit only on matches strictly
+    before i.
+
+    Returns a dict with keys "home_win", "draw", "away_win", each
+    mapping to (avg_predicted_probability, actual_frequency, n).
+    A well-calibrated model should show these two numbers close
+    together for each outcome - if avg_predicted is consistently HIGHER
+    than actual across all three outcomes, that's overconfidence (the
+    model routinely rates things as MORE likely than they really are,
+    for every listed outcome, which numerically it cannot be since the
+    three probabilities must sum to something reasonable across
+    matches - watch for this pattern specifically as it would indicate
+    a difference between predicted and realized SHARPNESS, not just a
+    single outcome being off).
+    """
+    sorted_matches = sorted(historical_matches, key=lambda m: m.match_date)
+    predictions = {"home_win": [], "draw": [], "away_win": []}
+    actuals = {"home_win": [], "draw": [], "away_win": []}
+
+    model = DixonColesModel()
+    fitted_up_to_index = -1
+
+    for i, match in enumerate(sorted_matches):
+        if i < min_training_matches:
+            continue
+
+        training_data = sorted_matches[:i]
+
+        needs_refit = (
+            fitted_up_to_index < 0
+            or (i - fitted_up_to_index) >= refit_every_n_matches
+        )
+        if needs_refit:
+            try:
+                model.fit(training_data, as_of=training_data[-1].match_date)
+                fitted_up_to_index = i
+            except Exception:
+                continue
+
+        try:
+            outcome_probs = model.match_outcome_probs(match.home_team, match.away_team)
+        except ValueError:
+            continue  # unknown team, same handling as run_backtest()
+
+        actual_home_win = match.home_goals > match.away_goals
+        actual_draw = match.home_goals == match.away_goals
+        actual_away_win = match.home_goals < match.away_goals
+
+        predictions["home_win"].append(outcome_probs["home_win"])
+        actuals["home_win"].append(1.0 if actual_home_win else 0.0)
+        predictions["draw"].append(outcome_probs["draw"])
+        actuals["draw"].append(1.0 if actual_draw else 0.0)
+        predictions["away_win"].append(outcome_probs["away_win"])
+        actuals["away_win"].append(1.0 if actual_away_win else 0.0)
+
+    result = {}
+    for outcome in ("home_win", "draw", "away_win"):
+        n = len(predictions[outcome])
+        if n == 0:
+            result[outcome] = (None, None, 0)
+            continue
+        avg_predicted = sum(predictions[outcome]) / n
+        avg_actual = sum(actuals[outcome]) / n
+        result[outcome] = (avg_predicted, avg_actual, n)
+    return result
 
 
 def _run_corners_calibration_check(matches_with_corners, min_training_matches=50):
