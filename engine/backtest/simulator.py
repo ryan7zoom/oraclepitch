@@ -8,11 +8,23 @@ evaluates Kelly-staked bets against actual outcomes to compute ROI.
 
 ************************************************************************
 ODDS COVERAGE STATUS (read before trusting backtest ROI numbers):
-The backtest CLI (_cli_main() below) now uses football-data.co.uk - a
-free, no-key, plain-CSV historical archive - for real Bet365 (or
-fallback bookmaker) odds. This covers match_winner (home/draw/away) and
-match_total_goals at the Over/Under 2.5 line specifically, which is the
-only goals line this data source provides odds for.
+The backtest CLI (_cli_main() below) uses xgabora/Club-Football-Match-Data
+(engine/sources/xgabora_match_data_source.py) - a free, no-key,
+GitHub-hosted CSV covering 2000-present - for real historical odds.
+This dataset does not document which specific bookmaker its odds
+columns come from, so treat these as "a" bookmaker's real market odds,
+not confirmed as Bet365 specifically. This covers match_winner
+(home/draw/away) and match_total_goals at the Over/Under 2.5 line
+specifically, which is the only goals line this data source provides
+odds for.
+
+NOTE: this replaces an earlier version of this module that used
+football-data.co.uk directly. That source experienced an extended
+outage (confirmed down via direct browser visit and curl from multiple
+independent networks, not a bot-detection or rate-limit issue - see
+git history for the diagnostic trail) and was replaced with this
+GitHub-hosted alternative, which is far less likely to experience
+similar downtime since it's served from GitHub's own infrastructure.
 
 Double chance (1X/X2), team total goals, team shots on target, and
 match shots on target still have NO real odds source connected. The
@@ -263,12 +275,12 @@ def _cli_main():
     """CLI entry point for `python -m engine.backtest.simulator --start Y --end Y`,
     matching the GitHub Actions backtest workflow's invocation.
 
-    Uses football-data.co.uk (engine/sources/football_data_co_uk_source.py)
+    Uses xgabora/Club-Football-Match-Data (engine/sources/xgabora_match_data_source.py)
     for BOTH the goals data used to fit Dixon-Coles AND the historical
-    Bet365 odds needed for Kelly staking - this is the odds source that
-    was previously missing (see this module's earlier docstring section
-    "UNRESOLVED GAP"). That gap is now closed for the match_winner and
-    match_total_goals (Over/Under 2.5 only - see note below) markets.
+    odds needed for Kelly staking - this is the odds source that was
+    previously missing (see this module's earlier docstring section
+    "ODDS COVERAGE STATUS"). That gap is now closed for the match_winner
+    and match_total_goals (Over/Under 2.5 only - see note below) markets.
     Double chance, team totals, and shots on target markets still have
     no real odds source and will report zero bets for those markets
     specifically - this is called out in the report, not hidden.
@@ -279,7 +291,7 @@ def _cli_main():
     import time
 
     import config
-    from engine.sources.football_data_co_uk_source import FootballDataCoUkSource
+    from engine.sources.xgabora_match_data_source import XgaboraMatchDataSource
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
     logger = logging.getLogger("engine.backtest.simulator")
@@ -289,7 +301,7 @@ def _cli_main():
     parser.add_argument("--end", type=int, default=config.BACKTEST_END_SEASON)
     args = parser.parse_args()
 
-    source = FootballDataCoUkSource()
+    source = XgaboraMatchDataSource()
     all_matches = []
     all_corners_rows = []
     # odds_lookup maps (home_team, away_team, match_date) -> HistoricalMatchOdds,
@@ -310,7 +322,7 @@ def _cli_main():
         if season > args.start:
             time.sleep(5)
 
-        logger.info(f"Fetching season {season} from football-data.co.uk...")
+        logger.info(f"Fetching season {season} from xgabora/Club-Football-Match-Data...")
         try:
             season_results = source.fetch_season(season)
         except Exception as e:
@@ -336,16 +348,17 @@ def _cli_main():
     if len(all_matches) < 50:
         logger.error(
             f"Only {len(all_matches)} matches fetched - insufficient for a "
-            f"meaningful backtest. Check the season range or football-data.co.uk "
+            f"meaningful backtest. Check the season range or xgabora/Club-Football-Match-Data "
             f"availability for these seasons."
         )
 
     def odds_provider(home_team, away_team, match_date, market, selection):
-        """Look up real Bet365 (or fallback bookmaker) odds for a given
-        bet. Returns None for markets/selections this data source
-        doesn't cover (double_chance, team_total_goals, shots_on_target),
-        which correctly causes run_backtest() to skip evaluating those
-        bets rather than fabricate odds for them.
+        """Look up real historical odds for a given bet (bookmaker
+        unspecified by the source dataset - see module docstring).
+        Returns None for markets/selections this data source doesn't
+        cover (double_chance, team_total_goals, shots_on_target), which
+        correctly causes run_backtest() to skip evaluating those bets
+        rather than fabricate odds for them.
         """
         record = odds_lookup.get((home_team, away_team, match_date))
         if record is None:
@@ -359,16 +372,20 @@ def _cli_main():
             }.get(selection)
 
         if market == "match_total_goals" and selection == "over_2.5":
-            # football-data.co.uk only provides the 2.5 goals line - the
+            # This data source only provides the 2.5 goals line - the
             # other GOAL_LINES (0.5, 1.5, 3.5, 4.5) have no odds coverage
-            # in this data source and correctly return None below.
+            # here and correctly return None below.
             return record.odds_over_2_5
 
         return None
 
-    # odds_provider is real now (backed by actual Bet365 historical
-    # odds), unlike the None passed here previously - see the module
-    # docstring's now-partially-resolved "UNRESOLVED GAP" section.
+    # odds_provider is real now (backed by actual historical odds from
+    # xgabora/Club-Football-Match-Data - this dataset does not document
+    # which specific bookmaker its OddHome/OddDraw/OddAway columns come
+    # from, so these are treated as "a" bookmaker's real market odds,
+    # not confirmed as Bet365 specifically), unlike the None passed
+    # here previously - see the module docstring's now-partially-resolved
+    # "UNRESOLVED GAP" section.
     report = run_backtest(all_matches, odds_provider=odds_provider)
 
     logger.info(f"Running corners calibration check on {len(all_corners_rows)} rows with corners data...")
@@ -403,7 +420,7 @@ def _cli_main():
         "EPL Backtest Report\n"
         f"Seasons: {args.start}-{args.end}\n"
         f"Total historical matches fetched: {len(all_matches)}\n"
-        f"Data source: football-data.co.uk (free historical CSV archive)\n"
+        f"Data source: xgabora/Club-Football-Match-Data (GitHub-hosted CSV, 2000-present)\n"
         "\n"
         "*** ODDS COVERAGE NOTE ***\n"
         "Real historical odds are only available for: match_winner "
