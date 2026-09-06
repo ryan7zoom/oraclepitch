@@ -276,6 +276,7 @@ def _cli_main():
     import argparse
     import logging
     import os
+    import time
 
     import config
     from engine.sources.football_data_co_uk_source import FootballDataCoUkSource
@@ -298,6 +299,17 @@ def _cli_main():
     odds_lookup = {}
 
     for season in range(args.start, args.end + 1):
+        # Small delay between seasons - the previous back-to-back
+        # fetch pattern (5 seasons in under 3 seconds) triggered
+        # consistent 503s from football-data.co.uk on every attempt,
+        # consistent with a request-rate trigger rather than a hard
+        # per-IP block. Spacing requests out is a low-cost thing to
+        # try before concluding the site has blocked GitHub Actions
+        # outright (see fetch_season()'s retry logic for the other
+        # half of this mitigation).
+        if season > args.start:
+            time.sleep(5)
+
         logger.info(f"Fetching season {season} from football-data.co.uk...")
         try:
             season_results = source.fetch_season(season)
