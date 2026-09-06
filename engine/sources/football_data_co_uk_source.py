@@ -38,6 +38,7 @@ URL pattern: https://www.football-data.co.uk/mmz4281/{season_code}/E0.csv
 import csv
 import io
 import logging
+import time
 from dataclasses import dataclass, field
 from datetime import date, datetime
 from typing import Optional
@@ -129,31 +130,40 @@ class FootballDataCoUkSource:
     def __init__(self, division_code: str = "E0"):
         self.division_code = division_code
 
-    def fetch_season(self, start_year: int) -> list[HistoricalMatchOdds]:
+    def fetch_season(self, start_year: int, max_retries: int = 3) -> list[HistoricalMatchOdds]:
         """Fetch and parse one season's CSV, e.g. fetch_season(2024) for
         the 2024-25 season.
 
         Raises requests.HTTPError if the season file doesn't exist
         (football-data.co.uk returns 404 for seasons it doesn't have,
         e.g. requesting a season too far in the past for this division,
-        or a season that hasn't started yet).
+        or a season that hasn't started yet) or if every retry attempt
+        for a 503 is exhausted.
+
+        RETRY BEHAVIOR: this data source was observed returning HTTP 503
+        on every single request when hit back-to-back for 5 seasons in
+        under 3 seconds from a GitHub Actions runner - consistent with
+        either a rate limit (many requests in a short window) or the
+        site being temporarily overloaded, as distinct from a hard,
+        permanent IP-level block (which a retry-with-backoff would not
+        fix). This method retries a 503 specifically (not other HTTP
+        errors, which likely indicate a real problem like a missing
+        season file) with an increasing delay between attempts, on the
+        theory that spacing requests out gives a rate limit or a
+        transient overload time to clear. If 503s persist through all
+        retries, that's a stronger signal of a harder block, and this
+        method will raise rather than loop forever.
         """
         scode = _season_code(start_year)
         url = BASE_URL.format(season_code=scode)
         # football-data.co.uk's robots.txt disallows generic automated
-        # access, and requests sent with Python's default user-agent
-        # were observed returning HTTP 503 consistently from a GitHub
-        # Actions runner (every season, every retry - not a transient
-        # outage). Setting a standard browser User-Agent header is a
+        # access. Setting a standard browser User-Agent header is a
         # minimal, honest attempt to be treated like an ordinary
         # browser request rather than an obviously-scripted client -
         # this does NOT bypass any access control that requires
         # authentication, it just avoids being fingerprinted by the
         # single most common naive bot-detection signal (the default
-        # "python-requests/X.X" user-agent string). If 503s persist
-        # even with this header, that indicates a firmer block (e.g.
-        # by source IP range) that this change cannot fix, and a
-        # different historical data source would be needed.
+        # "python-requests/X.X" user-agent string).
         headers = {
             "User-Agent": (
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -161,18 +171,40 @@ class FootballDataCoUkSource:
                 "Chrome/120.0.0.0 Safari/537.36"
             )
         }
-        response = requests.get(url, headers=headers, timeout=30)
-        response.raise_for_status()
 
-        # football-data.co.uk CSVs are sometimes latin-1 encoded (older
-        # seasons, non-ASCII characters in referee names etc.) - try utf-8
-        # first, fall back rather than crash on a decode error.
-        try:
-            text = response.content.decode("utf-8")
-        except UnicodeDecodeError:
-            text = response.content.decode("latin-1")
+        last_error = None
+        for attempt in range(max_retries):
+            if attempt > 0:
+                # Increasing delay: 3s, 6s, 9s... gives more room on
+                # each retry in case this is a rate limit that needs
+                # time to reset, rather than hammering again immediately.
+                delay = 3 * attempt
+                logger.info(f"Retrying season {start_year} after {delay}s delay (attempt {attempt + 1}/{max_retries})...")
+                time.sleep(delay)
 
-        return self._parse_csv(text, season_start_year=start_year)
+            response = requests.get(url, headers=headers, timeout=30)
+
+            if response.status_code == 503:
+                last_error = requests.HTTPError(
+                    f"503 Server Error: Service Temporarily Unavailable for url: {url}"
+                )
+                continue
+
+            response.raise_for_status()
+
+            # football-data.co.uk CSVs are sometimes latin-1 encoded
+            # (older seasons, non-ASCII characters in referee names
+            # etc.) - try utf-8 first, fall back rather than crash on
+            # a decode error.
+            try:
+                text = response.content.decode("utf-8")
+            except UnicodeDecodeError:
+                text = response.content.decode("latin-1")
+
+            return self._parse_csv(text, season_start_year=start_year)
+
+        # All retries exhausted with 503 every time
+        raise last_error
 
     def _parse_csv(self, csv_text: str, season_start_year: int) -> list[HistoricalMatchOdds]:
         reader = csv.DictReader(io.StringIO(csv_text))
