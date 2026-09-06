@@ -142,6 +142,41 @@ class BacktestReport:
             }
         return result
 
+    def roi_by_selection(self) -> dict:
+        """Finer-grained breakdown than roi_by_market(): groups by
+        (market, selection) pair rather than market alone.
+
+        This exists because roi_by_market() alone can hide exactly
+        where a market's losses are coming from - e.g. "match_winner"
+        at -5.8% ROI could mean all three selections (home_win, draw,
+        away_win) are mildly unprofitable, or it could mean one
+        selection (e.g. draw, which is notoriously hard to price well)
+        is badly unprofitable while the others are fine or even
+        profitable, and the market-level average is masking that. This
+        was specifically requested after an initial backtest run showed
+        an overall loss, to identify whether the loss is uniform or
+        concentrated - a very different diagnosis and a very different
+        fix depending on which it is.
+        """
+        keys = {(b.market, b.selection) for b in self.bets}
+        result = {}
+        for market, selection in keys:
+            sel_bets = [b for b in self.bets if b.market == market and b.selection == selection]
+            staked = sum(b.stake_fraction for b in sel_bets)
+            profit = sum(b.profit_fraction for b in sel_bets)
+            avg_model_prob = sum(b.model_probability for b in sel_bets) / len(sel_bets)
+            avg_odds = sum(b.decimal_odds for b in sel_bets) / len(sel_bets)
+            avg_implied_prob = sum(1.0 / b.decimal_odds for b in sel_bets) / len(sel_bets)
+            result[(market, selection)] = {
+                "roi": profit / staked if staked > 0 else 0.0,
+                "n_bets": len(sel_bets),
+                "win_rate": sum(1 for b in sel_bets if b.won) / len(sel_bets) if sel_bets else 0.0,
+                "avg_model_probability": avg_model_prob,
+                "avg_implied_probability": avg_implied_prob,
+                "avg_odds": avg_odds,
+            }
+        return result
+
     def summary(self) -> str:
         lines = [
             f"Total bets: {self.total_bets}",
@@ -156,6 +191,24 @@ class BacktestReport:
             lines.append(
                 f"  {market}: ROI={stats['roi']:+.1%}  "
                 f"n={stats['n_bets']}  win_rate={stats['win_rate']:.1%}"
+            )
+
+        lines.append("")
+        lines.append("ROI by selection (finer breakdown - where within each market the profit/loss is coming from):")
+        for (market, selection), stats in sorted(self.roi_by_selection().items()):
+            # avg_model_probability vs avg_implied_probability shows the
+            # AVERAGE edge the model believed it had going into these
+            # bets - if this gap was consistently positive but the
+            # selection still lost money, that's a strong signal the
+            # model's probabilities are systematically overconfident
+            # for this specific selection, not just unlucky variance.
+            edge = stats["avg_model_probability"] - stats["avg_implied_probability"]
+            lines.append(
+                f"  {market}/{selection}: ROI={stats['roi']:+.1%}  "
+                f"n={stats['n_bets']}  win_rate={stats['win_rate']:.1%}  "
+                f"avg_model_prob={stats['avg_model_probability']:.1%}  "
+                f"avg_implied_prob={stats['avg_implied_probability']:.1%}  "
+                f"avg_edge={edge:+.1%}  avg_odds={stats['avg_odds']:.2f}"
             )
         return "\n".join(lines)
 
