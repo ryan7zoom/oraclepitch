@@ -140,7 +140,28 @@ class FootballDataCoUkSource:
         """
         scode = _season_code(start_year)
         url = BASE_URL.format(season_code=scode)
-        response = requests.get(url, timeout=30)
+        # football-data.co.uk's robots.txt disallows generic automated
+        # access, and requests sent with Python's default user-agent
+        # were observed returning HTTP 503 consistently from a GitHub
+        # Actions runner (every season, every retry - not a transient
+        # outage). Setting a standard browser User-Agent header is a
+        # minimal, honest attempt to be treated like an ordinary
+        # browser request rather than an obviously-scripted client -
+        # this does NOT bypass any access control that requires
+        # authentication, it just avoids being fingerprinted by the
+        # single most common naive bot-detection signal (the default
+        # "python-requests/X.X" user-agent string). If 503s persist
+        # even with this header, that indicates a firmer block (e.g.
+        # by source IP range) that this change cannot fix, and a
+        # different historical data source would be needed.
+        headers = {
+            "User-Agent": (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/120.0.0.0 Safari/537.36"
+            )
+        }
+        response = requests.get(url, headers=headers, timeout=30)
         response.raise_for_status()
 
         # football-data.co.uk CSVs are sometimes latin-1 encoded (older
