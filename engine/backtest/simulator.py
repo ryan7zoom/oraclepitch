@@ -8,11 +8,23 @@ evaluates Kelly-staked bets against actual outcomes to compute ROI.
 
 ************************************************************************
 ODDS COVERAGE STATUS (read before trusting backtest ROI numbers):
-The backtest CLI (_cli_main() below) now uses football-data.co.uk - a
-free, no-key, plain-CSV historical archive - for real Bet365 (or
-fallback bookmaker) odds. This covers match_winner (home/draw/away) and
-match_total_goals at the Over/Under 2.5 line specifically, which is the
-only goals line this data source provides odds for.
+The backtest CLI (_cli_main() below) uses xgabora/Club-Football-Match-Data
+(engine/sources/xgabora_match_data_source.py) - a free, no-key,
+GitHub-hosted CSV covering 2000-present - for real historical odds.
+This dataset does not document which specific bookmaker its odds
+columns come from, so treat these as "a" bookmaker's real market odds,
+not confirmed as Bet365 specifically. This covers match_winner
+(home/draw/away) and match_total_goals at the Over/Under 2.5 line
+specifically, which is the only goals line this data source provides
+odds for.
+
+NOTE: this replaces an earlier version of this module that used
+football-data.co.uk directly. That source experienced an extended
+outage (confirmed down via direct browser visit and curl from multiple
+independent networks, not a bot-detection or rate-limit issue - see
+git history for the diagnostic trail) and was replaced with this
+GitHub-hosted alternative, which is far less likely to experience
+similar downtime since it's served from GitHub's own infrastructure.
 
 Double chance (1X/X2), team total goals, team shots on target, and
 match shots on target still have NO real odds source connected. The
@@ -130,6 +142,41 @@ class BacktestReport:
             }
         return result
 
+    def roi_by_selection(self) -> dict:
+        """Finer-grained breakdown than roi_by_market(): groups by
+        (market, selection) pair rather than market alone.
+
+        This exists because roi_by_market() alone can hide exactly
+        where a market's losses are coming from - e.g. "match_winner"
+        at -5.8% ROI could mean all three selections (home_win, draw,
+        away_win) are mildly unprofitable, or it could mean one
+        selection (e.g. draw, which is notoriously hard to price well)
+        is badly unprofitable while the others are fine or even
+        profitable, and the market-level average is masking that. This
+        was specifically requested after an initial backtest run showed
+        an overall loss, to identify whether the loss is uniform or
+        concentrated - a very different diagnosis and a very different
+        fix depending on which it is.
+        """
+        keys = {(b.market, b.selection) for b in self.bets}
+        result = {}
+        for market, selection in keys:
+            sel_bets = [b for b in self.bets if b.market == market and b.selection == selection]
+            staked = sum(b.stake_fraction for b in sel_bets)
+            profit = sum(b.profit_fraction for b in sel_bets)
+            avg_model_prob = sum(b.model_probability for b in sel_bets) / len(sel_bets)
+            avg_odds = sum(b.decimal_odds for b in sel_bets) / len(sel_bets)
+            avg_implied_prob = sum(1.0 / b.decimal_odds for b in sel_bets) / len(sel_bets)
+            result[(market, selection)] = {
+                "roi": profit / staked if staked > 0 else 0.0,
+                "n_bets": len(sel_bets),
+                "win_rate": sum(1 for b in sel_bets if b.won) / len(sel_bets) if sel_bets else 0.0,
+                "avg_model_probability": avg_model_prob,
+                "avg_implied_probability": avg_implied_prob,
+                "avg_odds": avg_odds,
+            }
+        return result
+
     def summary(self) -> str:
         lines = [
             f"Total bets: {self.total_bets}",
@@ -144,6 +191,24 @@ class BacktestReport:
             lines.append(
                 f"  {market}: ROI={stats['roi']:+.1%}  "
                 f"n={stats['n_bets']}  win_rate={stats['win_rate']:.1%}"
+            )
+
+        lines.append("")
+        lines.append("ROI by selection (finer breakdown - where within each market the profit/loss is coming from):")
+        for (market, selection), stats in sorted(self.roi_by_selection().items()):
+            # avg_model_probability vs avg_implied_probability shows the
+            # AVERAGE edge the model believed it had going into these
+            # bets - if this gap was consistently positive but the
+            # selection still lost money, that's a strong signal the
+            # model's probabilities are systematically overconfident
+            # for this specific selection, not just unlucky variance.
+            edge = stats["avg_model_probability"] - stats["avg_implied_probability"]
+            lines.append(
+                f"  {market}/{selection}: ROI={stats['roi']:+.1%}  "
+                f"n={stats['n_bets']}  win_rate={stats['win_rate']:.1%}  "
+                f"avg_model_prob={stats['avg_model_probability']:.1%}  "
+                f"avg_implied_prob={stats['avg_implied_probability']:.1%}  "
+                f"avg_edge={edge:+.1%}  avg_odds={stats['avg_odds']:.2f}"
             )
         return "\n".join(lines)
 
@@ -263,12 +328,12 @@ def _cli_main():
     """CLI entry point for `python -m engine.backtest.simulator --start Y --end Y`,
     matching the GitHub Actions backtest workflow's invocation.
 
-    Uses football-data.co.uk (engine/sources/football_data_co_uk_source.py)
+    Uses xgabora/Club-Football-Match-Data (engine/sources/xgabora_match_data_source.py)
     for BOTH the goals data used to fit Dixon-Coles AND the historical
-    Bet365 odds needed for Kelly staking - this is the odds source that
-    was previously missing (see this module's earlier docstring section
-    "UNRESOLVED GAP"). That gap is now closed for the match_winner and
-    match_total_goals (Over/Under 2.5 only - see note below) markets.
+    odds needed for Kelly staking - this is the odds source that was
+    previously missing (see this module's earlier docstring section
+    "ODDS COVERAGE STATUS"). That gap is now closed for the match_winner
+    and match_total_goals (Over/Under 2.5 only - see note below) markets.
     Double chance, team totals, and shots on target markets still have
     no real odds source and will report zero bets for those markets
     specifically - this is called out in the report, not hidden.
@@ -276,9 +341,10 @@ def _cli_main():
     import argparse
     import logging
     import os
+    import time
 
     import config
-    from engine.sources.football_data_co_uk_source import FootballDataCoUkSource
+    from engine.sources.xgabora_match_data_source import XgaboraMatchDataSource
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
     logger = logging.getLogger("engine.backtest.simulator")
@@ -288,7 +354,7 @@ def _cli_main():
     parser.add_argument("--end", type=int, default=config.BACKTEST_END_SEASON)
     args = parser.parse_args()
 
-    source = FootballDataCoUkSource()
+    source = XgaboraMatchDataSource()
     all_matches = []
     all_corners_rows = []
     # odds_lookup maps (home_team, away_team, match_date) -> HistoricalMatchOdds,
@@ -298,7 +364,18 @@ def _cli_main():
     odds_lookup = {}
 
     for season in range(args.start, args.end + 1):
-        logger.info(f"Fetching season {season} from football-data.co.uk...")
+        # Small delay between seasons - the previous back-to-back
+        # fetch pattern (5 seasons in under 3 seconds) triggered
+        # consistent 503s from football-data.co.uk on every attempt,
+        # consistent with a request-rate trigger rather than a hard
+        # per-IP block. Spacing requests out is a low-cost thing to
+        # try before concluding the site has blocked GitHub Actions
+        # outright (see fetch_season()'s retry logic for the other
+        # half of this mitigation).
+        if season > args.start:
+            time.sleep(5)
+
+        logger.info(f"Fetching season {season} from xgabora/Club-Football-Match-Data...")
         try:
             season_results = source.fetch_season(season)
         except Exception as e:
@@ -324,16 +401,17 @@ def _cli_main():
     if len(all_matches) < 50:
         logger.error(
             f"Only {len(all_matches)} matches fetched - insufficient for a "
-            f"meaningful backtest. Check the season range or football-data.co.uk "
+            f"meaningful backtest. Check the season range or xgabora/Club-Football-Match-Data "
             f"availability for these seasons."
         )
 
     def odds_provider(home_team, away_team, match_date, market, selection):
-        """Look up real Bet365 (or fallback bookmaker) odds for a given
-        bet. Returns None for markets/selections this data source
-        doesn't cover (double_chance, team_total_goals, shots_on_target),
-        which correctly causes run_backtest() to skip evaluating those
-        bets rather than fabricate odds for them.
+        """Look up real historical odds for a given bet (bookmaker
+        unspecified by the source dataset - see module docstring).
+        Returns None for markets/selections this data source doesn't
+        cover (double_chance, team_total_goals, shots_on_target), which
+        correctly causes run_backtest() to skip evaluating those bets
+        rather than fabricate odds for them.
         """
         record = odds_lookup.get((home_team, away_team, match_date))
         if record is None:
@@ -347,17 +425,55 @@ def _cli_main():
             }.get(selection)
 
         if market == "match_total_goals" and selection == "over_2.5":
-            # football-data.co.uk only provides the 2.5 goals line - the
+            # This data source only provides the 2.5 goals line - the
             # other GOAL_LINES (0.5, 1.5, 3.5, 4.5) have no odds coverage
-            # in this data source and correctly return None below.
+            # here and correctly return None below.
             return record.odds_over_2_5
 
         return None
 
-    # odds_provider is real now (backed by actual Bet365 historical
-    # odds), unlike the None passed here previously - see the module
-    # docstring's now-partially-resolved "UNRESOLVED GAP" section.
+    # odds_provider is real now (backed by actual historical odds from
+    # xgabora/Club-Football-Match-Data - this dataset does not document
+    # which specific bookmaker its OddHome/OddDraw/OddAway columns come
+    # from, so these are treated as "a" bookmaker's real market odds,
+    # not confirmed as Bet365 specifically), unlike the None passed
+    # here previously - see the module docstring's now-partially-resolved
+    # "UNRESOLVED GAP" section.
     report = run_backtest(all_matches, odds_provider=odds_provider)
+
+    logger.info(f"Running match outcome calibration check on {len(all_matches)} matches...")
+    outcome_calibration = {}
+    if len(all_matches) >= 60:
+        try:
+            outcome_calibration = _run_match_outcome_calibration_check(all_matches)
+        except Exception as e:
+            logger.error(f"Match outcome calibration check failed: {e}")
+    else:
+        logger.warning(
+            f"Only {len(all_matches)} matches - skipping match outcome "
+            f"calibration check (needs more data for a meaningful result)."
+        )
+
+    outcome_section_lines = [
+        "",
+        "Match outcome model calibration (raw Dixon-Coles predictions vs "
+        "actual outcomes, no odds/staking involved - see this check "
+        "specifically to distinguish 'model is overconfident' from "
+        "'staking/thresholds are the problem' when betting ROI is negative):",
+    ]
+    if outcome_calibration:
+        for outcome in ("home_win", "draw", "away_win"):
+            predicted, actual, n = outcome_calibration[outcome]
+            if n == 0:
+                outcome_section_lines.append(f"  {outcome}: no predictions made")
+            else:
+                gap = predicted - actual
+                outcome_section_lines.append(
+                    f"  {outcome}: predicted={predicted:.1%}  actual={actual:.1%}  "
+                    f"gap={gap:+.1%}  n={n}"
+                )
+    else:
+        outcome_section_lines.append("  (skipped - insufficient match data)")
 
     logger.info(f"Running corners calibration check on {len(all_corners_rows)} rows with corners data...")
     corners_calibration = {}
@@ -391,7 +507,7 @@ def _cli_main():
         "EPL Backtest Report\n"
         f"Seasons: {args.start}-{args.end}\n"
         f"Total historical matches fetched: {len(all_matches)}\n"
-        f"Data source: football-data.co.uk (free historical CSV archive)\n"
+        f"Data source: xgabora/Club-Football-Match-Data (GitHub-hosted CSV, 2000-present)\n"
         "\n"
         "*** ODDS COVERAGE NOTE ***\n"
         "Real historical odds are only available for: match_winner "
@@ -406,12 +522,101 @@ def _cli_main():
         "check (predicted probability vs actual frequency) is reported "
         "below instead of a betting ROI.\n"
         "\n" + report.summary() + "\n"
+        + "\n".join(outcome_section_lines) + "\n"
         + "\n".join(corners_section_lines)
     )
     with open(report_path, "w") as f:
         f.write(report_text)
     logger.info(f"Report written to {report_path}")
     print(report_text)
+
+
+def _run_match_outcome_calibration_check(historical_matches, min_training_matches=50, refit_every_n_matches=10):
+    """Standalone calibration check for the Dixon-Coles match outcome
+    model, checking raw predicted probabilities against actual outcomes
+    - completely independent of odds, staking, or Kelly criterion.
+
+    WHY THIS EXISTS: a real backtest run (2,748 bets across 5 seasons)
+    showed a positive average "edge" (model probability minus
+    bookmaker-implied probability) on every single selection
+    (home_win, draw, away_win, over_2.5) - meaning the model believed
+    it had a genuine edge on every bet - yet still lost money overall
+    (-6.5% ROI, 100% max drawdown at one point). That specific
+    combination (consistent believed edge + consistent losses) is a
+    classic signature of the model's probabilities being systematically
+    too confident, rather than just unlucky variance on a few bets -
+    but the betting-layer numbers alone can't distinguish "model is
+    miscalibrated" from "staking/thresholds are the problem" since both
+    run through the same Kelly-staked bets. This function isolates the
+    model's calibration by comparing its RAW predictions to actual
+    outcomes, with no odds or staking involved at all.
+
+    Uses the same no-lookahead discipline as run_backtest(): predictions
+    for match i are made using a model fit only on matches strictly
+    before i.
+
+    Returns a dict with keys "home_win", "draw", "away_win", each
+    mapping to (avg_predicted_probability, actual_frequency, n).
+    A well-calibrated model should show these two numbers close
+    together for each outcome - if avg_predicted is consistently HIGHER
+    than actual across all three outcomes, that's overconfidence (the
+    model routinely rates things as MORE likely than they really are,
+    for every listed outcome, which numerically it cannot be since the
+    three probabilities must sum to something reasonable across
+    matches - watch for this pattern specifically as it would indicate
+    a difference between predicted and realized SHARPNESS, not just a
+    single outcome being off).
+    """
+    sorted_matches = sorted(historical_matches, key=lambda m: m.match_date)
+    predictions = {"home_win": [], "draw": [], "away_win": []}
+    actuals = {"home_win": [], "draw": [], "away_win": []}
+
+    model = DixonColesModel()
+    fitted_up_to_index = -1
+
+    for i, match in enumerate(sorted_matches):
+        if i < min_training_matches:
+            continue
+
+        training_data = sorted_matches[:i]
+
+        needs_refit = (
+            fitted_up_to_index < 0
+            or (i - fitted_up_to_index) >= refit_every_n_matches
+        )
+        if needs_refit:
+            try:
+                model.fit(training_data, as_of=training_data[-1].match_date)
+                fitted_up_to_index = i
+            except Exception:
+                continue
+
+        try:
+            outcome_probs = model.match_outcome_probs(match.home_team, match.away_team)
+        except ValueError:
+            continue  # unknown team, same handling as run_backtest()
+
+        actual_home_win = match.home_goals > match.away_goals
+        actual_draw = match.home_goals == match.away_goals
+        actual_away_win = match.home_goals < match.away_goals
+
+        predictions["home_win"].append(outcome_probs["home_win"])
+        actuals["home_win"].append(1.0 if actual_home_win else 0.0)
+        predictions["draw"].append(outcome_probs["draw"])
+        actuals["draw"].append(1.0 if actual_draw else 0.0)
+        predictions["away_win"].append(outcome_probs["away_win"])
+        actuals["away_win"].append(1.0 if actual_away_win else 0.0)
+
+    result = {}
+    for outcome in ("home_win", "draw", "away_win"):
+        n = len(predictions[outcome])
+        if n == 0:
+            result[outcome] = (None, None, 0)
+            continue
+        avg_predicted = sum(predictions[outcome]) / n
+        avg_actual = sum(actuals[outcome]) / n
+        result[outcome] = (avg_predicted, avg_actual, n)
+    return result
 
 
 def _run_corners_calibration_check(matches_with_corners, min_training_matches=50):

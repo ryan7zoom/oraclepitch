@@ -144,6 +144,81 @@ def test_fetch_season_handles_latin1_encoding(mock_get):
     print("PASS: test_fetch_season_handles_latin1_encoding")
 
 
+@patch("engine.sources.football_data_co_uk_source.time.sleep")  # skip real delays in tests
+@patch("engine.sources.football_data_co_uk_source.requests.get")
+def test_fetch_season_retries_on_503_and_eventually_succeeds(mock_get, mock_sleep):
+    """Regression test for the real issue found in production: GitHub
+    Actions runs returned a consistent 503 on every request when 5
+    seasons were fetched back-to-back in under 3 seconds. This confirms
+    fetch_season() retries a 503 specifically (not immediately raising)
+    and succeeds once a later attempt returns 200.
+    """
+    mock_503 = MagicMock()
+    mock_503.status_code = 503
+    mock_success = make_mock_response(SAMPLE_CSV.encode("utf-8"))
+    mock_success.status_code = 200
+
+    mock_get.side_effect = [mock_503, mock_503, mock_success]
+    source = FootballDataCoUkSource()
+
+    results = source.fetch_season(2024, max_retries=3)
+
+    assert len(results) == 2, f"Expected the eventual successful response to be parsed, got {len(results)} rows"
+    assert mock_get.call_count == 3, f"Expected 3 attempts (2 failures + 1 success), got {mock_get.call_count}"
+    assert mock_sleep.call_count == 2, f"Expected a delay before each retry (2 retries), got {mock_sleep.call_count}"
+    print("PASS: test_fetch_season_retries_on_503_and_eventually_succeeds")
+
+
+@patch("engine.sources.football_data_co_uk_source.time.sleep")
+@patch("engine.sources.football_data_co_uk_source.requests.get")
+def test_fetch_season_raises_after_exhausting_retries_on_persistent_503(mock_get, mock_sleep):
+    """If EVERY attempt returns 503 (matching what was actually observed
+    against the real site), fetch_season() should raise after
+    max_retries rather than loop forever or silently return an empty
+    result that could be mistaken for "no matches in this season."
+    """
+    mock_503 = MagicMock()
+    mock_503.status_code = 503
+    mock_get.return_value = mock_503
+
+    source = FootballDataCoUkSource()
+
+    try:
+        source.fetch_season(2024, max_retries=3)
+        assert False, "Expected an exception after exhausting all retries"
+    except Exception as e:
+        assert "503" in str(e)
+
+    assert mock_get.call_count == 3, f"Expected exactly max_retries attempts, got {mock_get.call_count}"
+    print("PASS: test_fetch_season_raises_after_exhausting_retries_on_persistent_503")
+
+
+@patch("engine.sources.football_data_co_uk_source.time.sleep")
+@patch("engine.sources.football_data_co_uk_source.requests.get")
+def test_fetch_season_does_not_retry_non_503_errors(mock_get, mock_sleep):
+    """A 404 (season genuinely doesn't exist) or other non-503 error
+    should raise immediately, not burn through retries pointlessly -
+    retrying only makes sense for a transient/rate-limit-shaped error,
+    not a request that will never succeed no matter how many times
+    it's repeated.
+    """
+    mock_404 = MagicMock()
+    mock_404.status_code = 404
+    mock_404.raise_for_status.side_effect = Exception("404 Not Found")
+    mock_get.return_value = mock_404
+
+    source = FootballDataCoUkSource()
+
+    try:
+        source.fetch_season(2024, max_retries=3)
+        assert False, "Expected an exception for a 404"
+    except Exception:
+        pass
+
+    assert mock_get.call_count == 1, f"Expected no retries for a non-503 error, got {mock_get.call_count} attempts"
+    print("PASS: test_fetch_season_does_not_retry_non_503_errors")
+
+
 if __name__ == "__main__":
     test_season_code_conversion()
     test_parse_date_handles_both_formats()
@@ -152,4 +227,7 @@ if __name__ == "__main__":
     test_fetch_season_falls_back_through_bookmaker_priority()
     test_fetch_season_handles_completely_missing_odds()
     test_fetch_season_handles_latin1_encoding()
+    test_fetch_season_retries_on_503_and_eventually_succeeds()
+    test_fetch_season_raises_after_exhausting_retries_on_persistent_503()
+    test_fetch_season_does_not_retry_non_503_errors()
     print("\nAll tests passed.")

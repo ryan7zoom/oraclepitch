@@ -44,6 +44,7 @@ from engine.prediction.monte_carlo import MonteCarloSimulator
 from engine.prediction.shots import ShotsOnTargetModel, TeamShotsProfile
 from engine.prediction.ensemble import EnsemblePredictor
 from engine.output.generate_html import write_html
+from engine.streaks.analyzer import StreakAnalyzer
 
 logging.basicConfig(
     level=logging.INFO,
@@ -284,6 +285,78 @@ def run(target_date: date, max_historical_fixtures: int = None):
 
     logger.info(f"Generated {len(predictions)} predictions")
 
+    # Streak / double-mismatch analysis - a decision-support feature,
+    # not a predictive model (see engine/streaks/analyzer.py's module
+    # docstring for the full rationale). Uses XgaboraMatchDataSource
+    # rather than API-Football for historical data, since that source
+    # reliably provides shots-on-target and corners with home/away
+    # splits (confirmed during this project's backtest work), which
+    # API-Football's free tier does not consistently populate (see
+    # engine/sources/api_football_source.py's verification status).
+    # This is a SEPARATE historical fetch from the one above used for
+    # Dixon-Coles fitting - the two data sources cover overlapping but
+    # not identical historical periods and schemas, and keeping them
+    # separate avoids coupling the streak feature's correctness to
+    # whatever API-Football's statistics endpoint does or doesn't
+    # return on a given day.
+    all_mismatches = {}
+    all_streaks = {}
+    try:
+        from engine.sources.xgabora_match_data_source import XgaboraMatchDataSource
+        streak_source = XgaboraMatchDataSource()
+
+        # Pull enough historical seasons to give long-window streaks
+        # (up to STREAK_WINDOWS' max of 18, or H2H_WINDOWS' max of 15
+        # meetings) real data to work with - a single season's ~19
+        # home matches per team is enough for most window sizes, but
+        # H2H streaks specifically benefit from multiple seasons since
+        # two specific teams may only meet twice a season.
+        streak_seasons = range(config.BACKTEST_START_SEASON, season + 1)
+        streak_matches = []
+        for s in streak_seasons:
+            try:
+                streak_matches.extend(streak_source.fetch_season(s))
+            except Exception as e:
+                logger.warning(f"Could not fetch season {s} for streak analysis: {e}")
+
+        logger.info(f"Loaded {len(streak_matches)} historical matches for streak analysis")
+        analyzer = StreakAnalyzer(streak_matches)
+
+        involved_teams = set()
+        for fixture in scheduled:
+            fixture_label = f"{fixture.home_team} vs {fixture.away_team}"
+            try:
+                mismatches = analyzer.find_mismatches(fixture.home_team, fixture.away_team, target_date)
+            except Exception as e:
+                logger.warning(f"Streak analysis failed for {fixture_label}: {e}")
+                continue
+            if mismatches:
+                all_mismatches[fixture_label] = mismatches
+            involved_teams.add(fixture.home_team)
+            involved_teams.add(fixture.away_team)
+
+        # Populate all_streaks for the "All Streaks by Category" section:
+        # for each team involved in today's fixtures, compute their
+        # streaks across every configured stat/threshold/window
+        # combination (not just the ones that happened to produce a
+        # mismatch), so the user can see the full picture per spec 4.1's
+        # bottom section, not just the flagged subset.
+        for team in involved_teams:
+            team_streaks = []
+            for stat, thresholds in config.STREAK_THRESHOLDS.items():
+                for threshold in thresholds:
+                    for window in config.STREAK_WINDOWS:
+                        for direction in ("for", "against"):
+                            for filter_type in ("home_only", "away_only"):
+                                s = analyzer.get_streak(team, stat, threshold, window, direction, target_date, filter_type)
+                                if s.total >= config.MISMATCH_MIN_WINDOW:
+                                    team_streaks.append(s)
+            all_streaks[team] = team_streaks
+
+        logger.info(f"Found {sum(len(v) for v in all_mismatches.values())} total mismatches across {len(scheduled)} fixtures")
+    except Exception as e:
+        logger.error(f"Streak analysis failed entirely - continuing without it: {e}")
+
     with open(config.PREDICTIONS_JSON_PATH, "w") as f:
         json.dump({
             "generated_at": datetime.now().isoformat(),
@@ -292,7 +365,7 @@ def run(target_date: date, max_historical_fixtures: int = None):
         }, f, indent=2)
     logger.info(f"Wrote predictions to {config.PREDICTIONS_JSON_PATH}")
 
-    output_path = write_html(predictions)
+    output_path = write_html(predictions, all_mismatches=all_mismatches, all_streaks=all_streaks)
     logger.info(f"Wrote HTML dashboard to {output_path}")
 
     logger.info(f"Total API-Football requests used this run: {source.request_count}")

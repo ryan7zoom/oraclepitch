@@ -25,6 +25,13 @@ jobs:
         run: python -m engine.main --date today
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+        # NOTE: this run now also downloads the full ~45MB
+        # xgabora/Club-Football-Match-Data CSV (see engine/main.py's
+        # streak analysis section) in addition to the existing
+        # API-Football calls for live fixtures and Dixon-Coles fitting.
+        # This makes each daily run noticeably slower than before the
+        # streak feature was added, but stays well within GitHub
+        # Actions' free-tier time limits for a job like this.
 
       # The historical-fixtures cache (data/historical/*.json) built by
       # main.py's caching logic (see engine/main.py's

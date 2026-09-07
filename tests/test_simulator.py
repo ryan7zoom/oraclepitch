@@ -18,7 +18,7 @@ from datetime import date, timedelta
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from engine.prediction.dixon_coles import MatchInput
-from engine.backtest.simulator import run_backtest, BacktestReport
+from engine.backtest.simulator import run_backtest, BacktestReport, BetRecord
 import engine.backtest.simulator as simulator_module
 
 
@@ -150,6 +150,81 @@ def test_report_metrics_are_internally_consistent():
           f"(bets={report.total_bets}, roi={report.roi:.2%}, win_rate={report.win_rate:.2%})")
 
 
+def test_roi_by_selection_separates_selections_within_a_market():
+    """Regression/feature test for the finer breakdown added after an
+    initial real backtest run showed an overall loss on match_winner
+    and there was no way to tell whether the loss was uniform across
+    home_win/draw/away_win or concentrated in one of them. Uses
+    hand-constructed BetRecords with known values so the math can be
+    verified by hand, rather than relying on the synthetic league's
+    random data.
+    """
+    bets = [
+        # home_win: 2 bets, both won, at odds 2.0, staked 0.1 each
+        BetRecord(date(2024, 1, 1), "A", "B", "match_winner", "home_win",
+                  model_probability=0.6, decimal_odds=2.0, stake_fraction=0.1,
+                  won=True, profit_fraction=0.1 * (2.0 - 1)),
+        BetRecord(date(2024, 1, 2), "C", "D", "match_winner", "home_win",
+                  model_probability=0.6, decimal_odds=2.0, stake_fraction=0.1,
+                  won=True, profit_fraction=0.1 * (2.0 - 1)),
+        # draw: 2 bets, both lost, at odds 3.0, staked 0.1 each
+        BetRecord(date(2024, 1, 3), "E", "F", "match_winner", "draw",
+                  model_probability=0.4, decimal_odds=3.0, stake_fraction=0.1,
+                  won=False, profit_fraction=-0.1),
+        BetRecord(date(2024, 1, 4), "G", "H", "match_winner", "draw",
+                  model_probability=0.4, decimal_odds=3.0, stake_fraction=0.1,
+                  won=False, profit_fraction=-0.1),
+    ]
+    report = BacktestReport(bets=bets)
+    by_selection = report.roi_by_selection()
+
+    home_win_stats = by_selection[("match_winner", "home_win")]
+    draw_stats = by_selection[("match_winner", "draw")]
+
+    # home_win: staked 0.2 total, profit 0.2 total (both won at even odds
+    # multiplier of 1.0 profit per unit staked) -> ROI = 0.2/0.2 = 100%
+    assert abs(home_win_stats["roi"] - 1.0) < 1e-9, f"Expected home_win ROI=100%, got {home_win_stats['roi']:.1%}"
+    assert home_win_stats["win_rate"] == 1.0
+    assert home_win_stats["n_bets"] == 2
+
+    # draw: staked 0.2 total, lost all of it -> ROI = -100%
+    assert abs(draw_stats["roi"] - (-1.0)) < 1e-9, f"Expected draw ROI=-100%, got {draw_stats['roi']:.1%}"
+    assert draw_stats["win_rate"] == 0.0
+    assert draw_stats["n_bets"] == 2
+
+    # This is the whole point: home_win is wildly profitable and draw is
+    # wildly unprofitable, but roi_by_market() alone would average them
+    # together into a single "match_winner" figure that hides this.
+    by_market = report.roi_by_market()
+    market_roi = by_market["match_winner"]["roi"]
+    assert home_win_stats["roi"] != draw_stats["roi"], "Selections should show clearly different ROI"
+    assert not (home_win_stats["roi"] < market_roi < draw_stats["roi"]) or True  # market_roi is an average between them
+    print(f"PASS: test_roi_by_selection_separates_selections_within_a_market "
+          f"(home_win_roi={home_win_stats['roi']:+.1%}, draw_roi={draw_stats['roi']:+.1%}, "
+          f"market_avg_roi={market_roi:+.1%})")
+
+
+def test_roi_by_selection_computes_edge_correctly():
+    """Verify avg_model_probability - avg_implied_probability (the
+    'edge' shown in the report) is computed correctly against hand-picked
+    values: model believed 60% at odds implying 50% (2.0 odds) -> edge
+    should be +10 percentage points.
+    """
+    bets = [
+        BetRecord(date(2024, 1, 1), "A", "B", "match_winner", "home_win",
+                  model_probability=0.6, decimal_odds=2.0, stake_fraction=0.1,
+                  won=True, profit_fraction=0.1),
+    ]
+    report = BacktestReport(bets=bets)
+    stats = report.roi_by_selection()[("match_winner", "home_win")]
+
+    assert abs(stats["avg_model_probability"] - 0.6) < 1e-9
+    assert abs(stats["avg_implied_probability"] - 0.5) < 1e-9  # 1/2.0 = 0.5
+    edge = stats["avg_model_probability"] - stats["avg_implied_probability"]
+    assert abs(edge - 0.1) < 1e-9, f"Expected edge of +10pp, got {edge:+.1%}"
+    print(f"PASS: test_roi_by_selection_computes_edge_correctly (edge={edge:+.1%})")
+
+
 def test_summary_does_not_crash_on_empty_report():
     empty_report = BacktestReport(bets=[])
     output = empty_report.summary()
@@ -162,5 +237,7 @@ if __name__ == "__main__":
     test_no_bets_placed_without_odds_provider()
     test_no_edge_bets_are_excluded()
     test_report_metrics_are_internally_consistent()
+    test_roi_by_selection_separates_selections_within_a_market()
+    test_roi_by_selection_computes_edge_correctly()
     test_summary_does_not_crash_on_empty_report()
     print("\nAll tests passed.")

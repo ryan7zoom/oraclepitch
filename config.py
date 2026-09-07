@@ -109,3 +109,46 @@ API_FOOTBALL_REQUEST_DELAY_SECONDS = 1.0  # be polite between calls
 PREDICTIONS_JSON_PATH = "data/predictions/latest.json"
 HTML_OUTPUT_PATH = "docs/index.html"
 HISTORICAL_DATA_DIR = "data/historical"
+
+# ---------------------------------------------------------------------------
+# Streak analysis (double-streak mismatch dashboard)
+# ---------------------------------------------------------------------------
+# This is a decision-support feature, not a predictive model - it
+# surfaces recent-form patterns for the user's own judgment. See
+# engine/streaks/analyzer.py's module docstring for the full design
+# rationale (this reframing followed a real backtest showing the
+# Dixon-Coles model, while well-calibrated, had no exploitable edge
+# over bookmaker odds - see engine/backtest/simulator.py's calibration
+# check results).
+STREAK_THRESHOLDS = {
+    "shots_on_target": [3, 4, 5, 6],
+    "corners": [5, 6, 7, 8, 9],
+    "goals": [1, 2, 3],
+    "goals_conceded": [1, 2, 3],
+}
+
+# Window sizes for single-team recent-form streaks. Deliberately a mix
+# of short (noisy but recent) and long (stable but slower to react)
+# windows, since different streak lengths surface different patterns -
+# see engine/streaks/analyzer.py's _mismatch_strength_label() for how
+# window size affects the confidence rating given to a mismatch.
+STREAK_WINDOWS = [5, 6, 7, 8, 10, 13, 18]
+
+# Window sizes for head-to-head streaks specifically (separate from
+# STREAK_WINDOWS since H2H meetings between two specific teams are far
+# less frequent than each team's overall match list - a "last 18" H2H
+# window could span a decade or more, which is a very different kind
+# of signal than a "last 18" overall-form window).
+H2H_WINDOWS = [5, 10, 15]
+
+# A double-streak mismatch requires BOTH the "for" streak and the
+# "against" streak to independently clear this percentage before being
+# considered at all (see StreakAnalyzer._build_mismatch_if_qualifying()).
+MISMATCH_MIN_PERCENTAGE = 0.60
+
+# Minimum number of matches with usable data a streak must have before
+# it's considered reliable enough to contribute to a mismatch - a
+# streak computed from only 2-3 matches (e.g. due to missing stat data
+# in most of the window) is not meaningful evidence even if its
+# percentage looks high.
+MISMATCH_MIN_WINDOW = 5
