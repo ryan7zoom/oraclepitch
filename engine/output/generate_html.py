@@ -31,7 +31,7 @@ def _fmt_pct(value: Optional[float]) -> str:
     return f"{value * 100:.1f}%"
 
 
-def _mismatch_card_html(mismatch) -> str:
+def _mismatch_card_html(mismatch, match_label: str = None) -> str:
     """Render a single Mismatch (engine.streaks.analyzer.Mismatch) as an
     HTML card. If the mismatch has been enriched with a corresponding
     head-to-head streak (see StreakAnalyzer._enrich_with_h2h()), show
@@ -40,13 +40,23 @@ def _mismatch_card_html(mismatch) -> str:
     (H2H-only mismatches, or recent-form mismatches with no H2H data
     available) falls back to the simpler for/against-only layout.
 
+    match_label: if provided, used as the card's fixture label instead
+        of reconstructing "{home} vs {away}" from the Mismatch object's
+        own fields - needed for multi-league support, since Mismatch
+        itself has no league field, but the caller's all_mismatches
+        dict key (e.g. "[La Liga] Real Madrid vs Barcelona") already
+        has the league prefix. Without this, the league name was
+        silently dropped from the rendered card even though it was
+        present in the data passed in - a real bug found and fixed
+        during multi-league development.
+
     NEVER uses "Bet this" or "Recommend" language - always "Suggested
     Bet"/"Potential Opportunity", per the project's explicit
     requirement that this tool never makes betting decisions.
     """
     strength_class = f"strength-{mismatch.strength_label.lower()}"
     emoji = {"Strong": "\U0001F680", "Solid": "\u2705", "Watch": "\U0001F440"}.get(mismatch.strength_label, "")
-    match_label = f"{mismatch.home_team} vs {mismatch.away_team}"
+    match_label = match_label or f"{mismatch.home_team} vs {mismatch.away_team}"
     h2h_tag = " (H2H)" if mismatch.is_h2h else ""
 
     if mismatch.h2h_streak is not None:
@@ -77,20 +87,22 @@ def _mismatch_card_html(mismatch) -> str:
 
 def _mismatches_section_html(all_mismatches: dict) -> str:
     """Render the top "Mismatches Found" section. all_mismatches maps
-    "{home_team} vs {away_team}" -> list[Mismatch]. Only shown at all
-    if there's at least one mismatch across any fixture.
+    a fixture label (e.g. "[La Liga] Real Madrid vs Barcelona") ->
+    list[Mismatch]. Only shown at all if there's at least one mismatch
+    across any fixture.
     """
-    flat = []
+    flat = []  # list of (fixture_label, Mismatch) tuples
     for fixture_label, mismatches in all_mismatches.items():
-        flat.extend(mismatches)
+        for m in mismatches:
+            flat.append((fixture_label, m))
 
     if not flat:
         return ""
 
     strength_order = {"Strong": 0, "Solid": 1, "Watch": 2}
-    flat.sort(key=lambda m: strength_order.get(m.strength_label, 99))
+    flat.sort(key=lambda pair: strength_order.get(pair[1].strength_label, 99))
 
-    cards_html = "\n".join(_mismatch_card_html(m) for m in flat)
+    cards_html = "\n".join(_mismatch_card_html(m, match_label=label) for label, m in flat)
     return f"""
     <h2 class="section-heading">\U0001F50D Mismatches Found ({len(flat)})</h2>
     {cards_html}
@@ -172,7 +184,7 @@ def generate_html(
     streaks_html = _streaks_by_category_html(all_streaks or {}, flagged_keys)
 
     if not mismatches_html and not streaks_html:
-        body_html = '<div class="no-matches">No fixtures found for this date, or insufficient historical data to compute streaks.</div>'
+        body_html = '<div class="no-matches">No fixtures today.</div>'
     else:
         body_html = mismatches_html + streaks_html
 
@@ -274,16 +286,10 @@ def generate_html(
 <body>
 <header>
   <h1>EPL Match Preview Dashboard</h1>
-  <div class="meta">Generated: {timestamp_str} &middot; {fixture_count} fixture(s) analyzed &middot; Data: OpenFootball (fixtures) + xgabora/Club-Football-Match-Data (historical)</div>
 </header>
 
 {body_html}
 
-<footer>
-  This dashboard surfaces historical statistical trends for informational
-  purposes only. It does not predict outcomes, recommend bets, or suggest
-  stake sizes - all decisions are the user's own.
-</footer>
 </body>
 </html>
 """

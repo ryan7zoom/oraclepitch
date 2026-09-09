@@ -243,6 +243,143 @@ def test_get_fixtures_applies_name_normalization():
     print("PASS: test_get_fixtures_applies_name_normalization")
 
 
+def test_normalize_team_name_handles_all_confirmed_current_la_liga_clubs():
+    """Real, current (2026-27) La Liga team names checked against
+    xgabora's real short-name convention for the same league (both
+    pulled directly from live data during development)."""
+    expected = {
+        "Athletic Club": "Ath Bilbao",
+        "CA Osasuna": "Osasuna",
+        "Club Atlético de Madrid": "Ath Madrid",
+        "Deportivo Alavés": "Alaves",
+        "FC Barcelona": "Barcelona",
+        "Getafe CF": "Getafe",
+        "RC Celta de Vigo": "Celta",
+        "RCD Espanyol de Barcelona": "Espanol",
+        "Rayo Vallecano de Madrid": "Vallecano",
+        "Real Betis Balompié": "Betis",
+        "Real Madrid CF": "Real Madrid",
+        "Real Sociedad de Fútbol": "Sociedad",
+        "Sevilla FC": "Sevilla",
+        "Valencia CF": "Valencia",
+        "Villarreal CF": "Villarreal",
+    }
+    for of_name, expected_short in expected.items():
+        actual = _normalize_team_name(of_name, "la_liga")
+        assert actual == expected_short, f"{of_name!r} -> expected {expected_short!r}, got {actual!r}"
+    print(f"PASS: test_normalize_team_name_handles_all_confirmed_current_la_liga_clubs ({len(expected)} clubs checked)")
+
+
+def test_normalize_team_name_handles_all_confirmed_current_bundesliga_clubs():
+    expected = {
+        "1. FC Köln": "FC Koln",
+        "1. FC Union Berlin": "Union Berlin",
+        "1. FSV Mainz 05": "Mainz",
+        "Bayer 04 Leverkusen": "Leverkusen",
+        "Borussia Dortmund": "Dortmund",
+        "Borussia Mönchengladbach": "M'gladbach",
+        "Eintracht Frankfurt": "Ein Frankfurt",
+        "FC Augsburg": "Augsburg",
+        "FC Bayern München": "Bayern Munich",
+        "FC Schalke 04": "Schalke 04",
+        "Hamburger SV": "Hamburg",
+        "RB Leipzig": "RB Leipzig",
+        "SC Freiburg": "Freiburg",
+        "TSG 1899 Hoffenheim": "Hoffenheim",
+        "VfB Stuttgart": "Stuttgart",
+    }
+    for of_name, expected_short in expected.items():
+        actual = _normalize_team_name(of_name, "bundesliga")
+        assert actual == expected_short, f"{of_name!r} -> expected {expected_short!r}, got {actual!r}"
+    print(f"PASS: test_normalize_team_name_handles_all_confirmed_current_bundesliga_clubs ({len(expected)} clubs checked)")
+
+
+def test_normalize_team_name_handles_all_confirmed_current_serie_a_clubs():
+    expected = {
+        "AC Milan": "Milan",
+        "AS Roma": "Roma",
+        "Atalanta BC": "Atalanta",
+        "FC Internazionale Milano": "Inter",
+        "Juventus FC": "Juventus",
+        "SS Lazio": "Lazio",
+        "SSC Napoli": "Napoli",
+        "Torino FC": "Torino",
+        "Udinese Calcio": "Udinese",
+    }
+    for of_name, expected_short in expected.items():
+        actual = _normalize_team_name(of_name, "serie_a")
+        assert actual == expected_short, f"{of_name!r} -> expected {expected_short!r}, got {actual!r}"
+    print(f"PASS: test_normalize_team_name_handles_all_confirmed_current_serie_a_clubs ({len(expected)} clubs checked)")
+
+
+def test_normalize_team_name_handles_all_confirmed_current_ligue_1_clubs():
+    expected = {
+        "AS Monaco FC": "Monaco",
+        "Lille OSC": "Lille",
+        "OGC Nice": "Nice",
+        "Olympique Lyonnais": "Lyon",
+        "Olympique de Marseille": "Marseille",
+        "Paris Saint-Germain FC": "Paris SG",
+        "Racing Club de Lens": "Lens",
+        "Stade Rennais FC 1901": "Rennes",
+        "Toulouse FC": "Toulouse",
+    }
+    for of_name, expected_short in expected.items():
+        actual = _normalize_team_name(of_name, "ligue_1")
+        assert actual == expected_short, f"{of_name!r} -> expected {expected_short!r}, got {actual!r}"
+    print(f"PASS: test_normalize_team_name_handles_all_confirmed_current_ligue_1_clubs ({len(expected)} clubs checked)")
+
+
+def test_normalize_team_name_leagues_do_not_cross_contaminate():
+    """A team name that happens to exist in one league's mapping should
+    NOT be normalized using a different league's table - confirms the
+    per-league dict lookup is actually scoped correctly, not silently
+    falling back to a shared/merged mapping.
+    """
+    # "Real Madrid CF" is only in the la_liga mapping - looking it up
+    # under "epl" should return it UNCHANGED (no match), not accidentally
+    # find it via some shared fallback.
+    assert _normalize_team_name("Real Madrid CF", "epl") == "Real Madrid CF"
+    assert _normalize_team_name("Real Madrid CF", "la_liga") == "Real Madrid"
+    print("PASS: test_normalize_team_name_leagues_do_not_cross_contaminate")
+
+
+def test_get_fixtures_for_date_respects_league_parameter():
+    """get_fixtures_for_date() must pass the league through to both the
+    season fetch AND the name normalization - confirms the parameter
+    actually threads through the whole call, not just accepted and
+    ignored.
+    """
+    la_liga_json = {
+        "matches": [{
+            "round": "Matchday 1", "date": "2026-08-21", "time": "20:00",
+            "team1": "Real Madrid CF", "team2": "FC Barcelona",
+            "score": {"ht": [1, 0], "ft": [2, 1]},
+        }]
+    }
+    with patch("engine.sources.openfootball_source.requests.get", return_value=make_mock_response(la_liga_json)):
+        source = OpenFootballSource()
+        results = source.get_fixtures_for_date(date(2026, 8, 21), league="la_liga", season_start_year=2026)
+
+    assert len(results) == 1
+    assert results[0].home_team == "Real Madrid", f"Expected La Liga normalization, got {results[0].home_team!r}"
+    assert results[0].away_team == "Barcelona"
+    print("PASS: test_get_fixtures_for_date_respects_league_parameter")
+
+
+def test_fetch_season_raw_raises_on_unsupported_league():
+    """An unrecognized league code should fail loudly (ValueError),
+    not silently fetch the wrong league's file or return garbage.
+    """
+    source = OpenFootballSource()
+    try:
+        source._fetch_season_raw(2026, league="not_a_real_league")
+        assert False, "Expected ValueError for unsupported league"
+    except ValueError as e:
+        assert "not_a_real_league" in str(e)
+    print("PASS: test_fetch_season_raw_raises_on_unsupported_league")
+
+
 if __name__ == "__main__":
     test_season_folder_formatting()
     test_extract_score_handles_dict_shape()
@@ -252,7 +389,14 @@ if __name__ == "__main__":
     test_normalize_team_name_handles_all_confirmed_current_epl_clubs()
     test_normalize_team_name_catches_non_suffix_mismatches()
     test_normalize_team_name_returns_unchanged_for_unknown_team()
+    test_normalize_team_name_handles_all_confirmed_current_la_liga_clubs()
+    test_normalize_team_name_handles_all_confirmed_current_bundesliga_clubs()
+    test_normalize_team_name_handles_all_confirmed_current_serie_a_clubs()
+    test_normalize_team_name_handles_all_confirmed_current_ligue_1_clubs()
+    test_normalize_team_name_leagues_do_not_cross_contaminate()
     test_get_fixtures_applies_name_normalization()
+    test_get_fixtures_for_date_respects_league_parameter()
+    test_fetch_season_raw_raises_on_unsupported_league()
     test_get_fixtures_for_date_finds_played_match()
     test_get_fixtures_for_date_finds_bare_array_score_match()
     test_get_fixtures_for_date_finds_upcoming_match()

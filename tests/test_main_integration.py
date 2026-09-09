@@ -74,6 +74,12 @@ def _generate_fake_xgabora_history(teams, n_matches=40, seed=2):
 
 
 def test_full_pipeline_runs_without_crashing():
+    """Explicitly restricted to a single league (leagues=["epl"]) so
+    this test's fixture-count assertion stays deterministic - by
+    default run() now iterates over all 5 top leagues (see
+    test_multi_league_pipeline_covers_all_leagues below for that
+    behavior specifically).
+    """
     target_date = date(2025, 12, 1)
     matches, teams = _generate_fake_openfootball_season()
     _add_upcoming_fixtures(matches, target_date, [(teams[0], teams[1])])
@@ -87,7 +93,7 @@ def test_full_pipeline_runs_without_crashing():
              patch("engine.sources.xgabora_match_data_source.XgaboraMatchDataSource.fetch_season", return_value=history), \
              patch.object(config, "PREDICTIONS_JSON_PATH", predictions_path), \
              patch.object(config, "HTML_OUTPUT_PATH", html_path):
-            main_module.run(target_date)
+            main_module.run(target_date, leagues=["epl"])
 
         assert os.path.exists(predictions_path), "predictions.json was not written"
         assert os.path.exists(html_path), "index.html was not written"
@@ -103,6 +109,42 @@ def test_full_pipeline_runs_without_crashing():
         assert "<!DOCTYPE html>" in html
 
     print(f"PASS: test_full_pipeline_runs_without_crashing (fixture_count={data['fixture_count']})")
+
+
+def test_multi_league_pipeline_covers_all_leagues_by_default():
+    """When no explicit leagues list is passed, run() should iterate
+    over all 5 top leagues (see LEAGUE_CODES), not just EPL - this is
+    the core multi-league capability added after the project's
+    original EPL-only scope.
+    """
+    from engine.sources.openfootball_source import LEAGUE_CODES
+
+    target_date = date(2025, 12, 1)
+    matches, teams = _generate_fake_openfootball_season()
+    _add_upcoming_fixtures(matches, target_date, [(teams[0], teams[1])])
+    history = _generate_fake_xgabora_history(teams)
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        predictions_path = os.path.join(tmpdir, "predictions.json")
+        html_path = os.path.join(tmpdir, "index.html")
+
+        with patch("engine.sources.openfootball_source.OpenFootballSource._fetch_season_raw", return_value=matches), \
+             patch("engine.sources.xgabora_match_data_source.XgaboraMatchDataSource.fetch_season", return_value=history), \
+             patch.object(config, "PREDICTIONS_JSON_PATH", predictions_path), \
+             patch.object(config, "HTML_OUTPUT_PATH", html_path):
+            main_module.run(target_date)  # no leagues= arg - should default to all 5
+
+        with open(predictions_path) as f:
+            data = json.load(f)
+        # The same 1 mocked fixture is returned for every league (since
+        # _fetch_season_raw is mocked identically regardless of which
+        # league argument it's called with) - so with 5 leagues, we
+        # expect 5 total fixtures, not 1.
+        assert data["fixture_count"] == len(LEAGUE_CODES), (
+            f"Expected {len(LEAGUE_CODES)} fixtures (one per league), got {data['fixture_count']}"
+        )
+
+    print(f"PASS: test_multi_league_pipeline_covers_all_leagues_by_default (fixture_count={data['fixture_count']})")
 
 
 def test_pipeline_handles_no_fixtures_today():
@@ -129,7 +171,52 @@ def test_pipeline_handles_no_fixtures_today():
     print("PASS: test_pipeline_handles_no_fixtures_today")
 
 
-def test_pipeline_aborts_on_insufficient_historical_data():
+def test_pipeline_creates_missing_output_directories():
+    """Regression test for a REAL production crash: a fresh GitHub
+    Actions checkout does not have data/predictions/ or docs/ as
+    actual directories, since git does not track empty folders. The
+    original code assumed these directories already existed and
+    crashed with FileNotFoundError on the very first real run. This
+    test specifically points PREDICTIONS_JSON_PATH/HTML_OUTPUT_PATH at
+    subdirectories that do NOT exist yet (unlike the other tests in
+    this file, which point directly at a tempdir that already exists
+    as a directory, and therefore never actually exercised this bug).
+    """
+    target_date = date(2025, 12, 25)
+    matches, teams = _generate_fake_openfootball_season()
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        # Deliberately nested, non-existent subdirectories - matching
+        # the real repo's data/predictions/ and docs/ structure, which
+        # does not exist on a fresh checkout.
+        predictions_path = os.path.join(tmpdir, "data", "predictions", "latest.json")
+        html_path = os.path.join(tmpdir, "docs", "index.html")
+
+        assert not os.path.exists(os.path.dirname(predictions_path))
+        assert not os.path.exists(os.path.dirname(html_path))
+
+        with patch("engine.sources.openfootball_source.OpenFootballSource._fetch_season_raw", return_value=matches), \
+             patch.object(config, "PREDICTIONS_JSON_PATH", predictions_path), \
+             patch.object(config, "HTML_OUTPUT_PATH", html_path):
+            main_module.run(target_date)  # should not raise FileNotFoundError
+
+        assert os.path.exists(predictions_path), "predictions.json should exist even though its directory didn't"
+        assert os.path.exists(html_path), "index.html should exist even though its directory didn't"
+
+    print("PASS: test_pipeline_creates_missing_output_directories")
+
+
+def test_pipeline_skips_league_with_insufficient_historical_data():
+    """UPDATED BEHAVIOR: with multi-league support, one league having
+    insufficient historical data should no longer abort the entire
+    run (sys.exit) - it should skip just that league and continue,
+    since a data problem in one league (e.g. Ligue 1) shouldn't
+    prevent the dashboard from showing correct results for the other
+    four. Pinned to a single league here to test this in isolation:
+    with only "epl" requested and insufficient data for it, the run
+    completes successfully with zero fixtures/mismatches rather than
+    raising, since there's no other league to fall back to.
+    """
     target_date = date(2025, 12, 1)
     matches, teams = _generate_fake_openfootball_season()
     _add_upcoming_fixtures(matches, target_date, [(teams[0], teams[1])])
@@ -143,13 +230,13 @@ def test_pipeline_aborts_on_insufficient_historical_data():
              patch("engine.sources.xgabora_match_data_source.XgaboraMatchDataSource.fetch_season", return_value=tiny_history), \
              patch.object(config, "PREDICTIONS_JSON_PATH", predictions_path), \
              patch.object(config, "HTML_OUTPUT_PATH", html_path):
-            try:
-                main_module.run(target_date)
-                assert False, "Expected SystemExit due to insufficient historical data"
-            except SystemExit:
-                pass
+            main_module.run(target_date, leagues=["epl"])  # should NOT raise SystemExit anymore
 
-    print("PASS: test_pipeline_aborts_on_insufficient_historical_data")
+        with open(predictions_path) as f:
+            data = json.load(f)
+        assert data["total_mismatches"] == 0, "Expected no mismatches computed for the skipped league"
+
+    print("PASS: test_pipeline_skips_league_with_insufficient_historical_data")
 
 
 def test_pipeline_handles_streak_source_fetch_failure_gracefully():
@@ -174,7 +261,7 @@ def test_pipeline_handles_streak_source_fetch_failure_gracefully():
              patch("engine.sources.xgabora_match_data_source.XgaboraMatchDataSource.fetch_season", flaky_fetch_season), \
              patch.object(config, "PREDICTIONS_JSON_PATH", predictions_path), \
              patch.object(config, "HTML_OUTPUT_PATH", html_path):
-            main_module.run(target_date)
+            main_module.run(target_date, leagues=["epl"])
 
         assert os.path.exists(predictions_path)
 
@@ -183,7 +270,9 @@ def test_pipeline_handles_streak_source_fetch_failure_gracefully():
 
 if __name__ == "__main__":
     test_full_pipeline_runs_without_crashing()
+    test_multi_league_pipeline_covers_all_leagues_by_default()
     test_pipeline_handles_no_fixtures_today()
-    test_pipeline_aborts_on_insufficient_historical_data()
+    test_pipeline_creates_missing_output_directories()
+    test_pipeline_skips_league_with_insufficient_historical_data()
     test_pipeline_handles_streak_source_fetch_failure_gracefully()
     print("\nAll tests passed.")

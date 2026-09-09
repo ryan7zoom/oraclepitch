@@ -55,7 +55,7 @@ def test_generate_html_with_no_args_produces_valid_empty_state():
     html = generate_html()
     assert "<!DOCTYPE html>" in html
     assert "Mismatches Found" not in html
-    assert "No fixtures found" in html or "insufficient historical data" in html
+    assert "No fixtures today" in html
     print("PASS: test_generate_html_with_no_args_produces_valid_empty_state")
 
 
@@ -76,6 +76,23 @@ def test_mismatches_section_renders_when_present():
     assert "Mismatches Found" in html
     assert "TeamA" in html and "TeamB" in html
     print(f"PASS: test_mismatches_section_renders_when_present ({len(mismatches)} mismatches)")
+
+
+def test_mismatches_section_shows_league_prefix_from_dict_key():
+    """Regression test for a real bug found during multi-league
+    development: the fixture label dict key (which carries the league
+    prefix, e.g. "[La Liga] Real Madrid vs Barcelona") was being
+    discarded during rendering - the card's title was reconstructed
+    from Mismatch.home_team/away_team directly, which has no league
+    field at all, so the league name silently disappeared even though
+    it was present in the data passed to the renderer.
+    """
+    analyzer, as_of, mismatches = _build_clear_mismatch_scenario()
+    assert len(mismatches) > 0
+
+    html = _mismatches_section_html({"[La Liga] TeamA vs TeamB": mismatches})
+    assert "[La Liga]" in html, "Expected the league prefix from the dict key to appear in the rendered card"
+    print("PASS: test_mismatches_section_shows_league_prefix_from_dict_key")
 
 
 def test_mismatch_card_never_uses_forbidden_language():
@@ -195,6 +212,7 @@ if __name__ == "__main__":
     test_generate_html_with_no_args_produces_valid_empty_state()
     test_mismatches_section_omitted_when_empty()
     test_mismatches_section_renders_when_present()
+    test_mismatches_section_shows_league_prefix_from_dict_key()
     test_mismatch_card_never_uses_forbidden_language()
     test_mismatches_sorted_strongest_first()
     test_streaks_by_category_groups_correctly()
