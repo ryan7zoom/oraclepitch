@@ -6,6 +6,13 @@ on:
     - cron: '0 12 * * *'  # UTC 12:00
   workflow_dispatch:       # Manual trigger
 
+# Required for peaceiris/actions-gh-pages to push to the gh-pages
+# branch. Without this, the default GITHUB_TOKEN is read-only on many
+# repos (a GitHub security default) and the deploy step fails with a
+# 403 Permission denied error - confirmed via a real production run.
+permissions:
+  contents: write
+
 jobs:
   dashboard:
     runs-on: ubuntu-latest
