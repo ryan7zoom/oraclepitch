@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+*.pyo
+.DS_Store
+data/historical/*.json
+data/predictions/*.json
+docs/index.html

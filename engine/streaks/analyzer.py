@@ -96,13 +96,26 @@ class Mismatch:
     strength_label: str
     suggested_bet: str
     is_h2h: bool = False
+    # Populated only for recent-form (is_h2h=False) mismatches, when a
+    # head-to-head streak exists for the same for_team/stat/threshold -
+    # see find_mismatches()'s "enrichment" step. Used to compute
+    # `alignment` below, per the pivot spec's requirement to show
+    # recent-form AND head-to-head together with a verdict on whether
+    # they agree.
+    h2h_streak: Optional[StreakResult] = None
+    alignment: Optional[str] = None  # "Aligned" | "Mixed" | "Conflict" | None
 
     def describe(self) -> str:
-        return (
-            f"{self.for_streak.team}: {self.for_streak.describe()}\n"
-            f"{self.against_streak.team} allowed: {self.against_streak.describe()}\n"
-            f"Combined: {self.combined_percentage:.1%} -> {self.strength_label}"
-        )
+        lines = [
+            f"{self.for_streak.team}: {self.for_streak.describe()}",
+            f"{self.against_streak.team} allowed: {self.against_streak.describe()}",
+        ]
+        if self.h2h_streak is not None:
+            lines.append(f"H2H: {self.h2h_streak.describe()}")
+            if self.alignment:
+                lines.append(f"Alignment: {self.alignment}")
+        lines.append(f"Combined: {self.combined_percentage:.1%} -> {self.strength_label}")
+        return "\n".join(lines)
 
 
 _STAT_DISPLAY_NAMES = {
@@ -196,6 +209,34 @@ def _mismatch_strength_label(combined_percentage: float, window: int) -> str:
         return "Watch" if long_window else "Ignore"
     else:
         return "Ignore"
+
+
+def _classify_alignment(recent_form_percentage: float, h2h_percentage: float) -> str:
+    """Classify agreement between a recent-form streak percentage and
+    the corresponding head-to-head streak percentage for the same
+    stat/threshold, per the pivot spec's alignment rule:
+    - Both clearly point the same way (both high, or both low) -> "Aligned"
+    - They strongly contradict (one high, one low) -> "Conflict"
+    - Anything in between (one moderate, mixed signal) -> "Mixed"
+
+    The exact thresholds mirror the spec's own worked example (80% vs
+    20% called "Conflict"; the spec's other example, 80% vs 60%,
+    doesn't test the boundary between "Aligned" and "Mixed" directly,
+    so this uses a straightforward "both clear the mismatch threshold
+    in the same direction" rule for Aligned, a large gap for Conflict,
+    and Mixed for everything in between - documented here explicitly
+    since the spec described the concept but not exact numeric
+    boundaries beyond its one worked example).
+    """
+    gap = abs(recent_form_percentage - h2h_percentage)
+    both_high = recent_form_percentage >= config.MISMATCH_MIN_PERCENTAGE and h2h_percentage >= config.MISMATCH_MIN_PERCENTAGE
+    both_low = recent_form_percentage < config.MISMATCH_MIN_PERCENTAGE and h2h_percentage < config.MISMATCH_MIN_PERCENTAGE
+
+    if both_high or both_low:
+        return "Aligned"
+    if gap >= 0.5:
+        return "Conflict"
+    return "Mixed"
 
 
 class StreakAnalyzer:
@@ -338,6 +379,7 @@ class StreakAnalyzer:
                         home_for, away_against, is_h2h=False,
                     )
                     if m:
+                        self._enrich_with_h2h(m, as_of)
                         mismatches.append(m)
 
                     away_for = self.get_streak(away_team, stat, threshold, window, "for", as_of, "away_only")
@@ -347,6 +389,7 @@ class StreakAnalyzer:
                         away_for, home_against, is_h2h=False,
                     )
                     if m:
+                        self._enrich_with_h2h(m, as_of)
                         mismatches.append(m)
 
                 for window in config.H2H_WINDOWS:
@@ -369,6 +412,37 @@ class StreakAnalyzer:
                         mismatches.append(m)
 
         return mismatches
+
+    def _enrich_with_h2h(self, mismatch: Mismatch, as_of: date) -> None:
+        """Mutate a recent-form Mismatch in place, attaching the
+        corresponding head-to-head streak (same for_team/stat/threshold)
+        and an alignment verdict, per the pivot spec's requirement to
+        show recent-form and H2H together with an agreement flag.
+
+        Uses the LARGEST configured H2H_WINDOWS value (most H2H history
+        available) rather than every window size, since attaching one
+        representative H2H figure per card is what the spec's sample
+        output shows (one "Head-to-Head:" line per mismatch, not one
+        per window size) - showing every H2H window on every recent-
+        form card would be noisy repetition of information already
+        available in the "All Streaks by Category" section below.
+
+        Does nothing (leaves h2h_streak/alignment as None) if the H2H
+        streak doesn't meet MISMATCH_MIN_WINDOW - a small H2H sample
+        isn't meaningful evidence for or against alignment, and
+        showing a false "Conflict" or "Aligned" verdict from 1-2
+        H2H meetings would overstate the reliability of that signal.
+        """
+        h2h_window = max(config.H2H_WINDOWS)
+        h2h = self.get_h2h_streak(
+            mismatch.for_streak.team, mismatch.against_streak.team,
+            mismatch.stat, mismatch.threshold, h2h_window, as_of, direction="for",
+        )
+        if h2h.total < config.MISMATCH_MIN_WINDOW:
+            return
+
+        mismatch.h2h_streak = h2h
+        mismatch.alignment = _classify_alignment(mismatch.for_streak.percentage, h2h.percentage)
 
     def _build_mismatch_if_qualifying(
         self, for_team: str, against_team: str, stat: str, threshold: float,

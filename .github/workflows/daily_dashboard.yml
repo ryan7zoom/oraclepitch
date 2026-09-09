@@ -1,0 +1,37 @@
+name: Daily EPL Dashboard
+
+on:
+  schedule:
+    - cron: '0 4 * * *'   # UTC 04:00
+    - cron: '0 12 * * *'  # UTC 12:00
+  workflow_dispatch:       # Manual trigger
+
+jobs:
+  dashboard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - run: pip install -r requirements.txt
+
+      # No API keys needed - fixture discovery uses OpenFootballSource
+      # (free, no-key, GitHub-hosted) and historical data uses
+      # XgaboraMatchDataSource (also free, no-key, GitHub-hosted). This
+      # run downloads the full ~45MB xgabora CSV each time (no local
+      # caching since there's no per-fixture stats fetch to cache
+      # anymore after the project's pivot away from prediction models -
+      # see config.py's module docstring) - this is slower than an
+      # incremental fetch would be, but stays well within GitHub
+      # Actions' free-tier time limits for a job like this.
+      - name: Run daily dashboard generation
+        run: python -m engine.main --date today
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs

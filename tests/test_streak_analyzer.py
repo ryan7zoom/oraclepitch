@@ -16,7 +16,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from engine.sources.football_data_co_uk_source import HistoricalMatchOdds
 from engine.streaks.analyzer import (
     StreakAnalyzer, get_stat_value, get_opponent_stat_value,
-    _strength_label, _mismatch_strength_label,
+    _strength_label, _mismatch_strength_label, _classify_alignment,
 )
 import config
 
@@ -207,14 +207,89 @@ def test_find_mismatches_detects_a_clear_double_streak():
     print(f"PASS: test_find_mismatches_detects_a_clear_double_streak ({len(mismatches)} total mismatches found)")
 
 
+def test_classify_alignment_both_high_is_aligned():
+    assert _classify_alignment(0.80, 0.80) == "Aligned"
+    assert _classify_alignment(0.90, 0.65) == "Aligned"
+    print("PASS: test_classify_alignment_both_high_is_aligned")
+
+
+def test_classify_alignment_both_low_is_aligned():
+    assert _classify_alignment(0.30, 0.20) == "Aligned"
+    print("PASS: test_classify_alignment_both_low_is_aligned")
+
+
+def test_classify_alignment_large_gap_is_conflict():
+    """Matches the spec's own worked example: 80% recent form vs 20%
+    H2H is explicitly called "Conflict" in the spec.
+    """
+    assert _classify_alignment(0.80, 0.20) == "Conflict"
+    print("PASS: test_classify_alignment_large_gap_is_conflict")
+
+
+def test_classify_alignment_moderate_gap_is_mixed():
+    """A case that lands genuinely between "both clear the 60% bar"
+    (Aligned) and "one clearly high, one clearly low" (Conflict):
+    recent form clears the mismatch threshold but H2H falls just short
+    of it, with a moderate (not extreme) gap between them.
+    """
+    assert _classify_alignment(0.70, 0.45) == "Mixed"
+    print("PASS: test_classify_alignment_moderate_gap_is_mixed")
+
+
+def test_find_mismatches_enriches_recent_form_with_h2h_when_available():
+    matches = []
+    start = date(2020, 8, 1)
+    day = 0
+    for i in range(8):
+        matches.append(make_match(start + timedelta(days=day), "TeamA", f"Filler{i}", hst=7))
+        day += 7
+    for i in range(8):
+        matches.append(make_match(start + timedelta(days=day), f"Filler{i+10}", "TeamB", hst=7, ast=1))
+        day += 7
+    for i in range(5):
+        matches.append(make_match(start + timedelta(days=day), "TeamA", "TeamB", hst=8, ast=1))
+        day += 200
+
+    analyzer = StreakAnalyzer(matches)
+    as_of = start + timedelta(days=day + 30)
+    mismatches = analyzer.find_mismatches("TeamA", "TeamB", as_of)
+
+    recent_form_mismatches = [m for m in mismatches if not m.is_h2h and m.for_streak.team == "TeamA"
+                               and m.stat == "shots_on_target" and m.threshold == 5]
+    assert len(recent_form_mismatches) > 0, "Expected at least one qualifying recent-form mismatch"
+    enriched = [m for m in recent_form_mismatches if m.h2h_streak is not None]
+    assert len(enriched) > 0, "Expected at least one mismatch enriched with H2H data"
+    assert enriched[0].alignment == "Aligned", f"Expected Aligned (both high), got {enriched[0].alignment}"
+    print(f"PASS: test_find_mismatches_enriches_recent_form_with_h2h_when_available "
+          f"(alignment={enriched[0].alignment})")
+
+
+def test_find_mismatches_leaves_h2h_none_when_insufficient_h2h_history():
+    matches = []
+    start = date(2020, 8, 1)
+    day = 0
+    for i in range(8):
+        matches.append(make_match(start + timedelta(days=day), "TeamA", f"Filler{i}", hst=7))
+        day += 7
+    for i in range(8):
+        matches.append(make_match(start + timedelta(days=day), f"Filler{i+10}", "TeamB", hst=7, ast=1))
+        day += 7
+
+    analyzer = StreakAnalyzer(matches)
+    as_of = start + timedelta(days=day + 30)
+    mismatches = analyzer.find_mismatches("TeamA", "TeamB", as_of)
+
+    recent_form_mismatches = [m for m in mismatches if not m.is_h2h]
+    assert len(recent_form_mismatches) > 0
+    for m in recent_form_mismatches:
+        assert m.h2h_streak is None, f"Expected no H2H enrichment with zero H2H history, got {m.h2h_streak}"
+        assert m.alignment is None
+    print("PASS: test_find_mismatches_leaves_h2h_none_when_insufficient_h2h_history")
+
+
 def test_find_mismatches_never_recommends_bets_or_stakes():
     """Guard against a future edit accidentally adding staking/Kelly
     logic to this module - per spec, this is decision support only.
-
-    Checks for actual usage (an import, a function/class reference),
-    not just the word "kelly" appearing anywhere - the module's own
-    docstring legitimately mentions Kelly Criterion to explain that it
-    is NOT used here, which a naive text search would misflag.
     """
     import inspect
     from engine.streaks import analyzer as analyzer_module
@@ -227,8 +302,6 @@ def test_find_mismatches_never_recommends_bets_or_stakes():
     for pattern in forbidden_patterns:
         assert pattern.lower() not in source.lower(), f"FORBIDDEN: found {pattern!r} usage in streaks module"
 
-    # Also confirm no public method/function on the analyzer computes
-    # or returns anything stake-related.
     public_members = [name for name in dir(analyzer_module.StreakAnalyzer) if not name.startswith("_")]
     for name in public_members:
         assert "stake" not in name.lower() and "kelly" not in name.lower(), (
@@ -250,5 +323,11 @@ if __name__ == "__main__":
     test_get_h2h_streak_only_counts_matches_between_the_two_teams()
     test_find_mismatches_requires_minimum_window_size()
     test_find_mismatches_detects_a_clear_double_streak()
+    test_classify_alignment_both_high_is_aligned()
+    test_classify_alignment_both_low_is_aligned()
+    test_classify_alignment_large_gap_is_conflict()
+    test_classify_alignment_moderate_gap_is_mixed()
+    test_find_mismatches_enriches_recent_form_with_h2h_when_available()
+    test_find_mismatches_leaves_h2h_none_when_insufficient_h2h_history()
     test_find_mismatches_never_recommends_bets_or_stakes()
     print("\nAll tests passed.")
