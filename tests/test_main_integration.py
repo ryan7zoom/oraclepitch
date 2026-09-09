@@ -129,6 +129,41 @@ def test_pipeline_handles_no_fixtures_today():
     print("PASS: test_pipeline_handles_no_fixtures_today")
 
 
+def test_pipeline_creates_missing_output_directories():
+    """Regression test for a REAL production crash: a fresh GitHub
+    Actions checkout does not have data/predictions/ or docs/ as
+    actual directories, since git does not track empty folders. The
+    original code assumed these directories already existed and
+    crashed with FileNotFoundError on the very first real run. This
+    test specifically points PREDICTIONS_JSON_PATH/HTML_OUTPUT_PATH at
+    subdirectories that do NOT exist yet (unlike the other tests in
+    this file, which point directly at a tempdir that already exists
+    as a directory, and therefore never actually exercised this bug).
+    """
+    target_date = date(2025, 12, 25)
+    matches, teams = _generate_fake_openfootball_season()
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        # Deliberately nested, non-existent subdirectories - matching
+        # the real repo's data/predictions/ and docs/ structure, which
+        # does not exist on a fresh checkout.
+        predictions_path = os.path.join(tmpdir, "data", "predictions", "latest.json")
+        html_path = os.path.join(tmpdir, "docs", "index.html")
+
+        assert not os.path.exists(os.path.dirname(predictions_path))
+        assert not os.path.exists(os.path.dirname(html_path))
+
+        with patch("engine.sources.openfootball_source.OpenFootballSource._fetch_season_raw", return_value=matches), \
+             patch.object(config, "PREDICTIONS_JSON_PATH", predictions_path), \
+             patch.object(config, "HTML_OUTPUT_PATH", html_path):
+            main_module.run(target_date)  # should not raise FileNotFoundError
+
+        assert os.path.exists(predictions_path), "predictions.json should exist even though its directory didn't"
+        assert os.path.exists(html_path), "index.html should exist even though its directory didn't"
+
+    print("PASS: test_pipeline_creates_missing_output_directories")
+
+
 def test_pipeline_aborts_on_insufficient_historical_data():
     target_date = date(2025, 12, 1)
     matches, teams = _generate_fake_openfootball_season()
@@ -184,6 +219,7 @@ def test_pipeline_handles_streak_source_fetch_failure_gracefully():
 if __name__ == "__main__":
     test_full_pipeline_runs_without_crashing()
     test_pipeline_handles_no_fixtures_today()
+    test_pipeline_creates_missing_output_directories()
     test_pipeline_aborts_on_insufficient_historical_data()
     test_pipeline_handles_streak_source_fetch_failure_gracefully()
     print("\nAll tests passed.")
