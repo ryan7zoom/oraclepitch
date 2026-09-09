@@ -28,6 +28,7 @@ Usage: python -m engine.main --date today
 import argparse
 import json
 import logging
+import os
 import sys
 from datetime import date, datetime
 
@@ -127,6 +128,14 @@ def run(target_date: date):
 
 
 def _write_outputs(target_date: date, fixture_count: int, all_mismatches: dict, all_streaks: dict):
+    # Ensure the output directories exist before writing. git does not
+    # track empty directories, so a fresh checkout of this repo may be
+    # missing data/predictions/ (and potentially docs/) entirely - this
+    # was confirmed as a real production crash (FileNotFoundError) on
+    # a genuine GitHub Actions run, not a hypothetical edge case.
+    os.makedirs(os.path.dirname(config.PREDICTIONS_JSON_PATH), exist_ok=True)
+    os.makedirs(os.path.dirname(config.HTML_OUTPUT_PATH), exist_ok=True)
+
     with open(config.PREDICTIONS_JSON_PATH, "w") as f:
         json.dump({
             "generated_at": datetime.now().isoformat(),
