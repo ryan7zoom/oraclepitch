@@ -3,5 +3,3 @@ __pycache__/
 *.pyo
 .DS_Store
 data/historical/*.json
-data/predictions/*.json
-docs/index.html
