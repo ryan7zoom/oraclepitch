@@ -5,6 +5,11 @@ on:
     - cron: '0 4 * * *'   # UTC 04:00
     - cron: '0 12 * * *'  # UTC 12:00
   workflow_dispatch:       # Manual trigger
+    inputs:
+      date:
+        description: 'Date to check (YYYY-MM-DD), or leave blank for today - useful for testing against a date known to have fixtures, e.g. a weekend'
+        required: false
+        default: ''
 
 # Required for peaceiris/actions-gh-pages to push to the gh-pages
 # branch. Without this, the default GITHUB_TOKEN is read-only on many
@@ -35,7 +40,7 @@ jobs:
       # incremental fetch would be, but stays well within GitHub
       # Actions' free-tier time limits for a job like this.
       - name: Run daily dashboard generation
-        run: python -m engine.main --date today
+        run: python -m engine.main --date "${{ github.event.inputs.date || 'today' }}"
 
       - name: Save dashboard to repo
         run: |
