@@ -193,7 +193,7 @@ def generate_html(
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EPL Match Preview Dashboard</title>
+<title>Trends</title>
 <style>
   :root {{
     --bg: #0f1115;
@@ -285,7 +285,7 @@ def generate_html(
 </head>
 <body>
 <header>
-  <h1>EPL Match Preview Dashboard</h1>
+  <h1>Trends</h1>
 </header>
 
 {body_html}
