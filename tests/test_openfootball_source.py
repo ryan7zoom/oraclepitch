@@ -89,7 +89,7 @@ def test_get_fixtures_for_date_finds_played_match(mock_get):
     mock_get.return_value = make_mock_response(SAMPLE_SEASON_JSON)
     source = OpenFootballSource()
 
-    results = source.get_fixtures_for_date(date(2026, 8, 21), season_start_year=2026)
+    results = source.get_fixtures_for_date(date(2026, 8, 21), season_start_year=2026, window_days=0)
 
     assert len(results) == 1
     match = results[0]
@@ -106,7 +106,7 @@ def test_get_fixtures_for_date_finds_bare_array_score_match(mock_get):
     mock_get.return_value = make_mock_response(SAMPLE_SEASON_JSON)
     source = OpenFootballSource()
 
-    results = source.get_fixtures_for_date(date(2026, 8, 22), season_start_year=2026)
+    results = source.get_fixtures_for_date(date(2026, 8, 22), season_start_year=2026, window_days=0)
 
     assert len(results) == 1
     assert results[0].home_goals == 2
@@ -120,7 +120,7 @@ def test_get_fixtures_for_date_finds_upcoming_match(mock_get):
     mock_get.return_value = make_mock_response(SAMPLE_SEASON_JSON)
     source = OpenFootballSource()
 
-    results = source.get_fixtures_for_date(date(2027, 3, 13), season_start_year=2026)
+    results = source.get_fixtures_for_date(date(2027, 3, 13), season_start_year=2026, window_days=0)
 
     assert len(results) == 1
     match = results[0]
@@ -136,7 +136,7 @@ def test_get_fixtures_for_date_returns_empty_for_no_matches_that_day(mock_get):
     mock_get.return_value = make_mock_response(SAMPLE_SEASON_JSON)
     source = OpenFootballSource()
 
-    results = source.get_fixtures_for_date(date(2026, 12, 25), season_start_year=2026)
+    results = source.get_fixtures_for_date(date(2026, 12, 25), season_start_year=2026, window_days=0)
     assert results == []
     print("PASS: test_get_fixtures_for_date_returns_empty_for_no_matches_that_day")
 
@@ -146,8 +146,8 @@ def test_caches_season_and_does_not_refetch(mock_get):
     mock_get.return_value = make_mock_response(SAMPLE_SEASON_JSON)
     source = OpenFootballSource()
 
-    source.get_fixtures_for_date(date(2026, 8, 21), season_start_year=2026)
-    source.get_fixtures_for_date(date(2026, 8, 22), season_start_year=2026)
+    source.get_fixtures_for_date(date(2026, 8, 21), season_start_year=2026, window_days=0)
+    source.get_fixtures_for_date(date(2026, 8, 22), season_start_year=2026, window_days=0)
 
     assert mock_get.call_count == 1, f"Expected exactly 1 fetch (cached after that), got {mock_get.call_count}"
     print("PASS: test_caches_season_and_does_not_refetch")
@@ -158,7 +158,7 @@ def test_fetch_failure_returns_empty_list_not_crash(mock_get):
     mock_get.side_effect = Exception("404 Not Found")
     source = OpenFootballSource()
 
-    results = source.get_fixtures_for_date(date(2099, 1, 1), season_start_year=2098)
+    results = source.get_fixtures_for_date(date(2099, 1, 1), season_start_year=2098, window_days=0)
     assert results == []
     print("PASS: test_fetch_failure_returns_empty_list_not_crash")
 
@@ -235,7 +235,7 @@ def test_get_fixtures_applies_name_normalization():
     }
     with patch("engine.sources.openfootball_source.requests.get", return_value=make_mock_response(season_json)):
         source = OpenFootballSource()
-        results = source.get_fixtures_for_date(date(2026, 8, 21), season_start_year=2026)
+        results = source.get_fixtures_for_date(date(2026, 8, 21), season_start_year=2026, window_days=0)
 
     assert len(results) == 1
     assert results[0].home_team == "Man City", f"Expected normalized name, got {results[0].home_team!r}"
@@ -359,7 +359,7 @@ def test_get_fixtures_for_date_respects_league_parameter():
     }
     with patch("engine.sources.openfootball_source.requests.get", return_value=make_mock_response(la_liga_json)):
         source = OpenFootballSource()
-        results = source.get_fixtures_for_date(date(2026, 8, 21), league="la_liga", season_start_year=2026)
+        results = source.get_fixtures_for_date(date(2026, 8, 21), league="la_liga", season_start_year=2026, window_days=0)
 
     assert len(results) == 1
     assert results[0].home_team == "Real Madrid", f"Expected La Liga normalization, got {results[0].home_team!r}"
@@ -378,6 +378,50 @@ def test_fetch_season_raw_raises_on_unsupported_league():
     except ValueError as e:
         assert "not_a_real_league" in str(e)
     print("PASS: test_fetch_season_raw_raises_on_unsupported_league")
+
+
+def test_get_fixtures_for_date_default_window_includes_next_two_days():
+    """Regression/feature test for the 3-day window fix: with the
+    default window_days=2, a call for date(2026, 8, 21) should include
+    matches on the 21st, 22nd, AND 23rd (if any), not just the 21st.
+    Uses SAMPLE_SEASON_JSON, which has matches on the 21st and 22nd.
+    """
+    mock_get_patcher = patch("engine.sources.openfootball_source.requests.get", return_value=make_mock_response(SAMPLE_SEASON_JSON))
+    with mock_get_patcher:
+        source = OpenFootballSource()
+        results = source.get_fixtures_for_date(date(2026, 8, 21), season_start_year=2026)  # default window_days=2
+
+    result_dates = {r.date for r in results}
+    assert date(2026, 8, 21) in result_dates
+    assert date(2026, 8, 22) in result_dates, "Expected the default 2-day window to include the 22nd"
+    print(f"PASS: test_get_fixtures_for_date_default_window_includes_next_two_days (dates found: {sorted(result_dates)})")
+
+
+def test_get_fixtures_for_date_window_excludes_dates_outside_range():
+    """A match clearly outside the window (the 2027-03-13 fixture in
+    SAMPLE_SEASON_JSON) should NOT appear when querying a window
+    anchored at 2026-08-21, even with the default 2-day window.
+    """
+    with patch("engine.sources.openfootball_source.requests.get", return_value=make_mock_response(SAMPLE_SEASON_JSON)):
+        source = OpenFootballSource()
+        results = source.get_fixtures_for_date(date(2026, 8, 21), season_start_year=2026)
+
+    result_dates = {r.date for r in results}
+    assert date(2027, 3, 13) not in result_dates, "Expected the far-future fixture to be excluded from this window"
+    print("PASS: test_get_fixtures_for_date_window_excludes_dates_outside_range")
+
+
+def test_get_fixtures_for_date_custom_window_days():
+    """window_days=0 should behave like the original exact-date-only
+    matching (used throughout this file's other tests for
+    backward-compatible single-day assertions)."""
+    with patch("engine.sources.openfootball_source.requests.get", return_value=make_mock_response(SAMPLE_SEASON_JSON)):
+        source = OpenFootballSource()
+        results = source.get_fixtures_for_date(date(2026, 8, 21), season_start_year=2026, window_days=0)
+
+    assert len(results) == 1
+    assert results[0].date == date(2026, 8, 21)
+    print("PASS: test_get_fixtures_for_date_custom_window_days")
 
 
 if __name__ == "__main__":
@@ -403,4 +447,7 @@ if __name__ == "__main__":
     test_get_fixtures_for_date_returns_empty_for_no_matches_that_day()
     test_caches_season_and_does_not_refetch()
     test_fetch_failure_returns_empty_list_not_crash()
+    test_get_fixtures_for_date_default_window_includes_next_two_days()
+    test_get_fixtures_for_date_window_excludes_dates_outside_range()
+    test_get_fixtures_for_date_custom_window_days()
     print("\nAll tests passed.")

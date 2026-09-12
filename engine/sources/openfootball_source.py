@@ -55,7 +55,7 @@ SCHEMA NOTES:
 """
 
 import logging
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from typing import Optional
 
 import requests
@@ -349,16 +349,38 @@ class OpenFootballSource:
         logger.info(f"Fetched {len(matches)} matches for {league} season {folder} from openfootball")
         return matches
 
-    def get_fixtures_for_date(self, target_date: date, league: str = "epl", season_start_year: Optional[int] = None) -> list:
+    def get_fixtures_for_date(
+        self, target_date: date, league: str = "epl",
+        season_start_year: Optional[int] = None, window_days: int = 2,
+    ) -> list:
         """Return all matches in the given league scheduled or played
-        on target_date.
+        between target_date and target_date + window_days (inclusive).
+
+        WHY A WINDOW, NOT AN EXACT DATE: originally this matched only
+        target_date exactly. A real production issue surfaced this as
+        a bug: the user is in Bangladesh (UTC+6), the GitHub Actions
+        runner computes "today" in UTC, and with an exact-date match, a
+        fixture happening "tomorrow" from the user's perspective could
+        fall entirely outside what a single day's exact match would
+        ever check - not because the data was missing (verified real
+        matches did exist in the source for the affected dates), but
+        because of the date-boundary/timezone mismatch between how the
+        runner computes "today" and the user's actual local day. A
+        multi-day window is a robust fix that doesn't depend on getting
+        every timezone edge case exactly right - see engine/main.py's
+        _today_bd() for the actual local-date fix which addresses the
+        root cause; this window is a second, complementary layer of
+        robustness (also naturally gives the user a few days' advance
+        visibility into upcoming fixtures, which is a reasonable
+        feature in its own right, not just a bug workaround).
 
         league: one of the keys in LEAGUE_CODES (e.g. "epl", "la_liga").
         season_start_year: if not provided, inferred the same way
             engine.sources.api_football_source.ApiFootballSource does
-            (season "starts" in July, labeled by its starting year) -
-            duplicated here rather than imported to avoid a hard
-            dependency between this module and api_football_source.py.
+            (season "starts" in July, labeled by its starting year).
+        window_days: how many additional days beyond target_date to
+            include (default 2, giving a 3-day total window: today,
+            tomorrow, day after tomorrow).
         """
         if season_start_year is None:
             season_start_year = target_date.year if target_date.month >= 7 else target_date.year - 1
@@ -369,10 +391,12 @@ class OpenFootballSource:
             logger.error(f"Failed to fetch {league} season {season_start_year} from openfootball: {e}")
             return []
 
+        window_end = target_date + timedelta(days=window_days)
+
         results = []
         for m in raw_matches:
             match_date = _parse_match_date(m.get("date", ""))
-            if match_date != target_date:
+            if match_date is None or not (target_date <= match_date <= window_end):
                 continue
 
             home_goals, away_goals = _extract_score(m)
@@ -390,6 +414,7 @@ class OpenFootballSource:
                 away_team=away_team,
                 home_goals=home_goals,
                 away_goals=away_goals,
+
                 status=status,
                 raw=m,
             ))

@@ -111,6 +111,92 @@ def test_full_pipeline_runs_without_crashing():
     print(f"PASS: test_full_pipeline_runs_without_crashing (fixture_count={data['fixture_count']})")
 
 
+def test_per_fixture_streak_analysis_uses_own_match_date_not_window_start():
+    """Core regression/feature test for per-fixture as-of dates: with
+    two fixtures on different days within the 3-day window, each
+    fixture's streak analysis must use ITS OWN date as the as-of
+    reference, not the window's start date. Verified by instrumenting
+    StreakAnalyzer.find_mismatches to record which date it was called
+    with for each fixture.
+    """
+    from engine.streaks.analyzer import StreakAnalyzer
+
+    target_date = date(2025, 12, 1)
+    tomorrow = target_date + timedelta(days=1)
+    matches, teams = _generate_fake_openfootball_season()
+    _add_upcoming_fixtures(matches, target_date, [(teams[0], teams[1])])
+    _add_upcoming_fixtures(matches, tomorrow, [(teams[2], teams[3])])
+    history = _generate_fake_xgabora_history(teams)
+
+    calls = []
+    original_find_mismatches = StreakAnalyzer.find_mismatches
+
+    def instrumented_find_mismatches(self, home_team, away_team, as_of):
+        calls.append((home_team, away_team, as_of))
+        return original_find_mismatches(self, home_team, away_team, as_of)
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        predictions_path = os.path.join(tmpdir, "predictions.json")
+        html_path = os.path.join(tmpdir, "index.html")
+
+        with patch("engine.sources.openfootball_source.OpenFootballSource._fetch_season_raw", return_value=matches), \
+             patch("engine.sources.xgabora_match_data_source.XgaboraMatchDataSource.fetch_season", return_value=history), \
+             patch.object(StreakAnalyzer, "find_mismatches", instrumented_find_mismatches), \
+             patch.object(config, "PREDICTIONS_JSON_PATH", predictions_path), \
+             patch.object(config, "HTML_OUTPUT_PATH", html_path):
+            main_module.run(target_date, leagues=["epl"])
+
+    team0_1_calls = [c for c in calls if c[0] == teams[0] and c[1] == teams[1]]
+    team2_3_calls = [c for c in calls if c[0] == teams[2] and c[1] == teams[3]]
+
+    assert len(team0_1_calls) > 0, f"Expected a call for {teams[0]} vs {teams[1]}"
+    assert len(team2_3_calls) > 0, f"Expected a call for {teams[2]} vs {teams[3]}"
+
+    assert team0_1_calls[0][2] == target_date, (
+        f"Expected {teams[0]} vs {teams[1]} (scheduled on {target_date}) to use "
+        f"as_of={target_date}, got {team0_1_calls[0][2]}"
+    )
+    assert team2_3_calls[0][2] == tomorrow, (
+        f"Expected {teams[2]} vs {teams[3]} (scheduled on {tomorrow}) to use "
+        f"as_of={tomorrow} (its OWN date), not the window start {target_date} - "
+        f"got {team2_3_calls[0][2]}"
+    )
+
+    print(f"PASS: test_per_fixture_streak_analysis_uses_own_match_date_not_window_start "
+          f"(fixture 1 as_of={team0_1_calls[0][2]}, fixture 2 as_of={team2_3_calls[0][2]})")
+
+
+def test_pipeline_writes_fixtures_grouped_by_date_in_html():
+    """End-to-end check that fixtures on different days within the
+    window actually end up in different date-grouped sections of the
+    rendered HTML, not all merged into one section.
+    """
+    target_date = date(2025, 12, 1)
+    tomorrow = target_date + timedelta(days=1)
+    matches, teams = _generate_fake_openfootball_season()
+    _add_upcoming_fixtures(matches, target_date, [(teams[0], teams[1])])
+    _add_upcoming_fixtures(matches, tomorrow, [(teams[2], teams[3])])
+    history = _generate_fake_xgabora_history(teams)
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        predictions_path = os.path.join(tmpdir, "predictions.json")
+        html_path = os.path.join(tmpdir, "index.html")
+
+        with patch("engine.sources.openfootball_source.OpenFootballSource._fetch_season_raw", return_value=matches), \
+             patch("engine.sources.xgabora_match_data_source.XgaboraMatchDataSource.fetch_season", return_value=history), \
+             patch.object(config, "PREDICTIONS_JSON_PATH", predictions_path), \
+             patch.object(config, "HTML_OUTPUT_PATH", html_path):
+            main_module.run(target_date, leagues=["epl"])
+
+        with open(html_path) as f:
+            html = f.read()
+
+    assert "Today" in html
+    assert "Tomorrow" in html
+
+    print("PASS: test_pipeline_writes_fixtures_grouped_by_date_in_html")
+
+
 def test_multi_league_pipeline_covers_all_leagues_by_default():
     """When no explicit leagues list is passed, run() should iterate
     over all 5 top leagues (see LEAGUE_CODES), not just EPL - this is
@@ -270,6 +356,8 @@ def test_pipeline_handles_streak_source_fetch_failure_gracefully():
 
 if __name__ == "__main__":
     test_full_pipeline_runs_without_crashing()
+    test_per_fixture_streak_analysis_uses_own_match_date_not_window_start()
+    test_pipeline_writes_fixtures_grouped_by_date_in_html()
     test_multi_league_pipeline_covers_all_leagues_by_default()
     test_pipeline_handles_no_fixtures_today()
     test_pipeline_creates_missing_output_directories()

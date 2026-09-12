@@ -153,40 +153,97 @@ def _streaks_by_category_html(all_streaks: dict, flagged_streak_keys: set) -> st
     """
 
 
+def _day_label(d, target_date) -> str:
+    """Return a human label for a date relative to target_date, per the
+    pivot spec's exact format: "Today", "Tomorrow", "Day After
+    Tomorrow" for the first three days of the window, falling back to
+    a plain weekday+date format for anything beyond that (in case
+    window_days is ever configured larger than 2).
+    """
+    offset = (d - target_date).days
+    weekday = d.strftime("%A")
+    if offset == 0:
+        return f"Today \u2014 {d.isoformat()} ({weekday})"
+    elif offset == 1:
+        return f"Tomorrow \u2014 {d.isoformat()} ({weekday})"
+    elif offset == 2:
+        return f"Day After Tomorrow \u2014 {d.isoformat()} ({weekday})"
+    else:
+        return f"{d.isoformat()} ({weekday})"
+
+
+def _day_section_html(d, target_date, mismatches_for_day: dict, streaks_for_day: dict) -> str:
+    """Render one day's full section: heading, Mismatches Found (if
+    any), All Streaks by Category (if any), or a "no fixtures" message
+    if the day has neither.
+    """
+    mismatches_html = _mismatches_section_html(mismatches_for_day)
+
+    flagged_keys = set()
+    for mismatches in mismatches_for_day.values():
+        for m in mismatches:
+            for s in (m.for_streak, m.against_streak, m.h2h_streak):
+                if s is not None:
+                    flagged_keys.add((s.team, s.stat, s.threshold, s.window, s.direction, s.filter_type))
+    streaks_html = _streaks_by_category_html(streaks_for_day, flagged_keys)
+
+    if not mismatches_html and not streaks_html:
+        body = '<div class="no-matches">No fixtures scheduled for this day.</div>'
+    else:
+        body = mismatches_html + streaks_html
+
+    label = _day_label(d, target_date)
+    return f"""
+    <div class="day-section">
+      <h2 class="day-heading">\U0001F4C5 {label}</h2>
+      {body}
+    </div>
+    """
+
+
 def generate_html(
     fixture_count: int = 0,
     generated_at: Optional[datetime] = None,
-    all_mismatches: Optional[dict] = None,
-    all_streaks: Optional[dict] = None,
+    all_mismatches_by_date: Optional[dict] = None,
+    all_streaks_by_date: Optional[dict] = None,
+    target_date=None,
 ) -> str:
-    """Render the full dashboard HTML.
+    """Render the full dashboard HTML, grouped by day.
 
-    fixture_count: number of fixtures analyzed today, shown in the
-        header, purely informational.
-    all_mismatches: dict of "{home} vs {away}" -> list[Mismatch]
-        (engine.streaks.analyzer.Mismatch) for the "Mismatches Found"
-        section. Omitted or empty -> that section is skipped entirely.
-    all_streaks: dict of team_name -> list[StreakResult] for the
-        "All Streaks by Category" section.
+    fixture_count: total number of fixtures analyzed across all days,
+        purely informational (currently unused in the rendered output
+        itself, kept for API compatibility / potential future use).
+    all_mismatches_by_date: dict of date -> {fixture_label: list[Mismatch]}.
+        Each day gets its own "Mismatches Found" section. A day with no
+        mismatches simply shows no such section (not an empty one).
+    all_streaks_by_date: dict of date -> {team_name: list[StreakResult]}.
+        Each day gets its own "All Streaks by Category" section.
+    target_date: the window's start date, used to compute "Today" /
+        "Tomorrow" / "Day After Tomorrow" labels relative to it. If not
+        provided, inferred as the earliest date present in the input
+        dicts (or today's UTC date if both are empty, purely as a
+        harmless fallback for the truly-no-data case).
     """
     generated_at = generated_at or datetime.now(timezone.utc)
-    timestamp_str = generated_at.strftime("%Y-%m-%d %H:%M UTC")
 
-    mismatches_html = _mismatches_section_html(all_mismatches or {})
+    all_mismatches_by_date = all_mismatches_by_date or {}
+    all_streaks_by_date = all_streaks_by_date or {}
+    all_dates = sorted(set(all_mismatches_by_date.keys()) | set(all_streaks_by_date.keys()))
 
-    flagged_keys = set()
-    if all_mismatches:
-        for mismatches in all_mismatches.values():
-            for m in mismatches:
-                for s in (m.for_streak, m.against_streak, m.h2h_streak):
-                    if s is not None:
-                        flagged_keys.add((s.team, s.stat, s.threshold, s.window, s.direction, s.filter_type))
-    streaks_html = _streaks_by_category_html(all_streaks or {}, flagged_keys)
+    if target_date is None:
+        target_date = all_dates[0] if all_dates else generated_at.date()
 
-    if not mismatches_html and not streaks_html:
+    if not all_dates:
         body_html = '<div class="no-matches">No fixtures today.</div>'
     else:
-        body_html = mismatches_html + streaks_html
+        sections = []
+        for d in all_dates:
+            sections.append(_day_section_html(
+                d, target_date,
+                all_mismatches_by_date.get(d, {}),
+                all_streaks_by_date.get(d, {}),
+            ))
+        body_html = "\n".join(sections)
 
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -225,6 +282,14 @@ def generate_html(
     padding: 40px;
     color: var(--text-dim);
     text-align: center;
+  }}
+
+  .day-section {{ margin-bottom: 36px; }}
+  .day-heading {{
+    font-size: 1.15rem;
+    margin: 0 0 14px 0;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
   }}
 
   .section-heading {{
@@ -298,11 +363,17 @@ def generate_html(
 def write_html(
     fixture_count: int = 0,
     output_path: str = None,
-    all_mismatches: Optional[dict] = None,
-    all_streaks: Optional[dict] = None,
+    all_mismatches_by_date: Optional[dict] = None,
+    all_streaks_by_date: Optional[dict] = None,
+    target_date=None,
 ):
     output_path = output_path or config.HTML_OUTPUT_PATH
-    html = generate_html(fixture_count=fixture_count, all_mismatches=all_mismatches, all_streaks=all_streaks)
+    html = generate_html(
+        fixture_count=fixture_count,
+        all_mismatches_by_date=all_mismatches_by_date,
+        all_streaks_by_date=all_streaks_by_date,
+        target_date=target_date,
+    )
     with open(output_path, "w") as f:
         f.write(html)
     return output_path

@@ -152,17 +152,23 @@ def test_streaks_by_category_flags_mismatched_streaks():
 
 def test_full_generate_html_integration_with_mismatches_and_streaks():
     analyzer, as_of, mismatches = _build_clear_mismatch_scenario()
-    all_mismatches = {"TeamA vs TeamB": mismatches}
-    all_streaks = {
+    all_mismatches_by_date = {as_of: {"TeamA vs TeamB": mismatches}}
+    all_streaks_by_date = {as_of: {
         "TeamA": [analyzer.get_streak("TeamA", "shots_on_target", 5, 8, "for", as_of, "home_only")],
         "TeamB": [analyzer.get_streak("TeamB", "shots_on_target", 5, 8, "against", as_of, "away_only")],
-    }
+    }}
 
-    html = generate_html(fixture_count=2, all_mismatches=all_mismatches, all_streaks=all_streaks)
+    html = generate_html(
+        fixture_count=2,
+        all_mismatches_by_date=all_mismatches_by_date,
+        all_streaks_by_date=all_streaks_by_date,
+        target_date=as_of,
+    )
 
     assert "<!DOCTYPE html>" in html
     assert "Mismatches Found" in html
     assert "All Streaks by Category" in html
+    assert "Today" in html  # as_of == target_date, so should be labeled "Today"
 
     import re
     from collections import Counter
@@ -208,6 +214,66 @@ def test_mismatch_card_shows_h2h_and_alignment_when_enriched():
     print("PASS: test_mismatch_card_shows_h2h_and_alignment_when_enriched")
 
 
+def test_generate_html_groups_by_date_with_correct_labels():
+    """Core test for the 3-day window dashboard feature: three days
+    passed in should render as three separate sections labeled
+    "Today", "Tomorrow", and "Day After Tomorrow" respectively (per
+    the exact spec wording), in date order, each showing its own
+    fixtures/empty-state independently.
+    """
+    from datetime import timedelta
+    analyzer, as_of, mismatches = _build_clear_mismatch_scenario()
+
+    today = as_of
+    tomorrow = as_of + timedelta(days=1)
+    day_after = as_of + timedelta(days=2)
+
+    all_mismatches_by_date = {
+        today: {"TeamA vs TeamB": mismatches},
+        tomorrow: {},  # no mismatches tomorrow - should still get its own section
+        day_after: {},
+    }
+
+    html = generate_html(
+        fixture_count=1,
+        all_mismatches_by_date=all_mismatches_by_date,
+        all_streaks_by_date={},
+        target_date=today,
+    )
+
+    assert "Today" in html
+    assert "Tomorrow" in html
+    assert "Day After Tomorrow" in html
+    # Tomorrow and day-after have no mismatches - each should show the
+    # "no fixtures" message, not silently omit the day entirely.
+    assert html.count("No fixtures scheduled for this day") == 2
+
+    # Today's section should come before Tomorrow's in the rendered
+    # order (dates sorted ascending).
+    assert html.find("Today") < html.find("Tomorrow") < html.find("Day After Tomorrow")
+
+    print("PASS: test_generate_html_groups_by_date_with_correct_labels")
+
+
+def test_generate_html_infers_target_date_when_not_provided():
+    """If target_date isn't explicitly passed, it should be inferred as
+    the earliest date present in the input, so "Today" labeling still
+    makes sense without requiring every caller to pass target_date
+    redundantly.
+    """
+    from datetime import timedelta
+    analyzer, as_of, mismatches = _build_clear_mismatch_scenario()
+
+    html = generate_html(
+        fixture_count=1,
+        all_mismatches_by_date={as_of: {"TeamA vs TeamB": mismatches}},
+        all_streaks_by_date={},
+        # target_date deliberately omitted
+    )
+    assert "Today" in html, "Expected target_date to be inferred from the earliest date present"
+    print("PASS: test_generate_html_infers_target_date_when_not_provided")
+
+
 if __name__ == "__main__":
     test_generate_html_with_no_args_produces_valid_empty_state()
     test_mismatches_section_omitted_when_empty()
@@ -219,4 +285,6 @@ if __name__ == "__main__":
     test_streaks_by_category_flags_mismatched_streaks()
     test_full_generate_html_integration_with_mismatches_and_streaks()
     test_mismatch_card_shows_h2h_and_alignment_when_enriched()
+    test_generate_html_groups_by_date_with_correct_labels()
+    test_generate_html_infers_target_date_when_not_provided()
     print("\nAll tests passed.")
