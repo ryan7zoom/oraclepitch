@@ -67,17 +67,42 @@ class StreakResult:
     opponent: Optional[str] = None
 
     def describe(self) -> str:
+        """Human-readable one-line description, per the spec's exact
+        venue-context requirements:
+        - Home-only recent form: "5+ SOT in 9 of last 10 home games (90.0%)"
+        - Away-only recent form: "5+ SOT in 8 of last 10 away games (80.0%)"
+        - All-games recent form: "5+ SOT in 9 of last 10 games (90.0%)"
+        - H2H: "3+ SOT in 10 of last 10 head-to-head games vs Lazio (100.0%)"
+        - Against (allowed): "5+ SOT allowed in 8 of last 10 away games (80.0%)"
+
+        Fixed a real bug found during development: when opponent was
+        set (H2H streaks) AND filter_type was "all" (which H2H streaks
+        always use - see get_h2h_streak()), the phrase read "in X of
+        last Y games vs Opponent" with no indication these were
+        head-to-head meetings specifically, rather than just any X of
+        the team's last Y games in general - venue/context was
+        invisible exactly where it mattered most for telling recent-
+        form and H2H streaks apart at a glance.
+        """
         stat_label = _STAT_DISPLAY_NAMES.get(self.stat, self.stat)
         direction_word = "allowed" if self.direction == "against" else ""
-        filter_word = {
-            "home_only": "home ", "away_only": "away ", "all": "",
-        }[self.filter_type]
+
+        is_h2h = self.opponent is not None
+        if is_h2h:
+            games_word = "head-to-head games"
+        elif self.filter_type == "home_only":
+            games_word = "home games"
+        elif self.filter_type == "away_only":
+            games_word = "away games"
+        else:
+            games_word = "games"
+
         opponent_clause = f" vs {self.opponent}" if self.opponent else ""
 
         parts = [f"{self.threshold:g}+ {stat_label}"]
         if direction_word:
             parts.append(direction_word)
-        parts.append(f"in {self.count} of last {self.total} {filter_word}games{opponent_clause}")
+        parts.append(f"in {self.count} of last {self.total} {games_word}{opponent_clause}")
         parts.append(f"({self.percentage:.1%})")
         return " ".join(parts)
 
@@ -366,6 +391,24 @@ class StreakAnalyzer:
         home_team vs away_team, per spec section 3.2's four-step
         process: home "for" + away "against", away "for" + home
         "against", plus H2H mismatches in both directions.
+
+        DEDUPLICATION: this was found to produce real duplicate/near-
+        duplicate cards in production - e.g. the same H2H mismatch
+        (Milan's SOT vs Lazio, threshold 3) appearing 3 times, once for
+        each of the 5/10/15-game H2H_WINDOWS values, all showing 100%
+        since only ~10 real meetings exist between most pairs (so
+        windows of 10 and 15 return identical data to window 5 once
+        the actual meeting count is exhausted). Two kinds of
+        duplication are handled below:
+        1. Same (for_team, against_team, stat, threshold, direction)
+           appearing at multiple window sizes - keep only the best one
+           (longest window, then highest combined_percentage).
+        2. A standalone H2H-only mismatch that duplicates information
+           already captured in a recent-form mismatch that was
+           enriched with H2H data via _enrich_with_h2h() - suppress
+           the standalone H2H card in that case, so the user sees ONE
+           card with both Recent Form and Head-to-Head sections, not
+           two separate cards showing overlapping information.
         """
         mismatches = []
 
@@ -411,7 +454,74 @@ class StreakAnalyzer:
                     if m:
                         mismatches.append(m)
 
-        return mismatches
+        return self._deduplicate_mismatches(mismatches)
+
+    @staticmethod
+    def _mismatch_identity(m: Mismatch) -> tuple:
+        """The logical identity used for deduplication: two mismatches
+        with the same identity are considered "the same finding" even
+        if they came from different window sizes or from the
+        recent-form vs H2H code paths.
+        """
+        return (m.for_streak.team, m.against_streak.team, m.stat, m.threshold, m.for_streak.direction)
+
+    def _deduplicate_mismatches(self, mismatches: list) -> list:
+        """Collapse duplicate/overlapping mismatches per find_mismatches()'s
+        docstring. Two passes:
+
+        Pass 1: group by (for_team, against_team, stat, threshold,
+        direction) and keep only the single best entry per group -
+        "best" meaning longest window first, then highest
+        combined_percentage as a tiebreaker. This handles the
+        multiple-H2H-window duplication (5/10/15 all finding the same
+        ~10 real meetings).
+
+        Pass 2: among the surviving H2H-only entries (is_h2h=True),
+        drop any whose identity was ALREADY captured as the h2h_streak
+        of a surviving recent-form entry (is_h2h=False with
+        h2h_streak is not None) - this is the "same information shown
+        twice" case the spec called out, where a recent-form mismatch
+        already displays its H2H context inline via enrichment, so a
+        separate standalone H2H card for the exact same
+        team/stat/threshold/direction pairing is redundant.
+        """
+        best_by_identity: dict = {}
+        for m in mismatches:
+            identity = self._mismatch_identity(m)
+            existing = best_by_identity.get(identity)
+            if existing is None:
+                best_by_identity[identity] = m
+                continue
+            # Prefer the longer window; break ties with higher combined_percentage.
+            if (m.window, m.combined_percentage) > (existing.window, existing.combined_percentage):
+                best_by_identity[identity] = m
+
+        deduped = list(best_by_identity.values())
+
+        # Pass 2: suppress standalone H2H mismatches whose identity is
+        # already shown via a recent-form mismatch's h2h_streak enrichment.
+        enriched_identities = {
+            self._mismatch_identity(m)
+            for m in deduped
+            if not m.is_h2h and m.h2h_streak is not None
+        }
+        # An H2H-only mismatch's own identity uses its for_streak's
+        # direction (always "for" for H2H mismatches as built above),
+        # while the enrichment on a recent-form mismatch stores the
+        # H2H streak for the SAME for_team/stat/threshold - the
+        # identity tuple (for_team, against_team, stat, threshold,
+        # "for") matches in both cases since H2H mismatches are only
+        # ever built with direction="for" for the primary side (see
+        # get_h2h_streak calls above, which pass direction="for" for
+        # the h2h_for side and "against" for the h2h_against side -
+        # the mismatch's own for_streak.direction is therefore always
+        # "for" for is_h2h=True mismatches built this way).
+        final = [
+            m for m in deduped
+            if not (m.is_h2h and self._mismatch_identity(m) in enriched_identities)
+        ]
+
+        return final
 
     def _enrich_with_h2h(self, mismatch: Mismatch, as_of: date) -> None:
         """Mutate a recent-form Mismatch in place, attaching the

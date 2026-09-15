@@ -15,7 +15,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from engine.sources.football_data_co_uk_source import HistoricalMatchOdds
 from engine.streaks.analyzer import (
-    StreakAnalyzer, get_stat_value, get_opponent_stat_value,
+    StreakAnalyzer, StreakResult, get_stat_value, get_opponent_stat_value,
     _strength_label, _mismatch_strength_label, _classify_alignment,
 )
 import config
@@ -310,6 +310,115 @@ def test_find_mismatches_never_recommends_bets_or_stakes():
     print("PASS: test_find_mismatches_never_recommends_bets_or_stakes")
 
 
+def test_find_mismatches_deduplicates_same_identity_across_windows():
+    """Regression test for a real production bug: the exact same
+    logical mismatch (Milan's SOT vs Lazio, threshold 3, H2H) appeared
+    3 times on the dashboard - once for each of H2H_WINDOWS' 5/10/15
+    values, all showing identical 100% since only ~10 real meetings
+    existed (so windows of 10 and 15 return the same underlying data
+    as window 5 once the real meeting count is exhausted). After
+    deduplication, exactly ONE mismatch should exist per
+    (for_team, against_team, stat, threshold, direction) identity.
+    """
+    matches = []
+    start = date(2015, 8, 1)
+    day = 0
+    for i in range(10):
+        matches.append(make_match(start + timedelta(days=day), "Lazio", "Milan", hst=1, ast=4))
+        day += 200
+
+    analyzer = StreakAnalyzer(matches)
+    as_of = start + timedelta(days=day + 30)
+    mismatches = analyzer.find_mismatches("Lazio", "Milan", as_of)
+
+    seen_identities = [analyzer._mismatch_identity(m) for m in mismatches]
+    assert len(seen_identities) == len(set(seen_identities)), (
+        f"Found duplicate mismatch identities: {seen_identities}"
+    )
+    print(f"PASS: test_find_mismatches_deduplicates_same_identity_across_windows ({len(mismatches)} unique mismatches)")
+
+
+def test_find_mismatches_merges_recent_form_and_h2h_into_one_card():
+    """When both a recent-form mismatch AND a standalone H2H mismatch
+    would exist for the same (for_team, against_team, stat, threshold,
+    direction), only ONE card should survive - the recent-form one,
+    enriched with the H2H data - not two separate cards showing
+    overlapping information.
+    """
+    matches = []
+    start = date(2020, 8, 1)
+    day = 0
+    for i in range(8):
+        matches.append(make_match(start + timedelta(days=day), "TeamA", f"Filler{i}", hst=7))
+        day += 7
+    for i in range(8):
+        matches.append(make_match(start + timedelta(days=day), f"Filler{i+10}", "TeamB", hst=7, ast=1))
+        day += 7
+    for i in range(5):
+        matches.append(make_match(start + timedelta(days=day), "TeamA", "TeamB", hst=8, ast=1))
+        day += 200
+
+    analyzer = StreakAnalyzer(matches)
+    as_of = start + timedelta(days=day + 30)
+    mismatches = analyzer.find_mismatches("TeamA", "TeamB", as_of)
+
+    matching = [m for m in mismatches if m.stat == "shots_on_target" and m.threshold == 5 and m.for_streak.team == "TeamA"]
+    assert len(matching) == 1, (
+        f"Expected exactly 1 merged card for TeamA/shots_on_target/5, got {len(matching)}: "
+        f"{[(m.is_h2h, m.window) for m in matching]}"
+    )
+    assert matching[0].h2h_streak is not None, "Expected the surviving card to carry H2H enrichment"
+    print("PASS: test_find_mismatches_merges_recent_form_and_h2h_into_one_card")
+
+
+def test_describe_includes_home_for_home_only_filter():
+    s = StreakResult(team="Liverpool", stat="shots_on_target", threshold=5, window=10,
+                      direction="for", filter_type="home_only", count=9, total=10,
+                      percentage=0.9, strength_label="Strong")
+    assert "home games" in s.describe()
+    assert "away" not in s.describe()
+    print(f"PASS: test_describe_includes_home_for_home_only_filter ({s.describe()})")
+
+
+def test_describe_includes_away_for_away_only_filter():
+    s = StreakResult(team="Man United", stat="shots_on_target", threshold=5, window=10,
+                      direction="against", filter_type="away_only", count=8, total=10,
+                      percentage=0.8, strength_label="Solid")
+    desc = s.describe()
+    assert "away games" in desc
+    assert "allowed" in desc
+    print(f"PASS: test_describe_includes_away_for_away_only_filter ({desc})")
+
+
+def test_describe_includes_head_to_head_when_opponent_set():
+    """Regression test for a real bug: H2H streaks (opponent set, but
+    filter_type="all" since get_h2h_streak always uses "all") used to
+    render as plain "games" with no indication these were specifically
+    head-to-head meetings.
+    """
+    s = StreakResult(team="Milan", stat="shots_on_target", threshold=3, window=10,
+                      direction="for", filter_type="all", count=10, total=10,
+                      percentage=1.0, strength_label="Strong", opponent="Lazio")
+    desc = s.describe()
+    assert "head-to-head games" in desc, f"Expected 'head-to-head games' in: {desc}"
+    assert "vs Lazio" in desc
+    print(f"PASS: test_describe_includes_head_to_head_when_opponent_set ({desc})")
+
+
+def test_describe_plain_games_for_all_filter_without_opponent():
+    """A recent-form streak with filter_type="all" and no opponent
+    (i.e. not H2H, just "any of the team's last N games regardless of
+    venue") should say plain "games", not "home"/"away"/"head-to-head".
+    """
+    s = StreakResult(team="Arsenal", stat="goals", threshold=1, window=10,
+                      direction="for", filter_type="all", count=10, total=10,
+                      percentage=1.0, strength_label="Strong")
+    desc = s.describe()
+    assert "games (" in desc  # plain "games", immediately followed by the percentage
+    assert "home" not in desc and "away" not in desc and "head-to-head" not in desc
+    print(f"PASS: test_describe_plain_games_for_all_filter_without_opponent ({desc})")
+
+
 if __name__ == "__main__":
     test_get_stat_value_picks_correct_side()
     test_get_stat_value_goals_conceded_is_opponents_goals()
@@ -330,4 +439,10 @@ if __name__ == "__main__":
     test_find_mismatches_enriches_recent_form_with_h2h_when_available()
     test_find_mismatches_leaves_h2h_none_when_insufficient_h2h_history()
     test_find_mismatches_never_recommends_bets_or_stakes()
+    test_find_mismatches_deduplicates_same_identity_across_windows()
+    test_find_mismatches_merges_recent_form_and_h2h_into_one_card()
+    test_describe_includes_home_for_home_only_filter()
+    test_describe_includes_away_for_away_only_filter()
+    test_describe_includes_head_to_head_when_opponent_set()
+    test_describe_plain_games_for_all_filter_without_opponent()
     print("\nAll tests passed.")

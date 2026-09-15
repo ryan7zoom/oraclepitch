@@ -5,18 +5,28 @@ Renders the trend-surfacing dashboard: docs/index.html - a static,
 dark-themed, mobile-responsive page. No JS framework, no build step:
 plain HTML/CSS generated directly from Python.
 
-REWRITTEN FOR THE PROJECT PIVOT: this module previously rendered a
-predictions table (match winner %, double chance, goals/shots Over
-lines) driven by the Dixon-Coles/Monte Carlo/shots/corners models.
-That entire table and its supporting code (_match_row_html,
-_best_over_line, _lines_from_probs) were deleted along with the models
-themselves - see config.py's module docstring for the pivot rationale.
-This module now renders ONLY the two streak/mismatch sections:
-"Mismatches Found" and "All Streaks by Category". It never recommends
-bets or stake sizes - phrasing is always "Potential Opportunity" or a
-plain factual description, per the project's explicit requirement that
-this tool surface patterns for the user's own judgment, not make
-betting decisions.
+STRUCTURE (per the collapsed-by-default, league-nested rewrite):
+
+  Today
+    Premier League
+      <details> Liverpool vs Man United [3 mismatches x 12 streaks]
+        Mismatches Found
+        Recent Form Streaks
+      <details> Arsenal vs Chelsea [...]
+    La Liga
+      ...
+  Tomorrow
+    ...
+
+Each match is a native <details>/<summary> element, collapsed by
+default (no JavaScript needed) - this replaced an earlier flat
+render-everything-inline layout that produced a page tens of thousands
+of lines long and was unusable on mobile.
+
+This module never recommends bets or stake sizes - phrasing is always
+"Potential Opportunity" or a plain factual description, per the
+project's explicit requirement that this tool surface patterns for the
+user's own judgment, not make betting decisions.
 """
 
 from datetime import datetime, timezone
@@ -31,32 +41,26 @@ def _fmt_pct(value: Optional[float]) -> str:
     return f"{value * 100:.1f}%"
 
 
-def _mismatch_card_html(mismatch, match_label: str = None) -> str:
+def _mismatch_card_html(mismatch) -> str:
     """Render a single Mismatch (engine.streaks.analyzer.Mismatch) as an
-    HTML card. If the mismatch has been enriched with a corresponding
-    head-to-head streak (see StreakAnalyzer._enrich_with_h2h()), show
-    "Recent Form" and "Head-to-Head" as separate labeled sections with
-    an alignment verdict, per the pivot spec's sample output. Otherwise
-    (H2H-only mismatches, or recent-form mismatches with no H2H data
-    available) falls back to the simpler for/against-only layout.
+    HTML card. If the mismatch carries H2H enrichment (see
+    StreakAnalyzer._enrich_with_h2h()), show "Recent Form" and
+    "Head-to-Head" as separate labeled sections with an alignment
+    verdict. Otherwise falls back to the simpler for/against-only
+    layout.
 
-    match_label: if provided, used as the card's fixture label instead
-        of reconstructing "{home} vs {away}" from the Mismatch object's
-        own fields - needed for multi-league support, since Mismatch
-        itself has no league field, but the caller's all_mismatches
-        dict key (e.g. "[La Liga] Real Madrid vs Barcelona") already
-        has the league prefix. Without this, the league name was
-        silently dropped from the rendered card even though it was
-        present in the data passed in - a real bug found and fixed
-        during multi-league development.
+    Does NOT include a match_label/title of its own - the containing
+    <summary> already shows the team names, so repeating "Team A vs
+    Team B" inside every card would be redundant given matches are now
+    grouped one-per-<details> rather than flattened into a single long
+    list (which is why match_label was needed in the earlier version
+    of this function).
 
     NEVER uses "Bet this" or "Recommend" language - always "Suggested
-    Bet"/"Potential Opportunity", per the project's explicit
-    requirement that this tool never makes betting decisions.
+    Bet"/"Potential Opportunity".
     """
     strength_class = f"strength-{mismatch.strength_label.lower()}"
     emoji = {"Strong": "\U0001F680", "Solid": "\u2705", "Watch": "\U0001F440"}.get(mismatch.strength_label, "")
-    match_label = match_label or f"{mismatch.home_team} vs {mismatch.away_team}"
     h2h_tag = " (H2H)" if mismatch.is_h2h else ""
 
     if mismatch.h2h_streak is not None:
@@ -77,7 +81,7 @@ def _mismatch_card_html(mismatch, match_label: str = None) -> str:
 
     return f"""
     <div class="mismatch-card {strength_class}">
-      <div class="mismatch-title">{emoji} {mismatch.strength_label.upper()} MISMATCH: {match_label}{h2h_tag}</div>
+      <div class="mismatch-title">{emoji} {mismatch.strength_label.upper()} MISMATCH{h2h_tag}</div>
       {body}
       <div class="mismatch-combined">Combined confidence: {mismatch.combined_percentage:.1%} &rarr; {mismatch.strength_label}</div>
       <div class="mismatch-opportunity">Potential Opportunity: {mismatch.suggested_bet}</div>
@@ -85,80 +89,135 @@ def _mismatch_card_html(mismatch, match_label: str = None) -> str:
     """
 
 
-def _mismatches_section_html(all_mismatches: dict) -> str:
-    """Render the top "Mismatches Found" section. all_mismatches maps
-    a fixture label (e.g. "[La Liga] Real Madrid vs Barcelona") ->
-    list[Mismatch]. Only shown at all if there's at least one mismatch
-    across any fixture.
+def _mismatches_section_html(mismatches: list) -> str:
+    """Render the "Mismatches Found" section for ONE match. mismatches
+    is a flat list[Mismatch] for that specific fixture. Empty list ->
+    no section rendered at all (not an empty placeholder).
     """
-    flat = []  # list of (fixture_label, Mismatch) tuples
-    for fixture_label, mismatches in all_mismatches.items():
-        for m in mismatches:
-            flat.append((fixture_label, m))
-
-    if not flat:
+    if not mismatches:
         return ""
 
     strength_order = {"Strong": 0, "Solid": 1, "Watch": 2}
-    flat.sort(key=lambda pair: strength_order.get(pair[1].strength_label, 99))
+    ordered = sorted(mismatches, key=lambda m: strength_order.get(m.strength_label, 99))
 
-    cards_html = "\n".join(_mismatch_card_html(m, match_label=label) for label, m in flat)
+    cards_html = "\n".join(_mismatch_card_html(m) for m in ordered)
     return f"""
-    <h2 class="section-heading">\U0001F50D Mismatches Found ({len(flat)})</h2>
+    <h4 class="section-heading">\U0001F50D Mismatches Found ({len(ordered)})</h4>
     {cards_html}
     """
 
 
-def _streaks_by_category_html(all_streaks: dict, flagged_streak_keys: set) -> str:
-    """Render the "All Streaks by Category" section: streaks grouped by
-    stat, then by team within each stat, with mismatch-contributing
-    streaks visually flagged.
+def _recent_form_section_html(recent_form: dict) -> str:
+    """Render the "Recent Form Streaks" section for ONE match, per
+    Problem 2's spec: home team's home-only streaks and away team's
+    away-only streaks, each already filtered/sorted by
+    engine.main._compute_recent_form_streaks(). Format matches the
+    spec's exact example:
+
+        Liverpool (Home Form)
+          • 5+ SOT in 9 of last 10 home games (90.0%)
+
+        Manchester United (Away Form)
+          • 5+ SOT allowed in 8 of last 10 away games (80.0%)
     """
-    if not all_streaks:
+    home_streaks = recent_form.get("home", [])
+    away_streaks = recent_form.get("away", [])
+    if not home_streaks and not away_streaks:
         return ""
 
-    by_category = {}
-    for team, streaks in all_streaks.items():
-        for s in streaks:
-            by_category.setdefault(s.stat, {}).setdefault(team, []).append(s)
-
-    category_display_names = {
-        "shots_on_target": "Shots on Target",
-        "corners": "Corners",
-        "goals": "Goals",
-        "goals_conceded": "Goals Conceded",
-    }
-
-    sections = []
-    for stat, teams_dict in by_category.items():
-        category_name = category_display_names.get(stat, stat)
-        team_blocks = []
-        for team, streaks in teams_dict.items():
-            lines = []
-            for s in streaks:
-                key = (s.team, s.stat, s.threshold, s.window, s.direction, s.filter_type)
-                flag = ' <span class="mismatch-flag">&larr; Mismatch flagged</span>' if key in flagged_streak_keys else ""
-                line_class = "streak-line flagged" if key in flagged_streak_keys else "streak-line"
-                lines.append(f'<div class="{line_class}">&bull; {s.describe()}{flag}</div>')
-            team_blocks.append(
-                f'<div class="streak-team-name">{team}</div>' + "\n".join(lines)
-            )
-        sections.append(
-            f'<div class="streak-category"><h3>--- {category_name} ---</h3>' + "\n".join(team_blocks) + "</div>"
-        )
+    blocks = []
+    if home_streaks:
+        lines = "\n".join(f'<div class="streak-line">&bull; {s.describe()}</div>' for s in home_streaks)
+        blocks.append(f'<div class="streak-team-name">{recent_form["home_team"]} (Home Form)</div>{lines}')
+    if away_streaks:
+        lines = "\n".join(f'<div class="streak-line">&bull; {s.describe()}</div>' for s in away_streaks)
+        blocks.append(f'<div class="streak-team-name">{recent_form["away_team"]} (Away Form)</div>{lines}')
 
     return f"""
-    <h2 class="section-heading">\U0001F4C8 All Streaks by Category</h2>
-    {"".join(sections)}
+    <h4 class="section-heading">\U0001F4CA Recent Form Streaks</h4>
+    {"".join(blocks)}
+    """
+
+
+def _match_details_html(fixture_label: str, mismatches: list, recent_form: dict) -> str:
+    """Render one match as a collapsed <details> block, per Problem 5's
+    spec: native HTML disclosure widget, no JavaScript, collapsed by
+    default (no `open` attribute), with a compact one-line summary
+    showing team names and a mismatch/streak count badge.
+    """
+    n_mismatches = len(mismatches)
+    n_streaks = len(recent_form.get("home", [])) + len(recent_form.get("away", []))
+    has_strong = any(m.strength_label == "Strong" for m in mismatches)
+    strong_icon = "\U0001F680 " if has_strong else ""
+
+    badge_text = f"{n_mismatches} mismatch{'es' if n_mismatches != 1 else ''} &middot; {n_streaks} streak{'s' if n_streaks != 1 else ''}"
+
+    mismatches_html = _mismatches_section_html(mismatches)
+    recent_form_html = _recent_form_section_html(recent_form)
+    body = mismatches_html + recent_form_html
+    if not body:
+        body = '<div class="no-matches">No qualifying trends found for this match.</div>'
+
+    return f"""
+    <details class="match-details">
+      <summary>
+        <span class="match-teams">{strong_icon}<strong>{fixture_label}</strong></span>
+        <span class="badge">{badge_text}</span>
+      </summary>
+      <div class="match-body">
+        {body}
+      </div>
+    </details>
+    """
+
+
+def _match_sort_key(fixture_label: str, mismatches: list) -> tuple:
+    """Sort key for matches within a league, per Problem 5's spec:
+    1. Matches with a Strong mismatch first
+    2. Then matches with any mismatch
+    3. Then matches with only streaks (no mismatches)
+    4. Alphabetical by home team as tiebreaker
+
+    Lower tuple values sort first, so tier 0 = has-Strong (best),
+    tier 1 = has-any-mismatch, tier 2 = no mismatches at all.
+    """
+    has_strong = any(m.strength_label == "Strong" for m in mismatches)
+    has_any = len(mismatches) > 0
+    tier = 0 if has_strong else (1 if has_any else 2)
+    home_team = fixture_label.split(" vs ")[0]
+    return (tier, home_team)
+
+
+def _league_section_html(league_name: str, fixtures_dict: dict, recent_form_dict: dict) -> str:
+    """Render one league's fixtures for one day: a subheading followed
+    by each match as a collapsed <details> block, sorted per
+    _match_sort_key. fixtures_dict maps fixture_label -> list[Mismatch]
+    (may be an empty list for matches with no mismatches, which still
+    get a card if they have recent-form streaks).
+    """
+    all_labels = set(fixtures_dict.keys()) | set(recent_form_dict.keys())
+    if not all_labels:
+        return ""
+
+    ordered_labels = sorted(all_labels, key=lambda label: _match_sort_key(label, fixtures_dict.get(label, [])))
+
+    matches_html = "\n".join(
+        _match_details_html(label, fixtures_dict.get(label, []), recent_form_dict.get(label, {}))
+        for label in ordered_labels
+    )
+
+    return f"""
+    <div class="league-section">
+      <h3 class="league-heading">{league_name}</h3>
+      {matches_html}
+    </div>
     """
 
 
 def _day_label(d, target_date) -> str:
-    """Return a human label for a date relative to target_date, per the
-    pivot spec's exact format: "Today", "Tomorrow", "Day After
-    Tomorrow" for the first three days of the window, falling back to
-    a plain weekday+date format for anything beyond that (in case
-    window_days is ever configured larger than 2).
+    """Return a human label for a date relative to target_date: "Today",
+    "Tomorrow", "Day After Tomorrow" for the first three days of the
+    window, falling back to a plain weekday+date format beyond that.
     """
     offset = (d - target_date).days
     weekday = d.strftime("%A")
@@ -172,25 +231,34 @@ def _day_label(d, target_date) -> str:
         return f"{d.isoformat()} ({weekday})"
 
 
-def _day_section_html(d, target_date, mismatches_for_day: dict, streaks_for_day: dict) -> str:
-    """Render one day's full section: heading, Mismatches Found (if
-    any), All Streaks by Category (if any), or a "no fixtures" message
-    if the day has neither.
+def _day_section_html(
+    d, target_date, mismatches_for_day: dict, recent_form_for_day: dict,
+    league_display_names: dict, league_order: list,
+) -> str:
+    """Render one day's full section: heading, then one subsection per
+    league that actually has fixtures that day (leagues with zero
+    fixtures are skipped entirely, per Problem 4's spec), in
+    league_order. Leagues not in league_order (shouldn't normally
+    happen) are appended after the known ones, alphabetically, rather
+    than silently dropped.
     """
-    mismatches_html = _mismatches_section_html(mismatches_for_day)
+    leagues_present = set(mismatches_for_day.keys()) | set(recent_form_for_day.keys())
 
-    flagged_keys = set()
-    for mismatches in mismatches_for_day.values():
-        for m in mismatches:
-            for s in (m.for_streak, m.against_streak, m.h2h_streak):
-                if s is not None:
-                    flagged_keys.add((s.team, s.stat, s.threshold, s.window, s.direction, s.filter_type))
-    streaks_html = _streaks_by_category_html(streaks_for_day, flagged_keys)
-
-    if not mismatches_html and not streaks_html:
-        body = '<div class="no-matches">No fixtures scheduled for this day.</div>'
+    if not leagues_present:
+        body = '<div class="no-matches">No qualifying trends for this day\'s fixtures.</div>'
     else:
-        body = mismatches_html + streaks_html
+        ordered_leagues = [lg for lg in league_order if lg in leagues_present]
+        ordered_leagues += sorted(leagues_present - set(league_order))
+
+        sections = []
+        for league in ordered_leagues:
+            league_name = league_display_names.get(league, league)
+            sections.append(_league_section_html(
+                league_name,
+                mismatches_for_day.get(league, {}),
+                recent_form_for_day.get(league, {}),
+            ))
+        body = "".join(sections)
 
     label = _day_label(d, target_date)
     return f"""
@@ -204,31 +272,48 @@ def _day_section_html(d, target_date, mismatches_for_day: dict, streaks_for_day:
 def generate_html(
     fixture_count: int = 0,
     generated_at: Optional[datetime] = None,
-    all_mismatches_by_date: Optional[dict] = None,
-    all_streaks_by_date: Optional[dict] = None,
+    all_mismatches: Optional[dict] = None,
+    all_recent_form: Optional[dict] = None,
     target_date=None,
+    league_display_names: Optional[dict] = None,
+    league_order: Optional[list] = None,
+    dates_with_fixtures: Optional[list] = None,
 ) -> str:
-    """Render the full dashboard HTML, grouped by day.
+    """Render the full dashboard HTML, grouped by day then by league,
+    with each match collapsed by default.
 
-    fixture_count: total number of fixtures analyzed across all days,
-        purely informational (currently unused in the rendered output
-        itself, kept for API compatibility / potential future use).
-    all_mismatches_by_date: dict of date -> {fixture_label: list[Mismatch]}.
-        Each day gets its own "Mismatches Found" section. A day with no
-        mismatches simply shows no such section (not an empty one).
-    all_streaks_by_date: dict of date -> {team_name: list[StreakResult]}.
-        Each day gets its own "All Streaks by Category" section.
-    target_date: the window's start date, used to compute "Today" /
-        "Tomorrow" / "Day After Tomorrow" labels relative to it. If not
-        provided, inferred as the earliest date present in the input
-        dicts (or today's UTC date if both are empty, purely as a
-        harmless fallback for the truly-no-data case).
+    all_mismatches: dict of date -> league -> {fixture_label: list[Mismatch]}.
+    all_recent_form: dict of date -> league -> {fixture_label: {"home_team":.., "away_team":.., "home": [...], "away": [...]}}.
+    target_date: the window's start date, used for "Today"/"Tomorrow"
+        labeling. Inferred from the earliest date present if omitted.
+    league_display_names: dict mapping internal league key -> display
+        name (e.g. "epl" -> "Premier League"). Falls back to using the
+        key itself if not provided or a key is missing.
+    league_order: list of internal league keys defining display order
+        within each day. Leagues not in this list are appended after,
+        alphabetically.
+    dates_with_fixtures: explicit list of dates that had at least one
+        real fixture scheduled, even if that fixture produced zero
+        qualifying mismatches/recent-form streaks. Without this, a day
+        with real fixtures but no data clearing the 60% threshold would
+        be indistinguishable from a day with literally no fixtures at
+        all, and would incorrectly disappear from the page entirely
+        instead of showing its own "Today"/"Tomorrow" heading with a
+        day-level empty state. If omitted, falls back to only the
+        dates present as keys in all_mismatches/all_recent_form (the
+        old, narrower behavior).
     """
     generated_at = generated_at or datetime.now(timezone.utc)
 
-    all_mismatches_by_date = all_mismatches_by_date or {}
-    all_streaks_by_date = all_streaks_by_date or {}
-    all_dates = sorted(set(all_mismatches_by_date.keys()) | set(all_streaks_by_date.keys()))
+    all_mismatches = all_mismatches or {}
+    all_recent_form = all_recent_form or {}
+    league_display_names = league_display_names or {}
+    league_order = league_order or []
+
+    if dates_with_fixtures is not None:
+        all_dates = sorted(dates_with_fixtures)
+    else:
+        all_dates = sorted(set(all_mismatches.keys()) | set(all_recent_form.keys()))
 
     if target_date is None:
         target_date = all_dates[0] if all_dates else generated_at.date()
@@ -240,8 +325,9 @@ def generate_html(
         for d in all_dates:
             sections.append(_day_section_html(
                 d, target_date,
-                all_mismatches_by_date.get(d, {}),
-                all_streaks_by_date.get(d, {}),
+                all_mismatches.get(d, {}),
+                all_recent_form.get(d, {}),
+                league_display_names, league_order,
             ))
         body_html = "\n".join(sections)
 
@@ -272,19 +358,14 @@ def generate_html(
   }}
   header {{ margin-bottom: 20px; }}
   h1 {{ font-size: 1.4rem; margin: 0 0 4px 0; }}
-  .meta {{ color: var(--text-dim); font-size: 0.85rem; }}
-  footer {{
-    margin-top: 20px;
-    color: var(--text-dim);
-    font-size: 0.75rem;
-  }}
   .no-matches {{
-    padding: 40px;
+    padding: 24px 8px;
     color: var(--text-dim);
     text-align: center;
+    font-size: 0.9rem;
   }}
 
-  .day-section {{ margin-bottom: 36px; }}
+  .day-section {{ margin-bottom: 32px; }}
   .day-heading {{
     font-size: 1.15rem;
     margin: 0 0 14px 0;
@@ -292,9 +373,66 @@ def generate_html(
     border-bottom: 1px solid var(--border);
   }}
 
+  .league-section {{ margin-bottom: 20px; }}
+  .league-heading {{
+    font-size: 0.95rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin: 0 0 8px 4px;
+  }}
+
+  /* Collapsed-by-default match cards - native <details>/<summary>,
+     no JavaScript. See details[open] rule below for the expand marker
+     rotation. */
+  .match-details {{
+    border-bottom: 1px solid var(--border);
+  }}
+  .match-details summary {{
+    list-style: none;
+    cursor: pointer;
+    padding: 10px 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.88rem;
+  }}
+  .match-details summary::-webkit-details-marker {{ display: none; }}
+  .match-details summary::before {{
+    content: "\\25B6";
+    display: inline-block;
+    margin-right: 8px;
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    transition: transform 0.15s ease;
+  }}
+  .match-details[open] summary::before {{
+    transform: rotate(90deg);
+  }}
+  .match-teams {{
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }}
+  .badge {{
+    flex-shrink: 0;
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    background: var(--card-bg);
+    padding: 3px 8px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }}
+  .match-body {{
+    padding: 4px 4px 16px 20px;
+  }}
+
   .section-heading {{
-    font-size: 1.1rem;
-    margin: 32px 0 12px 0;
+    font-size: 0.95rem;
+    margin: 18px 0 10px 0;
   }}
   .mismatch-card {{
     background: var(--card-bg);
@@ -306,7 +444,7 @@ def generate_html(
   .mismatch-card.strength-strong {{ border-left: 4px solid var(--value-high); }}
   .mismatch-card.strength-solid {{ border-left: 4px solid var(--value-med); }}
   .mismatch-card.strength-watch {{ border-left: 4px solid #7a6a2c; }}
-  .mismatch-title {{ font-weight: 600; margin-bottom: 6px; }}
+  .mismatch-title {{ font-weight: 600; margin-bottom: 6px; font-size: 0.85rem; }}
   .mismatch-subheading {{
     font-weight: 600;
     font-size: 0.8rem;
@@ -337,15 +475,12 @@ def generate_html(
     color: var(--accent);
     margin-top: 4px;
   }}
-  .streak-category {{ margin-bottom: 20px; }}
-  .streak-team-name {{ font-weight: 600; margin: 10px 0 4px 0; }}
+  .streak-team-name {{ font-weight: 600; margin: 10px 0 4px 0; font-size: 0.85rem; }}
   .streak-line {{
     font-size: 0.82rem;
     color: var(--text-dim);
     margin: 2px 0 2px 12px;
   }}
-  .streak-line.flagged {{ color: var(--text); }}
-  .mismatch-flag {{ color: var(--accent); font-size: 0.78rem; }}
 </style>
 </head>
 <body>
@@ -363,16 +498,22 @@ def generate_html(
 def write_html(
     fixture_count: int = 0,
     output_path: str = None,
-    all_mismatches_by_date: Optional[dict] = None,
-    all_streaks_by_date: Optional[dict] = None,
+    all_mismatches: Optional[dict] = None,
+    all_recent_form: Optional[dict] = None,
     target_date=None,
+    league_display_names: Optional[dict] = None,
+    league_order: Optional[list] = None,
+    dates_with_fixtures: Optional[list] = None,
 ):
     output_path = output_path or config.HTML_OUTPUT_PATH
     html = generate_html(
         fixture_count=fixture_count,
-        all_mismatches_by_date=all_mismatches_by_date,
-        all_streaks_by_date=all_streaks_by_date,
+        all_mismatches=all_mismatches,
+        all_recent_form=all_recent_form,
         target_date=target_date,
+        league_display_names=league_display_names,
+        league_order=league_order,
+        dates_with_fixtures=dates_with_fixtures,
     )
     with open(output_path, "w") as f:
         f.write(html)

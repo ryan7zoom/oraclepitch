@@ -8,38 +8,36 @@ in a rolling window:
 1. Fetch fixtures for the next few days from OpenFootballSource.
 2. Fetch historical match data (goals, shots on target, corners) from
    XgaboraMatchDataSource.
-3. For each fixture, run StreakAnalyzer.find_mismatches() using THAT
-   FIXTURE'S OWN DATE as the as-of reference (not a single shared
-   date), and compute the full set of individual streaks for both
-   teams as of that same date.
+3. For each fixture, run StreakAnalyzer.find_mismatches() (double-sided
+   overlaps) AND compute single-sided recent-form streaks for the home
+   team's home form and the away team's away form specifically - using
+   THAT FIXTURE'S OWN DATE as the as-of reference in both cases.
 4. Write a predictions/streaks JSON snapshot and render the HTML
-   dashboard, grouped by day.
+   dashboard, grouped by day, then by league, with each match collapsed
+   by default.
 
-TIMEZONE FIX: originally this used date.today(), which returns the
-GitHub Actions runner's UTC date. The user is in Bangladesh (UTC+6) -
-this can differ from the UTC date by a full day during roughly the
-first 6 hours of the Bangladesh day, causing "today" fixtures to be
-missed entirely. _today_bd() below computes the date using
-Bangladesh's fixed UTC+6 offset instead of the runner's local/UTC
-clock.
+DATA MODEL: all_mismatches / all_recent_form_streaks are nested
+date -> league -> fixture_label -> ..., rather than flattening league
+into the fixture_label string and parsing it back out at render time
+(which was the previous approach - fragile and harder to group
+correctly). See engine/output/generate_html.py for how this nested
+structure is rendered.
 
-MULTI-DAY WINDOW: rather than relying on getting the timezone
-boundary exactly right in every case, fixture fetching now covers a
-3-day window (today, tomorrow, day after tomorrow - see
-OpenFootballSource.get_fixtures_for_date's window_days parameter) as a
-second, complementary layer of robustness. This also gives the user
-useful advance visibility into upcoming fixtures, which is a
-reasonable feature on its own, not just a bug workaround.
+TIMEZONE FIX: uses _today_bd() (Bangladesh, UTC+6) rather than
+date.today() (which returns the GitHub Actions runner's UTC date) -
+see that function's docstring for why this matters.
+
+MULTI-DAY WINDOW: fixture fetching covers a 3-day window (today,
+tomorrow, day after tomorrow) via OpenFootballSource's window_days
+parameter.
 
 MULTI-LEAGUE SUPPORT: covers the top 5 European leagues (EPL, La Liga,
 Bundesliga, Serie A, Ligue 1) - see
-engine/sources/openfootball_source.py's LEAGUE_CODES for the full
-mapping and per-league team-name normalization tables. Champions
-League / Europa League were investigated and are NOT supported: no
-free source with the required historical stats (shots on target,
-corners) covering those competitions was found - xgabora's dataset
-only contains domestic league divisions, confirmed by checking every
-division code actually present in the live file.
+engine/sources/openfootball_source.py's LEAGUE_CODES. Champions League
+/ Europa League are NOT supported: xgabora's dataset only contains
+domestic league divisions, confirmed by checking every division code
+actually present in the live file - no historical stats source exists
+for those competitions.
 
 Usage: python -m engine.main --date today
        python -m engine.main --date 2026-09-06
@@ -65,15 +63,16 @@ logging.basicConfig(
 )
 logger = logging.getLogger("engine.main")
 
-# How many seasons of history to pull for the streak analyzer. Long
-# enough to give the longest configured window (STREAK_WINDOWS' max of
-# 18, or H2H_WINDOWS' max of 15 meetings) real data to work with.
 STREAK_HISTORY_SEASONS_BACK = 5
-
-# How many days beyond the target date to also show fixtures for -
-# see module docstring's "MULTI-DAY WINDOW" section. 2 means a 3-day
-# total window: target date, +1, +2.
 FIXTURE_WINDOW_DAYS = 2
+
+# Recent-form streaks (Problem 2) are filtered to this minimum
+# percentage/sample size before being surfaced on the dashboard, per
+# spec - otherwise every stat/threshold/window combination for every
+# team would be dumped onto the page regardless of how weak or
+# unreliable the signal is.
+RECENT_FORM_MIN_PERCENTAGE = 0.60
+RECENT_FORM_MIN_WINDOW = 5
 
 LEAGUE_DISPLAY_NAMES = {
     "epl": "Premier League",
@@ -83,20 +82,46 @@ LEAGUE_DISPLAY_NAMES = {
     "ligue_1": "Ligue 1",
 }
 
-# Bangladesh Standard Time is a fixed UTC+6 offset (no daylight saving
-# time observed) - see module docstring's "TIMEZONE FIX" section.
 BD_TZ = timezone(timedelta(hours=6))
 
 
 def _today_bd() -> date:
     """Return the current date in Bangladesh time (UTC+6), NOT the
-    system/runner's local date. GitHub Actions runners use UTC, so
-    date.today() there returns the UTC date - during roughly the first
-    6 hours of the Bangladesh day, this differs from the actual
-    Bangladesh date, which was confirmed to cause real fixtures to be
-    missed (see module docstring).
+    system/runner's local date - see module docstring's TIMEZONE FIX.
     """
     return datetime.now(BD_TZ).date()
+
+
+def _compute_recent_form_streaks(analyzer: StreakAnalyzer, home_team: str, away_team: str, as_of: date) -> dict:
+    """Compute single-sided recent-form streaks for a fixture, per
+    Problem 2's spec: home team's HOME-ONLY form, away team's AWAY-ONLY
+    form specifically (not every filter combination for both teams -
+    that produced a 37,000-line page). Filtered to
+    RECENT_FORM_MIN_PERCENTAGE / RECENT_FORM_MIN_WINDOW, sorted by
+    percentage descending.
+
+    Returns {"home": [StreakResult, ...], "away": [StreakResult, ...]},
+    where "home" covers home_team's home-only for/against streaks and
+    "away" covers away_team's away-only for/against streaks - matching
+    "the actual match context (the home team is playing at home, the
+    away team is playing away)" per spec.
+    """
+    def _streaks_for(team: str, filter_type: str) -> list:
+        results = []
+        for stat, thresholds in config.STREAK_THRESHOLDS.items():
+            for threshold in thresholds:
+                for window in config.STREAK_WINDOWS:
+                    for direction in ("for", "against"):
+                        s = analyzer.get_streak(team, stat, threshold, window, direction, as_of, filter_type)
+                        if s.total >= RECENT_FORM_MIN_WINDOW and s.percentage >= RECENT_FORM_MIN_PERCENTAGE:
+                            results.append(s)
+        results.sort(key=lambda s: s.percentage, reverse=True)
+        return results
+
+    return {
+        "home": _streaks_for(home_team, "home_only"),
+        "away": _streaks_for(away_team, "away_only"),
+    }
 
 
 def run(target_date: date, leagues: list = None, window_days: int = FIXTURE_WINDOW_DAYS):
@@ -104,12 +129,8 @@ def run(target_date: date, leagues: list = None, window_days: int = FIXTURE_WIND
     fixture_source = OpenFootballSource()
     season = target_date.year if target_date.month >= 7 else target_date.year - 1
 
-    # fixtures_by_date maps date -> list of (league_key, MatchResult)
-    # tuples, so the dashboard can be grouped by day. Built up across
-    # all leagues before any streak analysis happens, since we need to
-    # know the full day-by-day fixture list before deciding which
-    # historical data to fetch per league.
-    fixtures_by_date: dict = defaultdict(list)
+    # fixtures_by_date_league maps date -> league -> list[MatchResult]
+    fixtures_by_date_league: dict = defaultdict(lambda: defaultdict(list))
 
     for league in leagues:
         league_name = LEAGUE_DISPLAY_NAMES.get(league, league)
@@ -121,24 +142,24 @@ def run(target_date: date, leagues: list = None, window_days: int = FIXTURE_WIND
         logger.info(f"[{league_name}] Found {len(scheduled)} scheduled fixtures across the {window_days + 1}-day window")
 
         for fixture in scheduled:
-            fixtures_by_date[fixture.date].append((league, fixture))
+            fixtures_by_date_league[fixture.date][league].append(fixture)
 
-    total_scheduled = sum(len(v) for v in fixtures_by_date.values())
+    total_scheduled = sum(
+        len(fixtures) for league_dict in fixtures_by_date_league.values() for fixtures in league_dict.values()
+    )
     if total_scheduled == 0:
         logger.info("No fixtures found in this window across any league - writing an empty dashboard.")
         _write_outputs(target_date, window_days, 0, {}, {})
         return
 
-    # Group by league now (across all days) so historical data is only
-    # fetched once per league for the whole window, not once per
-    # league per day.
-    leagues_with_fixtures = {league for date_fixtures in fixtures_by_date.values() for league, _ in date_fixtures}
+    leagues_with_fixtures = {
+        league for league_dict in fixtures_by_date_league.values() for league in league_dict
+    }
 
-    # all_mismatches / all_streaks are keyed by date first, matching
-    # what the HTML generator needs to render day-grouped sections -
-    # see engine/output/generate_html.py's date-grouped rendering.
-    all_mismatches_by_date: dict = {d: {} for d in fixtures_by_date}
-    all_streaks_by_date: dict = {d: {} for d in fixtures_by_date}
+    # Nested date -> league -> fixture_label -> ... per Problem 4's
+    # data model requirement.
+    all_mismatches: dict = defaultdict(lambda: defaultdict(dict))
+    all_recent_form: dict = defaultdict(lambda: defaultdict(dict))
 
     for league in leagues_with_fixtures:
         league_name = LEAGUE_DISPLAY_NAMES.get(league, league)
@@ -165,67 +186,62 @@ def run(target_date: date, leagues: list = None, window_days: int = FIXTURE_WIND
 
         analyzer = StreakAnalyzer(streak_matches)
 
-        for fixture_date, date_fixtures in fixtures_by_date.items():
-            league_fixtures_this_day = [f for lg, f in date_fixtures if lg == league]
+        for fixture_date, league_dict in fixtures_by_date_league.items():
+            league_fixtures_this_day = league_dict.get(league, [])
             if not league_fixtures_this_day:
                 continue
 
-            involved_teams = set()
             for fixture in league_fixtures_this_day:
-                fixture_label = f"[{league_name}] {fixture.home_team} vs {fixture.away_team}"
+                fixture_label = f"{fixture.home_team} vs {fixture.away_team}"
                 try:
-                    # IMPORTANT: uses fixture.date (this specific
-                    # match's own date), NOT the window's target_date -
-                    # each fixture's streaks must reflect team form
-                    # "as of" that fixture's actual date, not the
-                    # window's start date, so a match 2 days into the
-                    # window correctly includes any matches played in
-                    # between (per the pivot spec's requirement that
-                    # trend computation is unchanged and uses each
-                    # fixture's own date as the as-of reference).
+                    # Uses fixture.date (this specific match's own
+                    # date), NOT the window's target_date - each
+                    # fixture's streaks reflect team form "as of" that
+                    # fixture's actual date.
                     mismatches = analyzer.find_mismatches(fixture.home_team, fixture.away_team, fixture.date)
                 except Exception as e:
                     logger.warning(f"[{league_name}] Streak analysis failed for {fixture_label}: {e}")
                     continue
                 if mismatches:
-                    all_mismatches_by_date[fixture_date][fixture_label] = mismatches
-                involved_teams.add(fixture.home_team)
-                involved_teams.add(fixture.away_team)
+                    all_mismatches[fixture_date][league][fixture_label] = mismatches
 
-            for team in involved_teams:
-                team_streaks = []
-                for stat, thresholds in config.STREAK_THRESHOLDS.items():
-                    for threshold in thresholds:
-                        for window in config.STREAK_WINDOWS:
-                            for direction in ("for", "against"):
-                                for filter_type in ("home_only", "away_only"):
-                                    s = analyzer.get_streak(team, stat, threshold, window, direction, fixture_date, filter_type)
-                                    if s.total >= config.MISMATCH_MIN_WINDOW:
-                                        team_streaks.append(s)
-                all_streaks_by_date[fixture_date][f"{league}:{team}"] = team_streaks
+                try:
+                    recent_form = _compute_recent_form_streaks(analyzer, fixture.home_team, fixture.away_team, fixture.date)
+                except Exception as e:
+                    logger.warning(f"[{league_name}] Recent-form computation failed for {fixture_label}: {e}")
+                    recent_form = {"home": [], "away": []}
+                if recent_form["home"] or recent_form["away"]:
+                    all_recent_form[fixture_date][league][fixture_label] = {
+                        "home_team": fixture.home_team,
+                        "away_team": fixture.away_team,
+                        **recent_form,
+                    }
 
     total_mismatches = sum(
-        len(mismatches) for date_dict in all_mismatches_by_date.values() for mismatches in date_dict.values()
+        len(mismatches)
+        for league_dict in all_mismatches.values()
+        for fixture_dict in league_dict.values()
+        for mismatches in fixture_dict.values()
     )
     logger.info(f"Found {total_mismatches} total mismatches across {total_scheduled} fixtures across all leagues/days")
 
-    _write_outputs(target_date, window_days, total_scheduled, all_mismatches_by_date, all_streaks_by_date)
+    _write_outputs(target_date, window_days, total_scheduled, all_mismatches, all_recent_form,
+                   dates_with_fixtures=list(fixtures_by_date_league.keys()))
 
 
 def _write_outputs(
     target_date: date, window_days: int, fixture_count: int,
-    all_mismatches_by_date: dict, all_streaks_by_date: dict,
+    all_mismatches: dict, all_recent_form: dict,
+    dates_with_fixtures: list = None,
 ):
-    # Ensure the output directories exist before writing. git does not
-    # track empty directories, so a fresh checkout of this repo may be
-    # missing data/predictions/ (and potentially docs/) entirely - this
-    # was confirmed as a real production crash (FileNotFoundError) on
-    # a genuine GitHub Actions run, not a hypothetical edge case.
     os.makedirs(os.path.dirname(config.PREDICTIONS_JSON_PATH), exist_ok=True)
     os.makedirs(os.path.dirname(config.HTML_OUTPUT_PATH), exist_ok=True)
 
     total_mismatches = sum(
-        len(mismatches) for date_dict in all_mismatches_by_date.values() for mismatches in date_dict.values()
+        len(mismatches)
+        for league_dict in all_mismatches.values()
+        for fixture_dict in league_dict.values()
+        for mismatches in fixture_dict.values()
     )
 
     with open(config.PREDICTIONS_JSON_PATH, "w") as f:
@@ -238,22 +254,14 @@ def _write_outputs(
         }, f, indent=2)
     logger.info(f"Wrote summary to {config.PREDICTIONS_JSON_PATH}")
 
-    # all_streaks_by_date's inner dicts are keyed "league:TeamName"
-    # internally (collision guard for same-name clubs in different
-    # leagues) - strip that prefix for display, since the HTML
-    # shouldn't show the internal key format.
-    display_streaks_by_date = {}
-    for d, streaks_dict in all_streaks_by_date.items():
-        display_streaks_by_date[d] = {
-            (key.split(":", 1)[1] if ":" in key else key): streaks
-            for key, streaks in streaks_dict.items()
-        }
-
     output_path = write_html(
         fixture_count=fixture_count,
-        all_mismatches_by_date=all_mismatches_by_date,
-        all_streaks_by_date=display_streaks_by_date,
+        all_mismatches=all_mismatches,
+        all_recent_form=all_recent_form,
         target_date=target_date,
+        league_display_names=LEAGUE_DISPLAY_NAMES,
+        league_order=list(LEAGUE_CODES.keys()),
+        dates_with_fixtures=dates_with_fixtures,
     )
     logger.info(f"Wrote HTML dashboard to {output_path}")
 
