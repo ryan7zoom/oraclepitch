@@ -1,0 +1,2040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trends</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --card-bg: #171a21;
+    --border: #2a2e38;
+    --text: #e6e8eb;
+    --text-dim: #9aa0ab;
+    --accent: #4fd1c5;
+    --value-high: #1f6f5c;
+    --value-med: #2c4a63;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    margin: 0;
+    padding: 16px;
+  }
+  header { margin-bottom: 20px; }
+  h1 { font-size: 1.4rem; margin: 0 0 4px 0; }
+  .no-matches {
+    padding: 24px 8px;
+    color: var(--text-dim);
+    text-align: center;
+    font-size: 0.9rem;
+  }
+
+  .day-section { margin-bottom: 32px; }
+  .day-heading {
+    font-size: 1.15rem;
+    margin: 0 0 14px 0;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .league-section { margin-bottom: 20px; }
+  .league-heading {
+    font-size: 0.95rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin: 0 0 8px 4px;
+  }
+
+  /* Collapsed-by-default match cards - native <details>/<summary>,
+     no JavaScript. See details[open] rule below for the expand marker
+     rotation. */
+  .match-details {
+    border-bottom: 1px solid var(--border);
+  }
+  .match-details summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 10px 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.88rem;
+  }
+  .match-details summary::-webkit-details-marker { display: none; }
+  .match-details summary::before {
+    content: "\25B6";
+    display: inline-block;
+    margin-right: 8px;
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    transition: transform 0.15s ease;
+  }
+  .match-details[open] summary::before {
+    transform: rotate(90deg);
+  }
+  .match-teams {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .badge {
+    flex-shrink: 0;
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    background: var(--card-bg);
+    padding: 3px 8px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .match-body {
+    padding: 4px 4px 16px 20px;
+  }
+
+  .section-heading {
+    font-size: 0.95rem;
+    margin: 18px 0 10px 0;
+  }
+  .mismatch-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+  }
+  .mismatch-card.strength-strong { border-left: 4px solid var(--value-high); }
+  .mismatch-card.strength-solid { border-left: 4px solid var(--value-med); }
+  .mismatch-card.strength-watch { border-left: 4px solid #7a6a2c; }
+  .mismatch-title { font-weight: 600; margin-bottom: 6px; font-size: 0.85rem; }
+  .mismatch-subheading {
+    font-weight: 600;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-top: 10px;
+    margin-bottom: 2px;
+  }
+  .mismatch-line {
+    font-size: 0.85rem;
+    color: var(--text);
+    margin: 2px 0;
+  }
+  .mismatch-alignment {
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-top: 6px;
+  }
+  .alignment-aligned { color: var(--value-high); }
+  .alignment-mixed { color: #c9a227; }
+  .alignment-conflict { color: #c94d3f; }
+  .mismatch-combined {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    margin-top: 8px;
+  }
+  .mismatch-opportunity {
+    font-size: 0.85rem;
+    color: var(--accent);
+    margin-top: 4px;
+  }
+  .streak-team-name { font-weight: 600; margin: 10px 0 4px 0; font-size: 0.85rem; }
+  .streak-line {
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    margin: 2px 0 2px 12px;
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Trends</h1>
+</header>
+
+
+    <div class="day-section">
+      <h2 class="day-heading">📅 Today — 2026-09-15 (Tuesday)</h2>
+      
+    <div class="league-section">
+      <h3 class="league-heading">La Liga</h3>
+      
+    <details class="match-details">
+      <summary>
+        <span class="match-teams">🚀 <strong>Elche vs Real Madrid</strong></span>
+        <span class="badge">12 mismatches &middot; 123 streaks</span>
+      </summary>
+      <div class="match-body">
+        
+    <h4 class="section-heading">🔍 Mismatches Found (12)</h4>
+    
+    <div class="mismatch-card strength-strong">
+      <div class="mismatch-title">🚀 STRONG MISMATCH</div>
+      
+      <div class="mismatch-subheading">Recent Form:</div>
+      <div class="mismatch-line">Real Madrid: 3+ SOT in 15 of last 18 away games (83.3%)</div>
+      <div class="mismatch-line">Elche allowed: 3+ SOT allowed in 14 of last 18 home games (77.8%)</div>
+      <div class="mismatch-subheading">Head-to-Head:</div>
+      <div class="mismatch-line">Real Madrid: 3+ SOT in 6 of last 6 head-to-head games vs Elche (100.0%) &larr; Aligned</div>
+      <div class="mismatch-alignment alignment-aligned">🚀 ALIGNED</div>
+        
+      <div class="mismatch-combined">Combined confidence: 80.6% &rarr; Strong</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Real Madrid Total SOT Over 2.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-strong">
+      <div class="mismatch-title">🚀 STRONG MISMATCH (H2H)</div>
+      
+      <div class="mismatch-line">Real Madrid: 5+ SOT in 6 of last 6 head-to-head games vs Elche (100.0%)</div>
+      <div class="mismatch-line">Elche allowed: 5+ SOT allowed in 6 of last 6 head-to-head games vs Real Madrid (100.0%)</div>
+        
+      <div class="mismatch-combined">Combined confidence: 100.0% &rarr; Strong</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Real Madrid Total SOT Over 4.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-strong">
+      <div class="mismatch-title">🚀 STRONG MISMATCH (H2H)</div>
+      
+      <div class="mismatch-line">Real Madrid: 6+ SOT in 5 of last 6 head-to-head games vs Elche (83.3%)</div>
+      <div class="mismatch-line">Elche allowed: 6+ SOT allowed in 5 of last 6 head-to-head games vs Real Madrid (83.3%)</div>
+        
+      <div class="mismatch-combined">Combined confidence: 83.3% &rarr; Strong</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Real Madrid Total SOT Over 5.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-strong">
+      <div class="mismatch-title">🚀 STRONG MISMATCH (H2H)</div>
+      
+      <div class="mismatch-line">Real Madrid: 2+ goals in 6 of last 6 head-to-head games vs Elche (100.0%)</div>
+      <div class="mismatch-line">Elche allowed: 2+ goals allowed in 6 of last 6 head-to-head games vs Real Madrid (100.0%)</div>
+        
+      <div class="mismatch-combined">Combined confidence: 100.0% &rarr; Strong</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Real Madrid Total goals Over 1.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-strong">
+      <div class="mismatch-title">🚀 STRONG MISMATCH (H2H)</div>
+      
+      <div class="mismatch-line">Elche: 2+ goals conceded in 6 of last 6 head-to-head games vs Real Madrid (100.0%)</div>
+      <div class="mismatch-line">Real Madrid allowed: 2+ goals conceded allowed in 6 of last 6 head-to-head games vs Elche (100.0%)</div>
+        
+      <div class="mismatch-combined">Combined confidence: 100.0% &rarr; Strong</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Elche Total goals conceded Over 1.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-solid">
+      <div class="mismatch-title">✅ SOLID MISMATCH</div>
+      
+      <div class="mismatch-subheading">Recent Form:</div>
+      <div class="mismatch-line">Elche: 3+ SOT in 10 of last 13 home games (76.9%)</div>
+      <div class="mismatch-line">Real Madrid allowed: 3+ SOT allowed in 8 of last 13 away games (61.5%)</div>
+      <div class="mismatch-subheading">Head-to-Head:</div>
+      <div class="mismatch-line">Elche: 3+ SOT in 3 of last 6 head-to-head games vs Real Madrid (50.0%) &larr; Mixed</div>
+      <div class="mismatch-alignment alignment-mixed">👀 MIXED</div>
+        
+      <div class="mismatch-combined">Combined confidence: 69.2% &rarr; Solid</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Elche Total SOT Over 2.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-solid">
+      <div class="mismatch-title">✅ SOLID MISMATCH</div>
+      
+      <div class="mismatch-subheading">Recent Form:</div>
+      <div class="mismatch-line">Real Madrid: 4+ SOT in 14 of last 18 away games (77.8%)</div>
+      <div class="mismatch-line">Elche allowed: 4+ SOT allowed in 13 of last 18 home games (72.2%)</div>
+      <div class="mismatch-subheading">Head-to-Head:</div>
+      <div class="mismatch-line">Real Madrid: 4+ SOT in 6 of last 6 head-to-head games vs Elche (100.0%) &larr; Aligned</div>
+      <div class="mismatch-alignment alignment-aligned">🚀 ALIGNED</div>
+        
+      <div class="mismatch-combined">Combined confidence: 75.0% &rarr; Solid</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Real Madrid Total SOT Over 3.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-solid">
+      <div class="mismatch-title">✅ SOLID MISMATCH (H2H)</div>
+      
+      <div class="mismatch-line">Real Madrid: 5+ corners in 4 of last 6 head-to-head games vs Elche (66.7%)</div>
+      <div class="mismatch-line">Elche allowed: 5+ corners allowed in 4 of last 6 head-to-head games vs Real Madrid (66.7%)</div>
+        
+      <div class="mismatch-combined">Combined confidence: 66.7% &rarr; Solid</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Real Madrid Total corners Over 4.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-solid">
+      <div class="mismatch-title">✅ SOLID MISMATCH</div>
+      
+      <div class="mismatch-subheading">Recent Form:</div>
+      <div class="mismatch-line">Elche: 1+ goals in 15 of last 18 home games (83.3%)</div>
+      <div class="mismatch-line">Real Madrid allowed: 1+ goals allowed in 11 of last 18 away games (61.1%)</div>
+      <div class="mismatch-subheading">Head-to-Head:</div>
+      <div class="mismatch-line">Elche: 1+ goals in 4 of last 6 head-to-head games vs Real Madrid (66.7%) &larr; Aligned</div>
+      <div class="mismatch-alignment alignment-aligned">🚀 ALIGNED</div>
+        
+      <div class="mismatch-combined">Combined confidence: 72.2% &rarr; Solid</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Elche Total goals Over 0.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-solid">
+      <div class="mismatch-title">✅ SOLID MISMATCH</div>
+      
+      <div class="mismatch-subheading">Recent Form:</div>
+      <div class="mismatch-line">Real Madrid: 1+ goals in 16 of last 18 away games (88.9%)</div>
+      <div class="mismatch-line">Elche allowed: 1+ goals allowed in 11 of last 18 home games (61.1%)</div>
+      <div class="mismatch-subheading">Head-to-Head:</div>
+      <div class="mismatch-line">Real Madrid: 1+ goals in 6 of last 6 head-to-head games vs Elche (100.0%) &larr; Aligned</div>
+      <div class="mismatch-alignment alignment-aligned">🚀 ALIGNED</div>
+        
+      <div class="mismatch-combined">Combined confidence: 75.0% &rarr; Solid</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Real Madrid Total goals Over 0.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-solid">
+      <div class="mismatch-title">✅ SOLID MISMATCH</div>
+      
+      <div class="mismatch-subheading">Recent Form:</div>
+      <div class="mismatch-line">Elche: 1+ goals conceded in 11 of last 18 home games (61.1%)</div>
+      <div class="mismatch-line">Real Madrid allowed: 1+ goals conceded allowed in 16 of last 18 away games (88.9%)</div>
+      <div class="mismatch-subheading">Head-to-Head:</div>
+      <div class="mismatch-line">Elche: 1+ goals conceded in 6 of last 6 head-to-head games vs Real Madrid (100.0%) &larr; Aligned</div>
+      <div class="mismatch-alignment alignment-aligned">🚀 ALIGNED</div>
+        
+      <div class="mismatch-combined">Combined confidence: 75.0% &rarr; Solid</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Elche Total goals conceded Over 0.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-solid">
+      <div class="mismatch-title">✅ SOLID MISMATCH</div>
+      
+      <div class="mismatch-subheading">Recent Form:</div>
+      <div class="mismatch-line">Real Madrid: 1+ goals conceded in 11 of last 18 away games (61.1%)</div>
+      <div class="mismatch-line">Elche allowed: 1+ goals conceded allowed in 15 of last 18 home games (83.3%)</div>
+      <div class="mismatch-subheading">Head-to-Head:</div>
+      <div class="mismatch-line">Real Madrid: 1+ goals conceded in 4 of last 6 head-to-head games vs Elche (66.7%) &larr; Aligned</div>
+      <div class="mismatch-alignment alignment-aligned">🚀 ALIGNED</div>
+        
+      <div class="mismatch-combined">Combined confidence: 72.2% &rarr; Solid</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Real Madrid Total goals conceded Over 0.5</div>
+    </div>
+    
+    
+    <h4 class="section-heading">📊 Recent Form Streaks</h4>
+    <div class="streak-team-name">Elche (Home Form)</div><div class="streak-line">&bull; 3+ SOT allowed in 6 of last 7 home games (85.7%)</div>
+<div class="streak-line">&bull; 1+ goals in 6 of last 7 home games (85.7%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 6 of last 7 home games (85.7%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 11 of last 13 home games (84.6%)</div>
+<div class="streak-line">&bull; 1+ goals in 11 of last 13 home games (84.6%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 11 of last 13 home games (84.6%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 5 of last 6 home games (83.3%)</div>
+<div class="streak-line">&bull; 3+ SOT in 15 of last 18 home games (83.3%)</div>
+<div class="streak-line">&bull; 1+ goals in 5 of last 6 home games (83.3%)</div>
+<div class="streak-line">&bull; 1+ goals in 15 of last 18 home games (83.3%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 5 of last 6 home games (83.3%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 15 of last 18 home games (83.3%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 4 of last 5 home games (80.0%)</div>
+<div class="streak-line">&bull; 3+ SOT in 8 of last 10 home games (80.0%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 8 of last 10 home games (80.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 4 of last 5 home games (80.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 8 of last 10 home games (80.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 4 of last 5 home games (80.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 8 of last 10 home games (80.0%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 14 of last 18 home games (77.8%)</div>
+<div class="streak-line">&bull; 3+ SOT in 10 of last 13 home games (76.9%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 10 of last 13 home games (76.9%)</div>
+<div class="streak-line">&bull; 3+ SOT in 6 of last 8 home games (75.0%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 6 of last 8 home games (75.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 6 of last 8 home games (75.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 6 of last 8 home games (75.0%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 13 of last 18 home games (72.2%)</div>
+<div class="streak-line">&bull; 3+ SOT in 5 of last 7 home games (71.4%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 5 of last 7 home games (71.4%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 5 of last 7 home games (71.4%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 5 of last 7 home games (71.4%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 7 of last 10 home games (70.0%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 7 of last 10 home games (70.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 7 of last 10 home games (70.0%)</div>
+<div class="streak-line">&bull; 3+ SOT in 4 of last 6 home games (66.7%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 4 of last 6 home games (66.7%)</div>
+<div class="streak-line">&bull; 4+ SOT in 12 of last 18 home games (66.7%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 4 of last 6 home games (66.7%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 4 of last 6 home games (66.7%)</div>
+<div class="streak-line">&bull; 4+ SOT in 5 of last 8 home games (62.5%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 5 of last 8 home games (62.5%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 5 of last 8 home games (62.5%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 5 of last 8 home games (62.5%)</div>
+<div class="streak-line">&bull; 4+ SOT in 8 of last 13 home games (61.5%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 8 of last 13 home games (61.5%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 8 of last 13 home games (61.5%)</div>
+<div class="streak-line">&bull; 5+ SOT in 11 of last 18 home games (61.1%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 11 of last 18 home games (61.1%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 11 of last 18 home games (61.1%)</div>
+<div class="streak-line">&bull; 3+ SOT in 3 of last 5 home games (60.0%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 3 of last 5 home games (60.0%)</div>
+<div class="streak-line">&bull; 4+ SOT in 6 of last 10 home games (60.0%)</div>
+<div class="streak-line">&bull; 5+ corners in 3 of last 5 home games (60.0%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 3 of last 5 home games (60.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 3 of last 5 home games (60.0%)</div><div class="streak-team-name">Real Madrid (Away Form)</div><div class="streak-line">&bull; 3+ SOT allowed in 5 of last 5 away games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 12 of last 13 away games (92.3%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 12 of last 13 away games (92.3%)</div>
+<div class="streak-line">&bull; 1+ goals in 9 of last 10 away games (90.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 9 of last 10 away games (90.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 16 of last 18 away games (88.9%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 16 of last 18 away games (88.9%)</div>
+<div class="streak-line">&bull; 1+ goals in 7 of last 8 away games (87.5%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 7 of last 8 away games (87.5%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 6 of last 7 away games (85.7%)</div>
+<div class="streak-line">&bull; 1+ goals in 6 of last 7 away games (85.7%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 6 of last 7 away games (85.7%)</div>
+<div class="streak-line">&bull; 3+ SOT in 11 of last 13 away games (84.6%)</div>
+<div class="streak-line">&bull; 5+ corners in 11 of last 13 away games (84.6%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 5 of last 6 away games (83.3%)</div>
+<div class="streak-line">&bull; 3+ SOT in 15 of last 18 away games (83.3%)</div>
+<div class="streak-line">&bull; 1+ goals in 5 of last 6 away games (83.3%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 5 of last 6 away games (83.3%)</div>
+<div class="streak-line">&bull; 3+ SOT in 8 of last 10 away games (80.0%)</div>
+<div class="streak-line">&bull; 5+ corners in 4 of last 5 away games (80.0%)</div>
+<div class="streak-line">&bull; 5+ corners in 8 of last 10 away games (80.0%)</div>
+<div class="streak-line">&bull; 6+ corners in 4 of last 5 away games (80.0%)</div>
+<div class="streak-line">&bull; 6+ corners in 8 of last 10 away games (80.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 4 of last 5 away games (80.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 4 of last 5 away games (80.0%)</div>
+<div class="streak-line">&bull; 4+ SOT in 14 of last 18 away games (77.8%)</div>
+<div class="streak-line">&bull; 5+ corners in 14 of last 18 away games (77.8%)</div>
+<div class="streak-line">&bull; 4+ SOT in 10 of last 13 away games (76.9%)</div>
+<div class="streak-line">&bull; 6+ corners in 10 of last 13 away games (76.9%)</div>
+<div class="streak-line">&bull; 3+ SOT in 6 of last 8 away games (75.0%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 6 of last 8 away games (75.0%)</div>
+<div class="streak-line">&bull; 5+ corners in 6 of last 8 away games (75.0%)</div>
+<div class="streak-line">&bull; 6+ corners in 6 of last 8 away games (75.0%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 6 of last 8 away games (75.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 6 of last 8 away games (75.0%)</div>
+<div class="streak-line">&bull; 6+ corners in 13 of last 18 away games (72.2%)</div>
+<div class="streak-line">&bull; 3+ SOT in 5 of last 7 away games (71.4%)</div>
+<div class="streak-line">&bull; 5+ corners in 5 of last 7 away games (71.4%)</div>
+<div class="streak-line">&bull; 6+ corners in 5 of last 7 away games (71.4%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 5 of last 7 away games (71.4%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 5 of last 7 away games (71.4%)</div>
+<div class="streak-line">&bull; 4+ SOT in 7 of last 10 away games (70.0%)</div>
+<div class="streak-line">&bull; 3+ SOT in 4 of last 6 away games (66.7%)</div>
+<div class="streak-line">&bull; 4+ SOT in 4 of last 6 away games (66.7%)</div>
+<div class="streak-line">&bull; 5+ SOT in 4 of last 6 away games (66.7%)</div>
+<div class="streak-line">&bull; 5+ SOT in 12 of last 18 away games (66.7%)</div>
+<div class="streak-line">&bull; 5+ corners in 4 of last 6 away games (66.7%)</div>
+<div class="streak-line">&bull; 6+ corners in 4 of last 6 away games (66.7%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 4 of last 6 away games (66.7%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 4 of last 6 away games (66.7%)</div>
+<div class="streak-line">&bull; 4+ SOT in 5 of last 8 away games (62.5%)</div>
+<div class="streak-line">&bull; 5+ SOT in 5 of last 8 away games (62.5%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 8 of last 13 away games (61.5%)</div>
+<div class="streak-line">&bull; 5+ SOT in 8 of last 13 away games (61.5%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 8 of last 13 away games (61.5%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 8 of last 13 away games (61.5%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 11 of last 18 away games (61.1%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 11 of last 18 away games (61.1%)</div>
+<div class="streak-line">&bull; 3+ SOT in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 6 of last 10 away games (60.0%)</div>
+<div class="streak-line">&bull; 4+ SOT in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 5+ SOT in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 5+ SOT in 6 of last 10 away games (60.0%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 6 of last 10 away games (60.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 6 of last 10 away games (60.0%)</div>
+    
+      </div>
+    </details>
+    
+
+    <details class="match-details">
+      <summary>
+        <span class="match-teams">🚀 <strong>Vallecano vs Espanol</strong></span>
+        <span class="badge">13 mismatches &middot; 148 streaks</span>
+      </summary>
+      <div class="match-body">
+        
+    <h4 class="section-heading">🔍 Mismatches Found (13)</h4>
+    
+    <div class="mismatch-card strength-strong">
+      <div class="mismatch-title">🚀 STRONG MISMATCH</div>
+      
+      <div class="mismatch-subheading">Recent Form:</div>
+      <div class="mismatch-line">Vallecano: 3+ SOT in 17 of last 18 home games (94.4%)</div>
+      <div class="mismatch-line">Espanol allowed: 3+ SOT allowed in 16 of last 18 away games (88.9%)</div>
+      <div class="mismatch-subheading">Head-to-Head:</div>
+      <div class="mismatch-line">Vallecano: 3+ SOT in 5 of last 8 head-to-head games vs Espanol (62.5%) &larr; Aligned</div>
+      <div class="mismatch-alignment alignment-aligned">🚀 ALIGNED</div>
+        
+      <div class="mismatch-combined">Combined confidence: 91.7% &rarr; Strong</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Vallecano Total SOT Over 2.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-strong">
+      <div class="mismatch-title">🚀 STRONG MISMATCH</div>
+      
+      <div class="mismatch-subheading">Recent Form:</div>
+      <div class="mismatch-line">Vallecano: 4+ SOT in 16 of last 18 home games (88.9%)</div>
+      <div class="mismatch-line">Espanol allowed: 4+ SOT allowed in 14 of last 18 away games (77.8%)</div>
+      <div class="mismatch-subheading">Head-to-Head:</div>
+      <div class="mismatch-line">Vallecano: 4+ SOT in 4 of last 8 head-to-head games vs Espanol (50.0%) &larr; Mixed</div>
+      <div class="mismatch-alignment alignment-mixed">👀 MIXED</div>
+        
+      <div class="mismatch-combined">Combined confidence: 83.3% &rarr; Strong</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Vallecano Total SOT Over 3.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-solid">
+      <div class="mismatch-title">✅ SOLID MISMATCH (H2H)</div>
+      
+      <div class="mismatch-line">Espanol: 4+ SOT in 4 of last 5 head-to-head games vs Vallecano (80.0%)</div>
+      <div class="mismatch-line">Vallecano allowed: 4+ SOT allowed in 4 of last 5 head-to-head games vs Espanol (80.0%)</div>
+        
+      <div class="mismatch-combined">Combined confidence: 80.0% &rarr; Solid</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Espanol Total SOT Over 3.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-solid">
+      <div class="mismatch-title">✅ SOLID MISMATCH</div>
+      
+      <div class="mismatch-subheading">Recent Form:</div>
+      <div class="mismatch-line">Vallecano: 5+ SOT in 13 of last 18 home games (72.2%)</div>
+      <div class="mismatch-line">Espanol allowed: 5+ SOT allowed in 11 of last 18 away games (61.1%)</div>
+      <div class="mismatch-subheading">Head-to-Head:</div>
+      <div class="mismatch-line">Vallecano: 5+ SOT in 4 of last 8 head-to-head games vs Espanol (50.0%) &larr; Mixed</div>
+      <div class="mismatch-alignment alignment-mixed">👀 MIXED</div>
+        
+      <div class="mismatch-combined">Combined confidence: 66.7% &rarr; Solid</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Vallecano Total SOT Over 4.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-solid">
+      <div class="mismatch-title">✅ SOLID MISMATCH</div>
+      
+      <div class="mismatch-subheading">Recent Form:</div>
+      <div class="mismatch-line">Vallecano: 6+ SOT in 6 of last 10 home games (60.0%)</div>
+      <div class="mismatch-line">Espanol allowed: 6+ SOT allowed in 9 of last 10 away games (90.0%)</div>
+      <div class="mismatch-subheading">Head-to-Head:</div>
+      <div class="mismatch-line">Vallecano: 6+ SOT in 1 of last 8 head-to-head games vs Espanol (12.5%) &larr; Mixed</div>
+      <div class="mismatch-alignment alignment-mixed">👀 MIXED</div>
+        
+      <div class="mismatch-combined">Combined confidence: 75.0% &rarr; Solid</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Vallecano Total SOT Over 5.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-solid">
+      <div class="mismatch-title">✅ SOLID MISMATCH</div>
+      
+      <div class="mismatch-subheading">Recent Form:</div>
+      <div class="mismatch-line">Vallecano: 1+ goals in 15 of last 18 home games (83.3%)</div>
+      <div class="mismatch-line">Espanol allowed: 1+ goals allowed in 13 of last 18 away games (72.2%)</div>
+      <div class="mismatch-subheading">Head-to-Head:</div>
+      <div class="mismatch-line">Vallecano: 1+ goals in 6 of last 8 head-to-head games vs Espanol (75.0%) &larr; Aligned</div>
+      <div class="mismatch-alignment alignment-aligned">🚀 ALIGNED</div>
+        
+      <div class="mismatch-combined">Combined confidence: 77.8% &rarr; Solid</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Vallecano Total goals Over 0.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-solid">
+      <div class="mismatch-title">✅ SOLID MISMATCH</div>
+      
+      <div class="mismatch-subheading">Recent Form:</div>
+      <div class="mismatch-line">Espanol: 1+ goals in 11 of last 13 away games (84.6%)</div>
+      <div class="mismatch-line">Vallecano allowed: 1+ goals allowed in 8 of last 13 home games (61.5%)</div>
+      <div class="mismatch-subheading">Head-to-Head:</div>
+      <div class="mismatch-line">Espanol: 1+ goals in 4 of last 8 head-to-head games vs Vallecano (50.0%) &larr; Mixed</div>
+      <div class="mismatch-alignment alignment-mixed">👀 MIXED</div>
+        
+      <div class="mismatch-combined">Combined confidence: 73.1% &rarr; Solid</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Espanol Total goals Over 0.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-solid">
+      <div class="mismatch-title">✅ SOLID MISMATCH</div>
+      
+      <div class="mismatch-subheading">Recent Form:</div>
+      <div class="mismatch-line">Vallecano: 1+ goals conceded in 8 of last 13 home games (61.5%)</div>
+      <div class="mismatch-line">Espanol allowed: 1+ goals conceded allowed in 11 of last 13 away games (84.6%)</div>
+      <div class="mismatch-subheading">Head-to-Head:</div>
+      <div class="mismatch-line">Vallecano: 1+ goals conceded in 4 of last 8 head-to-head games vs Espanol (50.0%) &larr; Mixed</div>
+      <div class="mismatch-alignment alignment-mixed">👀 MIXED</div>
+        
+      <div class="mismatch-combined">Combined confidence: 73.1% &rarr; Solid</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Vallecano Total goals conceded Over 0.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-solid">
+      <div class="mismatch-title">✅ SOLID MISMATCH</div>
+      
+      <div class="mismatch-subheading">Recent Form:</div>
+      <div class="mismatch-line">Espanol: 1+ goals conceded in 13 of last 18 away games (72.2%)</div>
+      <div class="mismatch-line">Vallecano allowed: 1+ goals conceded allowed in 15 of last 18 home games (83.3%)</div>
+      <div class="mismatch-subheading">Head-to-Head:</div>
+      <div class="mismatch-line">Espanol: 1+ goals conceded in 6 of last 8 head-to-head games vs Vallecano (75.0%) &larr; Aligned</div>
+      <div class="mismatch-alignment alignment-aligned">🚀 ALIGNED</div>
+        
+      <div class="mismatch-combined">Combined confidence: 77.8% &rarr; Solid</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Espanol Total goals conceded Over 0.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-watch">
+      <div class="mismatch-title">👀 WATCH MISMATCH</div>
+      
+      <div class="mismatch-subheading">Recent Form:</div>
+      <div class="mismatch-line">Espanol: 3+ SOT in 11 of last 18 away games (61.1%)</div>
+      <div class="mismatch-line">Vallecano allowed: 3+ SOT allowed in 11 of last 18 home games (61.1%)</div>
+      <div class="mismatch-subheading">Head-to-Head:</div>
+      <div class="mismatch-line">Espanol: 3+ SOT in 5 of last 8 head-to-head games vs Vallecano (62.5%) &larr; Aligned</div>
+      <div class="mismatch-alignment alignment-aligned">🚀 ALIGNED</div>
+        
+      <div class="mismatch-combined">Combined confidence: 61.1% &rarr; Watch</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Espanol Total SOT Over 2.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-watch">
+      <div class="mismatch-title">👀 WATCH MISMATCH (H2H)</div>
+      
+      <div class="mismatch-line">Vallecano: 5+ corners in 5 of last 8 head-to-head games vs Espanol (62.5%)</div>
+      <div class="mismatch-line">Espanol allowed: 5+ corners allowed in 5 of last 8 head-to-head games vs Vallecano (62.5%)</div>
+        
+      <div class="mismatch-combined">Combined confidence: 62.5% &rarr; Watch</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Vallecano Total corners Over 4.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-watch">
+      <div class="mismatch-title">👀 WATCH MISMATCH</div>
+      
+      <div class="mismatch-subheading">Recent Form:</div>
+      <div class="mismatch-line">Espanol: 5+ corners in 3 of last 5 away games (60.0%)</div>
+      <div class="mismatch-line">Vallecano allowed: 5+ corners allowed in 4 of last 5 home games (80.0%)</div>
+      <div class="mismatch-subheading">Head-to-Head:</div>
+      <div class="mismatch-line">Espanol: 5+ corners in 3 of last 8 head-to-head games vs Vallecano (37.5%) &larr; Mixed</div>
+      <div class="mismatch-alignment alignment-mixed">👀 MIXED</div>
+        
+      <div class="mismatch-combined">Combined confidence: 70.0% &rarr; Watch</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Espanol Total corners Over 4.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-watch">
+      <div class="mismatch-title">👀 WATCH MISMATCH (H2H)</div>
+      
+      <div class="mismatch-line">Vallecano: 6+ corners in 5 of last 8 head-to-head games vs Espanol (62.5%)</div>
+      <div class="mismatch-line">Espanol allowed: 6+ corners allowed in 5 of last 8 head-to-head games vs Vallecano (62.5%)</div>
+        
+      <div class="mismatch-combined">Combined confidence: 62.5% &rarr; Watch</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Vallecano Total corners Over 5.5</div>
+    </div>
+    
+    
+    <h4 class="section-heading">📊 Recent Form Streaks</h4>
+    <div class="streak-team-name">Vallecano (Home Form)</div><div class="streak-line">&bull; 3+ SOT in 5 of last 5 home games (100.0%)</div>
+<div class="streak-line">&bull; 3+ SOT in 6 of last 6 home games (100.0%)</div>
+<div class="streak-line">&bull; 3+ SOT in 7 of last 7 home games (100.0%)</div>
+<div class="streak-line">&bull; 3+ SOT in 8 of last 8 home games (100.0%)</div>
+<div class="streak-line">&bull; 3+ SOT in 10 of last 10 home games (100.0%)</div>
+<div class="streak-line">&bull; 3+ SOT in 13 of last 13 home games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 5 of last 5 home games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 6 of last 6 home games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 7 of last 7 home games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 8 of last 8 home games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 10 of last 10 home games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 13 of last 13 home games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 5 of last 5 home games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 6 of last 6 home games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 7 of last 7 home games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 8 of last 8 home games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 10 of last 10 home games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 13 of last 13 home games (100.0%)</div>
+<div class="streak-line">&bull; 3+ SOT in 17 of last 18 home games (94.4%)</div>
+<div class="streak-line">&bull; 4+ SOT in 12 of last 13 home games (92.3%)</div>
+<div class="streak-line">&bull; 4+ SOT in 9 of last 10 home games (90.0%)</div>
+<div class="streak-line">&bull; 4+ SOT in 16 of last 18 home games (88.9%)</div>
+<div class="streak-line">&bull; 4+ SOT in 7 of last 8 home games (87.5%)</div>
+<div class="streak-line">&bull; 5+ corners in 7 of last 8 home games (87.5%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 6 of last 7 home games (85.7%)</div>
+<div class="streak-line">&bull; 4+ SOT in 6 of last 7 home games (85.7%)</div>
+<div class="streak-line">&bull; 5+ corners in 6 of last 7 home games (85.7%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 5 of last 6 home games (83.3%)</div>
+<div class="streak-line">&bull; 4+ SOT in 5 of last 6 home games (83.3%)</div>
+<div class="streak-line">&bull; 5+ SOT in 5 of last 6 home games (83.3%)</div>
+<div class="streak-line">&bull; 5+ corners in 5 of last 6 home games (83.3%)</div>
+<div class="streak-line">&bull; 6+ corners in 5 of last 6 home games (83.3%)</div>
+<div class="streak-line">&bull; 1+ goals in 15 of last 18 home games (83.3%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 15 of last 18 home games (83.3%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 4 of last 5 home games (80.0%)</div>
+<div class="streak-line">&bull; 4+ SOT in 4 of last 5 home games (80.0%)</div>
+<div class="streak-line">&bull; 5+ SOT in 4 of last 5 home games (80.0%)</div>
+<div class="streak-line">&bull; 5+ SOT in 8 of last 10 home games (80.0%)</div>
+<div class="streak-line">&bull; 5+ corners in 4 of last 5 home games (80.0%)</div>
+<div class="streak-line">&bull; 5+ corners allowed in 4 of last 5 home games (80.0%)</div>
+<div class="streak-line">&bull; 5+ corners in 8 of last 10 home games (80.0%)</div>
+<div class="streak-line">&bull; 6+ corners in 4 of last 5 home games (80.0%)</div>
+<div class="streak-line">&bull; 5+ corners in 14 of last 18 home games (77.8%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 6 of last 8 home games (75.0%)</div>
+<div class="streak-line">&bull; 5+ SOT in 6 of last 8 home games (75.0%)</div>
+<div class="streak-line">&bull; 6+ corners in 6 of last 8 home games (75.0%)</div>
+<div class="streak-line">&bull; 5+ SOT in 13 of last 18 home games (72.2%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 5 of last 7 home games (71.4%)</div>
+<div class="streak-line">&bull; 5+ SOT in 5 of last 7 home games (71.4%)</div>
+<div class="streak-line">&bull; 5+ corners allowed in 5 of last 7 home games (71.4%)</div>
+<div class="streak-line">&bull; 6+ corners in 5 of last 7 home games (71.4%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 7 of last 10 home games (70.0%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 9 of last 13 home games (69.2%)</div>
+<div class="streak-line">&bull; 5+ SOT in 9 of last 13 home games (69.2%)</div>
+<div class="streak-line">&bull; 5+ corners in 9 of last 13 home games (69.2%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 4 of last 6 home games (66.7%)</div>
+<div class="streak-line">&bull; 5+ corners allowed in 4 of last 6 home games (66.7%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 5 of last 8 home games (62.5%)</div>
+<div class="streak-line">&bull; 5+ corners allowed in 5 of last 8 home games (62.5%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 8 of last 13 home games (61.5%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 8 of last 13 home games (61.5%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 11 of last 18 home games (61.1%)</div>
+<div class="streak-line">&bull; 6+ corners in 11 of last 18 home games (61.1%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 3 of last 5 home games (60.0%)</div>
+<div class="streak-line">&bull; 6+ SOT in 3 of last 5 home games (60.0%)</div>
+<div class="streak-line">&bull; 6+ SOT in 6 of last 10 home games (60.0%)</div>
+<div class="streak-line">&bull; 5+ corners allowed in 6 of last 10 home games (60.0%)</div>
+<div class="streak-line">&bull; 6+ corners in 6 of last 10 home games (60.0%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 3 of last 5 home games (60.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 3 of last 5 home games (60.0%)</div><div class="streak-team-name">Espanol (Away Form)</div><div class="streak-line">&bull; 3+ SOT allowed in 5 of last 5 away games (100.0%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 6 of last 6 away games (100.0%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 7 of last 7 away games (100.0%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 8 of last 8 away games (100.0%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 10 of last 10 away games (100.0%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 5 of last 5 away games (100.0%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 6 of last 6 away games (100.0%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 7 of last 7 away games (100.0%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 8 of last 8 away games (100.0%)</div>
+<div class="streak-line">&bull; 5+ SOT allowed in 5 of last 5 away games (100.0%)</div>
+<div class="streak-line">&bull; 5+ SOT allowed in 6 of last 6 away games (100.0%)</div>
+<div class="streak-line">&bull; 5+ SOT allowed in 7 of last 7 away games (100.0%)</div>
+<div class="streak-line">&bull; 5+ SOT allowed in 8 of last 8 away games (100.0%)</div>
+<div class="streak-line">&bull; 6+ SOT allowed in 5 of last 5 away games (100.0%)</div>
+<div class="streak-line">&bull; 6+ SOT allowed in 6 of last 6 away games (100.0%)</div>
+<div class="streak-line">&bull; 6+ SOT allowed in 7 of last 7 away games (100.0%)</div>
+<div class="streak-line">&bull; 6+ SOT allowed in 8 of last 8 away games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 5 of last 5 away games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 5 of last 5 away games (100.0%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 12 of last 13 away games (92.3%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 12 of last 13 away games (92.3%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 12 of last 13 away games (92.3%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 9 of last 10 away games (90.0%)</div>
+<div class="streak-line">&bull; 5+ SOT allowed in 9 of last 10 away games (90.0%)</div>
+<div class="streak-line">&bull; 6+ SOT allowed in 9 of last 10 away games (90.0%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 9 of last 10 away games (90.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 9 of last 10 away games (90.0%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 16 of last 18 away games (88.9%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 7 of last 8 away games (87.5%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 7 of last 8 away games (87.5%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 6 of last 7 away games (85.7%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 6 of last 7 away games (85.7%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 11 of last 13 away games (84.6%)</div>
+<div class="streak-line">&bull; 5+ SOT allowed in 11 of last 13 away games (84.6%)</div>
+<div class="streak-line">&bull; 1+ goals in 11 of last 13 away games (84.6%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 11 of last 13 away games (84.6%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 5 of last 6 away games (83.3%)</div>
+<div class="streak-line">&bull; 1+ goals in 15 of last 18 away games (83.3%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 5 of last 6 away games (83.3%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 15 of last 18 away games (83.3%)</div>
+<div class="streak-line">&bull; 3+ SOT in 4 of last 5 away games (80.0%)</div>
+<div class="streak-line">&bull; 5+ corners allowed in 4 of last 5 away games (80.0%)</div>
+<div class="streak-line">&bull; 6+ corners allowed in 4 of last 5 away games (80.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 4 of last 5 away games (80.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 8 of last 10 away games (80.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 4 of last 5 away games (80.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 8 of last 10 away games (80.0%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 14 of last 18 away games (77.8%)</div>
+<div class="streak-line">&bull; 6+ SOT allowed in 10 of last 13 away games (76.9%)</div>
+<div class="streak-line">&bull; 1+ goals in 6 of last 8 away games (75.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 6 of last 8 away games (75.0%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 13 of last 18 away games (72.2%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 13 of last 18 away games (72.2%)</div>
+<div class="streak-line">&bull; 5+ corners allowed in 5 of last 7 away games (71.4%)</div>
+<div class="streak-line">&bull; 1+ goals in 5 of last 7 away games (71.4%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 5 of last 7 away games (71.4%)</div>
+<div class="streak-line">&bull; 5+ corners allowed in 7 of last 10 away games (70.0%)</div>
+<div class="streak-line">&bull; 2+ goals allowed in 7 of last 10 away games (70.0%)</div>
+<div class="streak-line">&bull; 2+ goals conceded in 7 of last 10 away games (70.0%)</div>
+<div class="streak-line">&bull; 3+ SOT in 4 of last 6 away games (66.7%)</div>
+<div class="streak-line">&bull; 5+ corners allowed in 4 of last 6 away games (66.7%)</div>
+<div class="streak-line">&bull; 6+ corners allowed in 4 of last 6 away games (66.7%)</div>
+<div class="streak-line">&bull; 1+ goals in 4 of last 6 away games (66.7%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 4 of last 6 away games (66.7%)</div>
+<div class="streak-line">&bull; 3+ SOT in 5 of last 8 away games (62.5%)</div>
+<div class="streak-line">&bull; 5+ corners allowed in 5 of last 8 away games (62.5%)</div>
+<div class="streak-line">&bull; 2+ goals allowed in 5 of last 8 away games (62.5%)</div>
+<div class="streak-line">&bull; 2+ goals conceded in 5 of last 8 away games (62.5%)</div>
+<div class="streak-line">&bull; 3+ SOT in 8 of last 13 away games (61.5%)</div>
+<div class="streak-line">&bull; 5+ corners allowed in 8 of last 13 away games (61.5%)</div>
+<div class="streak-line">&bull; 2+ goals allowed in 8 of last 13 away games (61.5%)</div>
+<div class="streak-line">&bull; 2+ goals conceded in 8 of last 13 away games (61.5%)</div>
+<div class="streak-line">&bull; 3+ SOT in 11 of last 18 away games (61.1%)</div>
+<div class="streak-line">&bull; 5+ SOT allowed in 11 of last 18 away games (61.1%)</div>
+<div class="streak-line">&bull; 5+ corners in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 7+ corners allowed in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 2+ goals allowed in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 2+ goals conceded in 3 of last 5 away games (60.0%)</div>
+    
+      </div>
+    </details>
+    
+
+    <details class="match-details">
+      <summary>
+        <span class="match-teams"><strong>Alaves vs Valencia</strong></span>
+        <span class="badge">8 mismatches &middot; 107 streaks</span>
+      </summary>
+      <div class="match-body">
+        
+    <h4 class="section-heading">🔍 Mismatches Found (8)</h4>
+    
+    <div class="mismatch-card strength-solid">
+      <div class="mismatch-title">✅ SOLID MISMATCH</div>
+      
+      <div class="mismatch-subheading">Recent Form:</div>
+      <div class="mismatch-line">Alaves: 3+ SOT in 14 of last 18 home games (77.8%)</div>
+      <div class="mismatch-line">Valencia allowed: 3+ SOT allowed in 14 of last 18 away games (77.8%)</div>
+      <div class="mismatch-subheading">Head-to-Head:</div>
+      <div class="mismatch-line">Alaves: 3+ SOT in 7 of last 8 head-to-head games vs Valencia (87.5%) &larr; Aligned</div>
+      <div class="mismatch-alignment alignment-aligned">🚀 ALIGNED</div>
+        
+      <div class="mismatch-combined">Combined confidence: 77.8% &rarr; Solid</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Alaves Total SOT Over 2.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-solid">
+      <div class="mismatch-title">✅ SOLID MISMATCH (H2H)</div>
+      
+      <div class="mismatch-line">Valencia: 3+ SOT in 6 of last 8 head-to-head games vs Alaves (75.0%)</div>
+      <div class="mismatch-line">Alaves allowed: 3+ SOT allowed in 6 of last 8 head-to-head games vs Valencia (75.0%)</div>
+        
+      <div class="mismatch-combined">Combined confidence: 75.0% &rarr; Solid</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Valencia Total SOT Over 2.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-solid">
+      <div class="mismatch-title">✅ SOLID MISMATCH</div>
+      
+      <div class="mismatch-subheading">Recent Form:</div>
+      <div class="mismatch-line">Alaves: 5+ corners in 15 of last 18 home games (83.3%)</div>
+      <div class="mismatch-line">Valencia allowed: 5+ corners allowed in 11 of last 18 away games (61.1%)</div>
+      <div class="mismatch-subheading">Head-to-Head:</div>
+      <div class="mismatch-line">Alaves: 5+ corners in 4 of last 8 head-to-head games vs Valencia (50.0%) &larr; Mixed</div>
+      <div class="mismatch-alignment alignment-mixed">👀 MIXED</div>
+        
+      <div class="mismatch-combined">Combined confidence: 72.2% &rarr; Solid</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Alaves Total corners Over 4.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-solid">
+      <div class="mismatch-title">✅ SOLID MISMATCH</div>
+      
+      <div class="mismatch-subheading">Recent Form:</div>
+      <div class="mismatch-line">Alaves: 1+ goals in 15 of last 18 home games (83.3%)</div>
+      <div class="mismatch-line">Valencia allowed: 1+ goals allowed in 13 of last 18 away games (72.2%)</div>
+      <div class="mismatch-subheading">Head-to-Head:</div>
+      <div class="mismatch-line">Alaves: 1+ goals in 6 of last 8 head-to-head games vs Valencia (75.0%) &larr; Aligned</div>
+      <div class="mismatch-alignment alignment-aligned">🚀 ALIGNED</div>
+        
+      <div class="mismatch-combined">Combined confidence: 77.8% &rarr; Solid</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Alaves Total goals Over 0.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-solid">
+      <div class="mismatch-title">✅ SOLID MISMATCH</div>
+      
+      <div class="mismatch-subheading">Recent Form:</div>
+      <div class="mismatch-line">Valencia: 1+ goals in 14 of last 18 away games (77.8%)</div>
+      <div class="mismatch-line">Alaves allowed: 1+ goals allowed in 13 of last 18 home games (72.2%)</div>
+      <div class="mismatch-subheading">Head-to-Head:</div>
+      <div class="mismatch-line">Valencia: 1+ goals in 4 of last 8 head-to-head games vs Alaves (50.0%) &larr; Mixed</div>
+      <div class="mismatch-alignment alignment-mixed">👀 MIXED</div>
+        
+      <div class="mismatch-combined">Combined confidence: 75.0% &rarr; Solid</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Valencia Total goals Over 0.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-solid">
+      <div class="mismatch-title">✅ SOLID MISMATCH</div>
+      
+      <div class="mismatch-subheading">Recent Form:</div>
+      <div class="mismatch-line">Valencia: 1+ goals conceded in 13 of last 18 away games (72.2%)</div>
+      <div class="mismatch-line">Alaves allowed: 1+ goals conceded allowed in 15 of last 18 home games (83.3%)</div>
+      <div class="mismatch-subheading">Head-to-Head:</div>
+      <div class="mismatch-line">Valencia: 1+ goals conceded in 6 of last 8 head-to-head games vs Alaves (75.0%) &larr; Aligned</div>
+      <div class="mismatch-alignment alignment-aligned">🚀 ALIGNED</div>
+        
+      <div class="mismatch-combined">Combined confidence: 77.8% &rarr; Solid</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Valencia Total goals conceded Over 0.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-solid">
+      <div class="mismatch-title">✅ SOLID MISMATCH</div>
+      
+      <div class="mismatch-subheading">Recent Form:</div>
+      <div class="mismatch-line">Alaves: 1+ goals conceded in 13 of last 18 home games (72.2%)</div>
+      <div class="mismatch-line">Valencia allowed: 1+ goals conceded allowed in 14 of last 18 away games (77.8%)</div>
+      <div class="mismatch-subheading">Head-to-Head:</div>
+      <div class="mismatch-line">Alaves: 1+ goals conceded in 4 of last 8 head-to-head games vs Valencia (50.0%) &larr; Mixed</div>
+      <div class="mismatch-alignment alignment-mixed">👀 MIXED</div>
+        
+      <div class="mismatch-combined">Combined confidence: 75.0% &rarr; Solid</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Alaves Total goals conceded Over 0.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-watch">
+      <div class="mismatch-title">👀 WATCH MISMATCH</div>
+      
+      <div class="mismatch-subheading">Recent Form:</div>
+      <div class="mismatch-line">Alaves: 4+ SOT in 11 of last 18 home games (61.1%)</div>
+      <div class="mismatch-line">Valencia allowed: 4+ SOT allowed in 11 of last 18 away games (61.1%)</div>
+      <div class="mismatch-subheading">Head-to-Head:</div>
+      <div class="mismatch-line">Alaves: 4+ SOT in 4 of last 8 head-to-head games vs Valencia (50.0%) &larr; Mixed</div>
+      <div class="mismatch-alignment alignment-mixed">👀 MIXED</div>
+        
+      <div class="mismatch-combined">Combined confidence: 61.1% &rarr; Watch</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Alaves Total SOT Over 3.5</div>
+    </div>
+    
+    
+    <h4 class="section-heading">📊 Recent Form Streaks</h4>
+    <div class="streak-team-name">Alaves (Home Form)</div><div class="streak-line">&bull; 1+ goals in 5 of last 5 home games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 6 of last 6 home games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 7 of last 7 home games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 8 of last 8 home games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 5 of last 5 home games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 6 of last 6 home games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 7 of last 7 home games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 8 of last 8 home games (100.0%)</div>
+<div class="streak-line">&bull; 5+ corners in 12 of last 13 home games (92.3%)</div>
+<div class="streak-line">&bull; 1+ goals in 12 of last 13 home games (92.3%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 12 of last 13 home games (92.3%)</div>
+<div class="streak-line">&bull; 5+ corners in 9 of last 10 home games (90.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 9 of last 10 home games (90.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 9 of last 10 home games (90.0%)</div>
+<div class="streak-line">&bull; 5+ corners in 7 of last 8 home games (87.5%)</div>
+<div class="streak-line">&bull; 3+ SOT in 6 of last 7 home games (85.7%)</div>
+<div class="streak-line">&bull; 5+ corners in 6 of last 7 home games (85.7%)</div>
+<div class="streak-line">&bull; 3+ SOT in 5 of last 6 home games (83.3%)</div>
+<div class="streak-line">&bull; 5+ corners in 5 of last 6 home games (83.3%)</div>
+<div class="streak-line">&bull; 5+ corners in 15 of last 18 home games (83.3%)</div>
+<div class="streak-line">&bull; 1+ goals in 15 of last 18 home games (83.3%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 15 of last 18 home games (83.3%)</div>
+<div class="streak-line">&bull; 3+ SOT in 4 of last 5 home games (80.0%)</div>
+<div class="streak-line">&bull; 3+ SOT in 8 of last 10 home games (80.0%)</div>
+<div class="streak-line">&bull; 5+ corners in 4 of last 5 home games (80.0%)</div>
+<div class="streak-line">&bull; 3+ SOT in 14 of last 18 home games (77.8%)</div>
+<div class="streak-line">&bull; 3+ SOT in 10 of last 13 home games (76.9%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 10 of last 13 home games (76.9%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 10 of last 13 home games (76.9%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 10 of last 13 home games (76.9%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 10 of last 13 home games (76.9%)</div>
+<div class="streak-line">&bull; 3+ SOT in 6 of last 8 home games (75.0%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 13 of last 18 home games (72.2%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 13 of last 18 home games (72.2%)</div>
+<div class="streak-line">&bull; 4+ SOT in 5 of last 7 home games (71.4%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 7 of last 10 home games (70.0%)</div>
+<div class="streak-line">&bull; 4+ SOT in 7 of last 10 home games (70.0%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 7 of last 10 home games (70.0%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 7 of last 10 home games (70.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 7 of last 10 home games (70.0%)</div>
+<div class="streak-line">&bull; 4+ SOT in 9 of last 13 home games (69.2%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 12 of last 18 home games (66.7%)</div>
+<div class="streak-line">&bull; 4+ SOT in 4 of last 6 home games (66.7%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 5 of last 8 home games (62.5%)</div>
+<div class="streak-line">&bull; 4+ SOT in 5 of last 8 home games (62.5%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 5 of last 8 home games (62.5%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 5 of last 8 home games (62.5%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 5 of last 8 home games (62.5%)</div>
+<div class="streak-line">&bull; 6+ corners in 8 of last 13 home games (61.5%)</div>
+<div class="streak-line">&bull; 4+ SOT in 11 of last 18 home games (61.1%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 11 of last 18 home games (61.1%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 3 of last 5 home games (60.0%)</div>
+<div class="streak-line">&bull; 4+ SOT in 3 of last 5 home games (60.0%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 3 of last 5 home games (60.0%)</div>
+<div class="streak-line">&bull; 5+ corners allowed in 3 of last 5 home games (60.0%)</div>
+<div class="streak-line">&bull; 6+ corners in 6 of last 10 home games (60.0%)</div><div class="streak-team-name">Valencia (Away Form)</div><div class="streak-line">&bull; 3+ SOT in 5 of last 5 away games (100.0%)</div>
+<div class="streak-line">&bull; 3+ SOT in 6 of last 6 away games (100.0%)</div>
+<div class="streak-line">&bull; 3+ SOT in 7 of last 8 away games (87.5%)</div>
+<div class="streak-line">&bull; 3+ SOT in 6 of last 7 away games (85.7%)</div>
+<div class="streak-line">&bull; 1+ goals in 11 of last 13 away games (84.6%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 11 of last 13 away games (84.6%)</div>
+<div class="streak-line">&bull; 1+ goals in 5 of last 6 away games (83.3%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 5 of last 6 away games (83.3%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 4 of last 5 away games (80.0%)</div>
+<div class="streak-line">&bull; 3+ SOT in 8 of last 10 away games (80.0%)</div>
+<div class="streak-line">&bull; 5+ corners allowed in 4 of last 5 away games (80.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 4 of last 5 away games (80.0%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 4 of last 5 away games (80.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 8 of last 10 away games (80.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 4 of last 5 away games (80.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 4 of last 5 away games (80.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 8 of last 10 away games (80.0%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 14 of last 18 away games (77.8%)</div>
+<div class="streak-line">&bull; 1+ goals in 14 of last 18 away games (77.8%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 14 of last 18 away games (77.8%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 6 of last 8 away games (75.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 6 of last 8 away games (75.0%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 6 of last 8 away games (75.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 6 of last 8 away games (75.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 6 of last 8 away games (75.0%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 13 of last 18 away games (72.2%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 13 of last 18 away games (72.2%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 5 of last 7 away games (71.4%)</div>
+<div class="streak-line">&bull; 1+ goals in 5 of last 7 away games (71.4%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 5 of last 7 away games (71.4%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 5 of last 7 away games (71.4%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 5 of last 7 away games (71.4%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 7 of last 10 away games (70.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 7 of last 10 away games (70.0%)</div>
+<div class="streak-line">&bull; 3+ SOT in 9 of last 13 away games (69.2%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 9 of last 13 away games (69.2%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 9 of last 13 away games (69.2%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 9 of last 13 away games (69.2%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 4 of last 6 away games (66.7%)</div>
+<div class="streak-line">&bull; 4+ SOT in 4 of last 6 away games (66.7%)</div>
+<div class="streak-line">&bull; 5+ corners allowed in 4 of last 6 away games (66.7%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 4 of last 6 away games (66.7%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 4 of last 6 away games (66.7%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 5 of last 8 away games (62.5%)</div>
+<div class="streak-line">&bull; 5+ corners allowed in 5 of last 8 away games (62.5%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 11 of last 18 away games (61.1%)</div>
+<div class="streak-line">&bull; 5+ corners allowed in 11 of last 18 away games (61.1%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 6 of last 10 away games (60.0%)</div>
+<div class="streak-line">&bull; 4+ SOT in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 5+ corners in 3 of last 5 away games (60.0%)</div>
+    
+      </div>
+    </details>
+    
+    </div>
+    
+    </div>
+    
+
+    <div class="day-section">
+      <h2 class="day-heading">📅 Tomorrow — 2026-09-16 (Wednesday)</h2>
+      
+    <div class="league-section">
+      <h3 class="league-heading">La Liga</h3>
+      
+    <details class="match-details">
+      <summary>
+        <span class="match-teams">🚀 <strong>Ath Madrid vs Osasuna</strong></span>
+        <span class="badge">9 mismatches &middot; 111 streaks</span>
+      </summary>
+      <div class="match-body">
+        
+    <h4 class="section-heading">🔍 Mismatches Found (9)</h4>
+    
+    <div class="mismatch-card strength-strong">
+      <div class="mismatch-title">🚀 STRONG MISMATCH</div>
+      
+      <div class="mismatch-subheading">Recent Form:</div>
+      <div class="mismatch-line">Ath Madrid: 3+ SOT in 17 of last 18 home games (94.4%)</div>
+      <div class="mismatch-line">Osasuna allowed: 3+ SOT allowed in 14 of last 18 away games (77.8%)</div>
+      <div class="mismatch-subheading">Head-to-Head:</div>
+      <div class="mismatch-line">Ath Madrid: 3+ SOT in 8 of last 10 head-to-head games vs Osasuna (80.0%) &larr; Aligned</div>
+      <div class="mismatch-alignment alignment-aligned">🚀 ALIGNED</div>
+        
+      <div class="mismatch-combined">Combined confidence: 86.1% &rarr; Strong</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Ath Madrid Total SOT Over 2.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-strong">
+      <div class="mismatch-title">🚀 STRONG MISMATCH</div>
+      
+      <div class="mismatch-subheading">Recent Form:</div>
+      <div class="mismatch-line">Ath Madrid: 4+ SOT in 17 of last 18 home games (94.4%)</div>
+      <div class="mismatch-line">Osasuna allowed: 4+ SOT allowed in 13 of last 18 away games (72.2%)</div>
+      <div class="mismatch-subheading">Head-to-Head:</div>
+      <div class="mismatch-line">Ath Madrid: 4+ SOT in 7 of last 10 head-to-head games vs Osasuna (70.0%) &larr; Aligned</div>
+      <div class="mismatch-alignment alignment-aligned">🚀 ALIGNED</div>
+        
+      <div class="mismatch-combined">Combined confidence: 83.3% &rarr; Strong</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Ath Madrid Total SOT Over 3.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-strong">
+      <div class="mismatch-title">🚀 STRONG MISMATCH</div>
+      
+      <div class="mismatch-subheading">Recent Form:</div>
+      <div class="mismatch-line">Ath Madrid: 1+ goals in 16 of last 18 home games (88.9%)</div>
+      <div class="mismatch-line">Osasuna allowed: 1+ goals allowed in 16 of last 18 away games (88.9%)</div>
+      <div class="mismatch-subheading">Head-to-Head:</div>
+      <div class="mismatch-line">Ath Madrid: 1+ goals in 9 of last 10 head-to-head games vs Osasuna (90.0%) &larr; Aligned</div>
+      <div class="mismatch-alignment alignment-aligned">🚀 ALIGNED</div>
+        
+      <div class="mismatch-combined">Combined confidence: 88.9% &rarr; Strong</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Ath Madrid Total goals Over 0.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-strong">
+      <div class="mismatch-title">🚀 STRONG MISMATCH</div>
+      
+      <div class="mismatch-subheading">Recent Form:</div>
+      <div class="mismatch-line">Osasuna: 1+ goals conceded in 16 of last 18 away games (88.9%)</div>
+      <div class="mismatch-line">Ath Madrid allowed: 1+ goals conceded allowed in 16 of last 18 home games (88.9%)</div>
+      <div class="mismatch-subheading">Head-to-Head:</div>
+      <div class="mismatch-line">Osasuna: 1+ goals conceded in 9 of last 10 head-to-head games vs Ath Madrid (90.0%) &larr; Aligned</div>
+      <div class="mismatch-alignment alignment-aligned">🚀 ALIGNED</div>
+        
+      <div class="mismatch-combined">Combined confidence: 88.9% &rarr; Strong</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Osasuna Total goals conceded Over 0.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-solid">
+      <div class="mismatch-title">✅ SOLID MISMATCH</div>
+      
+      <div class="mismatch-subheading">Recent Form:</div>
+      <div class="mismatch-line">Ath Madrid: 5+ corners in 15 of last 18 home games (83.3%)</div>
+      <div class="mismatch-line">Osasuna allowed: 5+ corners allowed in 11 of last 18 away games (61.1%)</div>
+      <div class="mismatch-subheading">Head-to-Head:</div>
+      <div class="mismatch-line">Ath Madrid: 5+ corners in 4 of last 10 head-to-head games vs Osasuna (40.0%) &larr; Mixed</div>
+      <div class="mismatch-alignment alignment-mixed">👀 MIXED</div>
+        
+      <div class="mismatch-combined">Combined confidence: 72.2% &rarr; Solid</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Ath Madrid Total corners Over 4.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-watch">
+      <div class="mismatch-title">👀 WATCH MISMATCH (H2H)</div>
+      
+      <div class="mismatch-line">Osasuna: 3+ SOT in 6 of last 10 head-to-head games vs Ath Madrid (60.0%)</div>
+      <div class="mismatch-line">Ath Madrid allowed: 3+ SOT allowed in 6 of last 10 head-to-head games vs Osasuna (60.0%)</div>
+        
+      <div class="mismatch-combined">Combined confidence: 60.0% &rarr; Watch</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Osasuna Total SOT Over 2.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-watch">
+      <div class="mismatch-title">👀 WATCH MISMATCH</div>
+      
+      <div class="mismatch-subheading">Recent Form:</div>
+      <div class="mismatch-line">Osasuna: 4+ SOT in 4 of last 6 away games (66.7%)</div>
+      <div class="mismatch-line">Ath Madrid allowed: 4+ SOT allowed in 4 of last 6 home games (66.7%)</div>
+      <div class="mismatch-subheading">Head-to-Head:</div>
+      <div class="mismatch-line">Osasuna: 4+ SOT in 4 of last 10 head-to-head games vs Ath Madrid (40.0%) &larr; Mixed</div>
+      <div class="mismatch-alignment alignment-mixed">👀 MIXED</div>
+        
+      <div class="mismatch-combined">Combined confidence: 66.7% &rarr; Watch</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Osasuna Total SOT Over 3.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-watch">
+      <div class="mismatch-title">👀 WATCH MISMATCH</div>
+      
+      <div class="mismatch-subheading">Recent Form:</div>
+      <div class="mismatch-line">Osasuna: 1+ goals in 6 of last 10 away games (60.0%)</div>
+      <div class="mismatch-line">Ath Madrid allowed: 1+ goals allowed in 7 of last 10 home games (70.0%)</div>
+      <div class="mismatch-subheading">Head-to-Head:</div>
+      <div class="mismatch-line">Osasuna: 1+ goals in 3 of last 10 head-to-head games vs Ath Madrid (30.0%) &larr; Mixed</div>
+      <div class="mismatch-alignment alignment-mixed">👀 MIXED</div>
+        
+      <div class="mismatch-combined">Combined confidence: 65.0% &rarr; Watch</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Osasuna Total goals Over 0.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-watch">
+      <div class="mismatch-title">👀 WATCH MISMATCH</div>
+      
+      <div class="mismatch-subheading">Recent Form:</div>
+      <div class="mismatch-line">Ath Madrid: 1+ goals conceded in 7 of last 10 home games (70.0%)</div>
+      <div class="mismatch-line">Osasuna allowed: 1+ goals conceded allowed in 6 of last 10 away games (60.0%)</div>
+      <div class="mismatch-subheading">Head-to-Head:</div>
+      <div class="mismatch-line">Ath Madrid: 1+ goals conceded in 3 of last 10 head-to-head games vs Osasuna (30.0%) &larr; Mixed</div>
+      <div class="mismatch-alignment alignment-mixed">👀 MIXED</div>
+        
+      <div class="mismatch-combined">Combined confidence: 65.0% &rarr; Watch</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Ath Madrid Total goals conceded Over 0.5</div>
+    </div>
+    
+    
+    <h4 class="section-heading">📊 Recent Form Streaks</h4>
+    <div class="streak-team-name">Ath Madrid (Home Form)</div><div class="streak-line">&bull; 3+ SOT in 5 of last 5 home games (100.0%)</div>
+<div class="streak-line">&bull; 4+ SOT in 5 of last 5 home games (100.0%)</div>
+<div class="streak-line">&bull; 3+ SOT in 17 of last 18 home games (94.4%)</div>
+<div class="streak-line">&bull; 4+ SOT in 17 of last 18 home games (94.4%)</div>
+<div class="streak-line">&bull; 3+ SOT in 12 of last 13 home games (92.3%)</div>
+<div class="streak-line">&bull; 4+ SOT in 12 of last 13 home games (92.3%)</div>
+<div class="streak-line">&bull; 3+ SOT in 9 of last 10 home games (90.0%)</div>
+<div class="streak-line">&bull; 4+ SOT in 9 of last 10 home games (90.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 16 of last 18 home games (88.9%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 16 of last 18 home games (88.9%)</div>
+<div class="streak-line">&bull; 3+ SOT in 7 of last 8 home games (87.5%)</div>
+<div class="streak-line">&bull; 4+ SOT in 7 of last 8 home games (87.5%)</div>
+<div class="streak-line">&bull; 1+ goals in 7 of last 8 home games (87.5%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 7 of last 8 home games (87.5%)</div>
+<div class="streak-line">&bull; 3+ SOT in 6 of last 7 home games (85.7%)</div>
+<div class="streak-line">&bull; 4+ SOT in 6 of last 7 home games (85.7%)</div>
+<div class="streak-line">&bull; 1+ goals in 6 of last 7 home games (85.7%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 6 of last 7 home games (85.7%)</div>
+<div class="streak-line">&bull; 5+ corners in 11 of last 13 home games (84.6%)</div>
+<div class="streak-line">&bull; 1+ goals in 11 of last 13 home games (84.6%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 11 of last 13 home games (84.6%)</div>
+<div class="streak-line">&bull; 3+ SOT in 5 of last 6 home games (83.3%)</div>
+<div class="streak-line">&bull; 4+ SOT in 5 of last 6 home games (83.3%)</div>
+<div class="streak-line">&bull; 5+ corners in 15 of last 18 home games (83.3%)</div>
+<div class="streak-line">&bull; 1+ goals in 5 of last 6 home games (83.3%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 5 of last 6 home games (83.3%)</div>
+<div class="streak-line">&bull; 5+ corners in 4 of last 5 home games (80.0%)</div>
+<div class="streak-line">&bull; 5+ corners in 8 of last 10 home games (80.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 4 of last 5 home games (80.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 8 of last 10 home games (80.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 4 of last 5 home games (80.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 8 of last 10 home games (80.0%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 6 of last 8 home games (75.0%)</div>
+<div class="streak-line">&bull; 5+ corners in 6 of last 8 home games (75.0%)</div>
+<div class="streak-line">&bull; 5+ SOT in 13 of last 18 home games (72.2%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 5 of last 7 home games (71.4%)</div>
+<div class="streak-line">&bull; 5+ corners in 5 of last 7 home games (71.4%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 7 of last 10 home games (70.0%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 7 of last 10 home games (70.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 7 of last 10 home games (70.0%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 4 of last 6 home games (66.7%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 4 of last 6 home games (66.7%)</div>
+<div class="streak-line">&bull; 5+ corners in 4 of last 6 home games (66.7%)</div>
+<div class="streak-line">&bull; 6+ corners in 12 of last 18 home games (66.7%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 4 of last 6 home games (66.7%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 4 of last 6 home games (66.7%)</div>
+<div class="streak-line">&bull; 6+ corners in 5 of last 8 home games (62.5%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 5 of last 8 home games (62.5%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 5 of last 8 home games (62.5%)</div>
+<div class="streak-line">&bull; 5+ SOT in 8 of last 13 home games (61.5%)</div>
+<div class="streak-line">&bull; 6+ corners in 8 of last 13 home games (61.5%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 8 of last 13 home games (61.5%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 8 of last 13 home games (61.5%)</div>
+<div class="streak-line">&bull; 6+ SOT in 11 of last 18 home games (61.1%)</div>
+<div class="streak-line">&bull; 2+ goals in 11 of last 18 home games (61.1%)</div>
+<div class="streak-line">&bull; 2+ goals conceded allowed in 11 of last 18 home games (61.1%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 3 of last 5 home games (60.0%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 3 of last 5 home games (60.0%)</div>
+<div class="streak-line">&bull; 6+ corners in 3 of last 5 home games (60.0%)</div>
+<div class="streak-line">&bull; 6+ corners in 6 of last 10 home games (60.0%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 3 of last 5 home games (60.0%)</div>
+<div class="streak-line">&bull; 2+ goals in 3 of last 5 home games (60.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 3 of last 5 home games (60.0%)</div>
+<div class="streak-line">&bull; 2+ goals conceded allowed in 3 of last 5 home games (60.0%)</div><div class="streak-team-name">Osasuna (Away Form)</div><div class="streak-line">&bull; 3+ SOT in 5 of last 5 away games (100.0%)</div>
+<div class="streak-line">&bull; 3+ SOT in 6 of last 6 away games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 5 of last 5 away games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 6 of last 6 away games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 7 of last 7 away games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 5 of last 5 away games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 6 of last 6 away games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 7 of last 7 away games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 12 of last 13 away games (92.3%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 12 of last 13 away games (92.3%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 9 of last 10 away games (90.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 9 of last 10 away games (90.0%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 16 of last 18 away games (88.9%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 16 of last 18 away games (88.9%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 7 of last 8 away games (87.5%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 7 of last 8 away games (87.5%)</div>
+<div class="streak-line">&bull; 3+ SOT in 6 of last 7 away games (85.7%)</div>
+<div class="streak-line">&bull; 5+ corners allowed in 4 of last 5 away games (80.0%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 14 of last 18 away games (77.8%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 10 of last 13 away games (76.9%)</div>
+<div class="streak-line">&bull; 3+ SOT in 6 of last 8 away games (75.0%)</div>
+<div class="streak-line">&bull; 5+ corners allowed in 6 of last 8 away games (75.0%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 13 of last 18 away games (72.2%)</div>
+<div class="streak-line">&bull; 5+ corners allowed in 5 of last 7 away games (71.4%)</div>
+<div class="streak-line">&bull; 3+ SOT in 7 of last 10 away games (70.0%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 7 of last 10 away games (70.0%)</div>
+<div class="streak-line">&bull; 5+ corners allowed in 7 of last 10 away games (70.0%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 9 of last 13 away games (69.2%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 4 of last 6 away games (66.7%)</div>
+<div class="streak-line">&bull; 4+ SOT in 4 of last 6 away games (66.7%)</div>
+<div class="streak-line">&bull; 5+ SOT in 4 of last 6 away games (66.7%)</div>
+<div class="streak-line">&bull; 5+ corners allowed in 4 of last 6 away games (66.7%)</div>
+<div class="streak-line">&bull; 1+ goals in 4 of last 6 away games (66.7%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 4 of last 6 away games (66.7%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 5 of last 8 away games (62.5%)</div>
+<div class="streak-line">&bull; 5+ corners allowed in 8 of last 13 away games (61.5%)</div>
+<div class="streak-line">&bull; 5+ corners allowed in 11 of last 18 away games (61.1%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 4+ SOT in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 6 of last 10 away games (60.0%)</div>
+<div class="streak-line">&bull; 5+ SOT in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 6 of last 10 away games (60.0%)</div>
+<div class="streak-line">&bull; 2+ goals in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 6 of last 10 away games (60.0%)</div>
+<div class="streak-line">&bull; 2+ goals conceded allowed in 3 of last 5 away games (60.0%)</div>
+    
+      </div>
+    </details>
+    
+
+    <details class="match-details">
+      <summary>
+        <span class="match-teams">🚀 <strong>Levante vs Ath Bilbao</strong></span>
+        <span class="badge">10 mismatches &middot; 129 streaks</span>
+      </summary>
+      <div class="match-body">
+        
+    <h4 class="section-heading">🔍 Mismatches Found (10)</h4>
+    
+    <div class="mismatch-card strength-strong">
+      <div class="mismatch-title">🚀 STRONG MISMATCH</div>
+      
+      <div class="mismatch-line">Levante: 3+ SOT in 14 of last 18 home games (77.8%)</div>
+      <div class="mismatch-line">Ath Bilbao allowed: 3+ SOT allowed in 15 of last 18 away games (83.3%)</div>
+        
+      <div class="mismatch-combined">Combined confidence: 80.6% &rarr; Strong</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Levante Total SOT Over 2.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-solid">
+      <div class="mismatch-title">✅ SOLID MISMATCH</div>
+      
+      <div class="mismatch-line">Ath Bilbao: 3+ SOT in 11 of last 18 away games (61.1%)</div>
+      <div class="mismatch-line">Levante allowed: 3+ SOT allowed in 14 of last 18 home games (77.8%)</div>
+        
+      <div class="mismatch-combined">Combined confidence: 69.4% &rarr; Solid</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Ath Bilbao Total SOT Over 2.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-solid">
+      <div class="mismatch-title">✅ SOLID MISMATCH</div>
+      
+      <div class="mismatch-line">Levante: 4+ SOT in 8 of last 13 home games (61.5%)</div>
+      <div class="mismatch-line">Ath Bilbao allowed: 4+ SOT allowed in 11 of last 13 away games (84.6%)</div>
+        
+      <div class="mismatch-combined">Combined confidence: 73.1% &rarr; Solid</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Levante Total SOT Over 3.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-solid">
+      <div class="mismatch-title">✅ SOLID MISMATCH</div>
+      
+      <div class="mismatch-line">Levante: 1+ goals in 13 of last 18 home games (72.2%)</div>
+      <div class="mismatch-line">Ath Bilbao allowed: 1+ goals allowed in 15 of last 18 away games (83.3%)</div>
+        
+      <div class="mismatch-combined">Combined confidence: 77.8% &rarr; Solid</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Levante Total goals Over 0.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-solid">
+      <div class="mismatch-title">✅ SOLID MISMATCH</div>
+      
+      <div class="mismatch-line">Ath Bilbao: 1+ goals in 11 of last 18 away games (61.1%)</div>
+      <div class="mismatch-line">Levante allowed: 1+ goals allowed in 13 of last 18 home games (72.2%)</div>
+        
+      <div class="mismatch-combined">Combined confidence: 66.7% &rarr; Solid</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Ath Bilbao Total goals Over 0.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-solid">
+      <div class="mismatch-title">✅ SOLID MISMATCH</div>
+      
+      <div class="mismatch-line">Ath Bilbao: 1+ goals conceded in 15 of last 18 away games (83.3%)</div>
+      <div class="mismatch-line">Levante allowed: 1+ goals conceded allowed in 13 of last 18 home games (72.2%)</div>
+        
+      <div class="mismatch-combined">Combined confidence: 77.8% &rarr; Solid</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Ath Bilbao Total goals conceded Over 0.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-solid">
+      <div class="mismatch-title">✅ SOLID MISMATCH</div>
+      
+      <div class="mismatch-line">Levante: 1+ goals conceded in 13 of last 18 home games (72.2%)</div>
+      <div class="mismatch-line">Ath Bilbao allowed: 1+ goals conceded allowed in 11 of last 18 away games (61.1%)</div>
+        
+      <div class="mismatch-combined">Combined confidence: 66.7% &rarr; Solid</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Levante Total goals conceded Over 0.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-watch">
+      <div class="mismatch-title">👀 WATCH MISMATCH</div>
+      
+      <div class="mismatch-line">Ath Bilbao: 5+ corners in 4 of last 5 away games (80.0%)</div>
+      <div class="mismatch-line">Levante allowed: 5+ corners allowed in 3 of last 5 home games (60.0%)</div>
+        
+      <div class="mismatch-combined">Combined confidence: 70.0% &rarr; Watch</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Ath Bilbao Total corners Over 4.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-watch">
+      <div class="mismatch-title">👀 WATCH MISMATCH</div>
+      
+      <div class="mismatch-line">Levante: 2+ goals in 6 of last 10 home games (60.0%)</div>
+      <div class="mismatch-line">Ath Bilbao allowed: 2+ goals allowed in 7 of last 10 away games (70.0%)</div>
+        
+      <div class="mismatch-combined">Combined confidence: 65.0% &rarr; Watch</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Levante Total goals Over 1.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-watch">
+      <div class="mismatch-title">👀 WATCH MISMATCH</div>
+      
+      <div class="mismatch-line">Ath Bilbao: 2+ goals conceded in 7 of last 10 away games (70.0%)</div>
+      <div class="mismatch-line">Levante allowed: 2+ goals conceded allowed in 6 of last 10 home games (60.0%)</div>
+        
+      <div class="mismatch-combined">Combined confidence: 65.0% &rarr; Watch</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Ath Bilbao Total goals conceded Over 1.5</div>
+    </div>
+    
+    
+    <h4 class="section-heading">📊 Recent Form Streaks</h4>
+    <div class="streak-team-name">Levante (Home Form)</div><div class="streak-line">&bull; 3+ SOT in 5 of last 5 home games (100.0%)</div>
+<div class="streak-line">&bull; 3+ SOT in 6 of last 6 home games (100.0%)</div>
+<div class="streak-line">&bull; 3+ SOT in 7 of last 7 home games (100.0%)</div>
+<div class="streak-line">&bull; 3+ SOT in 8 of last 8 home games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 5 of last 5 home games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 6 of last 6 home games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 7 of last 7 home games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 8 of last 8 home games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 5 of last 5 home games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 6 of last 6 home games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 7 of last 7 home games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 8 of last 8 home games (100.0%)</div>
+<div class="streak-line">&bull; 3+ SOT in 9 of last 10 home games (90.0%)</div>
+<div class="streak-line">&bull; 2+ goals in 5 of last 6 home games (83.3%)</div>
+<div class="streak-line">&bull; 2+ goals conceded allowed in 5 of last 6 home games (83.3%)</div>
+<div class="streak-line">&bull; 1+ goals in 8 of last 10 home games (80.0%)</div>
+<div class="streak-line">&bull; 2+ goals in 4 of last 5 home games (80.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 8 of last 10 home games (80.0%)</div>
+<div class="streak-line">&bull; 2+ goals conceded allowed in 4 of last 5 home games (80.0%)</div>
+<div class="streak-line">&bull; 3+ SOT in 14 of last 18 home games (77.8%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 14 of last 18 home games (77.8%)</div>
+<div class="streak-line">&bull; 3+ SOT in 10 of last 13 home games (76.9%)</div>
+<div class="streak-line">&bull; 1+ goals in 10 of last 13 home games (76.9%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 10 of last 13 home games (76.9%)</div>
+<div class="streak-line">&bull; 4+ SOT in 6 of last 8 home games (75.0%)</div>
+<div class="streak-line">&bull; 2+ goals in 6 of last 8 home games (75.0%)</div>
+<div class="streak-line">&bull; 2+ goals conceded allowed in 6 of last 8 home games (75.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 13 of last 18 home games (72.2%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 13 of last 18 home games (72.2%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 13 of last 18 home games (72.2%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 13 of last 18 home games (72.2%)</div>
+<div class="streak-line">&bull; 4+ SOT in 5 of last 7 home games (71.4%)</div>
+<div class="streak-line">&bull; 2+ goals in 5 of last 7 home games (71.4%)</div>
+<div class="streak-line">&bull; 2+ goals conceded allowed in 5 of last 7 home games (71.4%)</div>
+<div class="streak-line">&bull; 4+ SOT in 7 of last 10 home games (70.0%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 9 of last 13 home games (69.2%)</div>
+<div class="streak-line">&bull; 4+ SOT in 4 of last 6 home games (66.7%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 5 of last 8 home games (62.5%)</div>
+<div class="streak-line">&bull; 4+ SOT in 8 of last 13 home games (61.5%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 8 of last 13 home games (61.5%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 8 of last 13 home games (61.5%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 3 of last 5 home games (60.0%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 6 of last 10 home games (60.0%)</div>
+<div class="streak-line">&bull; 4+ SOT in 3 of last 5 home games (60.0%)</div>
+<div class="streak-line">&bull; 5+ corners in 3 of last 5 home games (60.0%)</div>
+<div class="streak-line">&bull; 5+ corners allowed in 3 of last 5 home games (60.0%)</div>
+<div class="streak-line">&bull; 6+ corners allowed in 3 of last 5 home games (60.0%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 6 of last 10 home games (60.0%)</div>
+<div class="streak-line">&bull; 2+ goals in 6 of last 10 home games (60.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 6 of last 10 home games (60.0%)</div>
+<div class="streak-line">&bull; 2+ goals conceded allowed in 6 of last 10 home games (60.0%)</div><div class="streak-team-name">Ath Bilbao (Away Form)</div><div class="streak-line">&bull; 1+ goals allowed in 12 of last 13 away games (92.3%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 12 of last 13 away games (92.3%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 9 of last 10 away games (90.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 9 of last 10 away games (90.0%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 7 of last 8 away games (87.5%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 7 of last 8 away games (87.5%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 7 of last 8 away games (87.5%)</div>
+<div class="streak-line">&bull; 2+ goals allowed in 7 of last 8 away games (87.5%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 7 of last 8 away games (87.5%)</div>
+<div class="streak-line">&bull; 2+ goals conceded in 7 of last 8 away games (87.5%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 6 of last 7 away games (85.7%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 6 of last 7 away games (85.7%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 6 of last 7 away games (85.7%)</div>
+<div class="streak-line">&bull; 2+ goals allowed in 6 of last 7 away games (85.7%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 6 of last 7 away games (85.7%)</div>
+<div class="streak-line">&bull; 2+ goals conceded in 6 of last 7 away games (85.7%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 11 of last 13 away games (84.6%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 11 of last 13 away games (84.6%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 5 of last 6 away games (83.3%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 15 of last 18 away games (83.3%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 5 of last 6 away games (83.3%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 15 of last 18 away games (83.3%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 5 of last 6 away games (83.3%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 15 of last 18 away games (83.3%)</div>
+<div class="streak-line">&bull; 2+ goals allowed in 5 of last 6 away games (83.3%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 5 of last 6 away games (83.3%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 15 of last 18 away games (83.3%)</div>
+<div class="streak-line">&bull; 2+ goals conceded in 5 of last 6 away games (83.3%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 4 of last 5 away games (80.0%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 8 of last 10 away games (80.0%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 4 of last 5 away games (80.0%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 8 of last 10 away games (80.0%)</div>
+<div class="streak-line">&bull; 5+ corners in 4 of last 5 away games (80.0%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 4 of last 5 away games (80.0%)</div>
+<div class="streak-line">&bull; 2+ goals allowed in 4 of last 5 away games (80.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 4 of last 5 away games (80.0%)</div>
+<div class="streak-line">&bull; 2+ goals conceded in 4 of last 5 away games (80.0%)</div>
+<div class="streak-line">&bull; 2+ goals allowed in 7 of last 10 away games (70.0%)</div>
+<div class="streak-line">&bull; 2+ goals conceded in 7 of last 10 away games (70.0%)</div>
+<div class="streak-line">&bull; 3+ SOT in 9 of last 13 away games (69.2%)</div>
+<div class="streak-line">&bull; 1+ goals in 9 of last 13 away games (69.2%)</div>
+<div class="streak-line">&bull; 2+ goals allowed in 9 of last 13 away games (69.2%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 9 of last 13 away games (69.2%)</div>
+<div class="streak-line">&bull; 2+ goals conceded in 9 of last 13 away games (69.2%)</div>
+<div class="streak-line">&bull; 3+ SOT in 4 of last 6 away games (66.7%)</div>
+<div class="streak-line">&bull; 4+ SOT in 4 of last 6 away games (66.7%)</div>
+<div class="streak-line">&bull; 5+ corners in 4 of last 6 away games (66.7%)</div>
+<div class="streak-line">&bull; 1+ goals in 4 of last 6 away games (66.7%)</div>
+<div class="streak-line">&bull; 2+ goals in 4 of last 6 away games (66.7%)</div>
+<div class="streak-line">&bull; 2+ goals allowed in 12 of last 18 away games (66.7%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 4 of last 6 away games (66.7%)</div>
+<div class="streak-line">&bull; 2+ goals conceded allowed in 4 of last 6 away games (66.7%)</div>
+<div class="streak-line">&bull; 2+ goals conceded in 12 of last 18 away games (66.7%)</div>
+<div class="streak-line">&bull; 3+ SOT in 5 of last 8 away games (62.5%)</div>
+<div class="streak-line">&bull; 4+ SOT in 5 of last 8 away games (62.5%)</div>
+<div class="streak-line">&bull; 5+ SOT allowed in 5 of last 8 away games (62.5%)</div>
+<div class="streak-line">&bull; 5+ corners in 5 of last 8 away games (62.5%)</div>
+<div class="streak-line">&bull; 4+ SOT in 8 of last 13 away games (61.5%)</div>
+<div class="streak-line">&bull; 5+ SOT allowed in 8 of last 13 away games (61.5%)</div>
+<div class="streak-line">&bull; 5+ corners in 8 of last 13 away games (61.5%)</div>
+<div class="streak-line">&bull; 3+ SOT in 11 of last 18 away games (61.1%)</div>
+<div class="streak-line">&bull; 5+ SOT allowed in 11 of last 18 away games (61.1%)</div>
+<div class="streak-line">&bull; 1+ goals in 11 of last 18 away games (61.1%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 11 of last 18 away games (61.1%)</div>
+<div class="streak-line">&bull; 3+ SOT in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 3+ SOT in 6 of last 10 away games (60.0%)</div>
+<div class="streak-line">&bull; 4+ SOT in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 4+ SOT in 6 of last 10 away games (60.0%)</div>
+<div class="streak-line">&bull; 5+ SOT allowed in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 5+ SOT allowed in 6 of last 10 away games (60.0%)</div>
+<div class="streak-line">&bull; 6+ corners in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 7+ corners in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 6 of last 10 away games (60.0%)</div>
+<div class="streak-line">&bull; 2+ goals in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 6 of last 10 away games (60.0%)</div>
+<div class="streak-line">&bull; 2+ goals conceded allowed in 3 of last 5 away games (60.0%)</div>
+    
+      </div>
+    </details>
+    
+
+    <details class="match-details">
+      <summary>
+        <span class="match-teams"><strong>Barcelona vs Santander</strong></span>
+        <span class="badge">0 mismatches &middot; 81 streaks</span>
+      </summary>
+      <div class="match-body">
+        
+    <h4 class="section-heading">📊 Recent Form Streaks</h4>
+    <div class="streak-team-name">Barcelona (Home Form)</div><div class="streak-line">&bull; 3+ SOT in 5 of last 5 home games (100.0%)</div>
+<div class="streak-line">&bull; 3+ SOT in 6 of last 6 home games (100.0%)</div>
+<div class="streak-line">&bull; 3+ SOT in 7 of last 7 home games (100.0%)</div>
+<div class="streak-line">&bull; 3+ SOT in 8 of last 8 home games (100.0%)</div>
+<div class="streak-line">&bull; 3+ SOT in 10 of last 10 home games (100.0%)</div>
+<div class="streak-line">&bull; 3+ SOT in 13 of last 13 home games (100.0%)</div>
+<div class="streak-line">&bull; 3+ SOT in 18 of last 18 home games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 5 of last 5 home games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 6 of last 6 home games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 7 of last 7 home games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 8 of last 8 home games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 10 of last 10 home games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 13 of last 13 home games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 18 of last 18 home games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 5 of last 5 home games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 6 of last 6 home games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 7 of last 7 home games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 8 of last 8 home games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 10 of last 10 home games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 13 of last 13 home games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 18 of last 18 home games (100.0%)</div>
+<div class="streak-line">&bull; 4+ SOT in 17 of last 18 home games (94.4%)</div>
+<div class="streak-line">&bull; 4+ SOT in 12 of last 13 home games (92.3%)</div>
+<div class="streak-line">&bull; 4+ SOT in 9 of last 10 home games (90.0%)</div>
+<div class="streak-line">&bull; 5+ SOT in 16 of last 18 home games (88.9%)</div>
+<div class="streak-line">&bull; 2+ goals in 16 of last 18 home games (88.9%)</div>
+<div class="streak-line">&bull; 2+ goals conceded allowed in 16 of last 18 home games (88.9%)</div>
+<div class="streak-line">&bull; 4+ SOT in 7 of last 8 home games (87.5%)</div>
+<div class="streak-line">&bull; 4+ SOT in 6 of last 7 home games (85.7%)</div>
+<div class="streak-line">&bull; 5+ corners in 6 of last 7 home games (85.7%)</div>
+<div class="streak-line">&bull; 5+ SOT in 11 of last 13 home games (84.6%)</div>
+<div class="streak-line">&bull; 6+ SOT in 11 of last 13 home games (84.6%)</div>
+<div class="streak-line">&bull; 2+ goals in 11 of last 13 home games (84.6%)</div>
+<div class="streak-line">&bull; 2+ goals conceded allowed in 11 of last 13 home games (84.6%)</div>
+<div class="streak-line">&bull; 4+ SOT in 5 of last 6 home games (83.3%)</div>
+<div class="streak-line">&bull; 5+ SOT in 5 of last 6 home games (83.3%)</div>
+<div class="streak-line">&bull; 6+ SOT in 5 of last 6 home games (83.3%)</div>
+<div class="streak-line">&bull; 6+ SOT in 15 of last 18 home games (83.3%)</div>
+<div class="streak-line">&bull; 5+ corners in 5 of last 6 home games (83.3%)</div>
+<div class="streak-line">&bull; 5+ corners in 15 of last 18 home games (83.3%)</div>
+<div class="streak-line">&bull; 2+ goals in 5 of last 6 home games (83.3%)</div>
+<div class="streak-line">&bull; 2+ goals conceded allowed in 5 of last 6 home games (83.3%)</div>
+<div class="streak-line">&bull; 4+ SOT in 4 of last 5 home games (80.0%)</div>
+<div class="streak-line">&bull; 5+ SOT in 4 of last 5 home games (80.0%)</div>
+<div class="streak-line">&bull; 5+ SOT in 8 of last 10 home games (80.0%)</div>
+<div class="streak-line">&bull; 6+ SOT in 4 of last 5 home games (80.0%)</div>
+<div class="streak-line">&bull; 6+ SOT in 8 of last 10 home games (80.0%)</div>
+<div class="streak-line">&bull; 5+ corners in 4 of last 5 home games (80.0%)</div>
+<div class="streak-line">&bull; 2+ goals in 4 of last 5 home games (80.0%)</div>
+<div class="streak-line">&bull; 2+ goals in 8 of last 10 home games (80.0%)</div>
+<div class="streak-line">&bull; 2+ goals conceded allowed in 4 of last 5 home games (80.0%)</div>
+<div class="streak-line">&bull; 2+ goals conceded allowed in 8 of last 10 home games (80.0%)</div>
+<div class="streak-line">&bull; 5+ corners in 10 of last 13 home games (76.9%)</div>
+<div class="streak-line">&bull; 5+ SOT in 6 of last 8 home games (75.0%)</div>
+<div class="streak-line">&bull; 6+ SOT in 6 of last 8 home games (75.0%)</div>
+<div class="streak-line">&bull; 5+ corners in 6 of last 8 home games (75.0%)</div>
+<div class="streak-line">&bull; 2+ goals in 6 of last 8 home games (75.0%)</div>
+<div class="streak-line">&bull; 2+ goals conceded allowed in 6 of last 8 home games (75.0%)</div>
+<div class="streak-line">&bull; 5+ SOT in 5 of last 7 home games (71.4%)</div>
+<div class="streak-line">&bull; 6+ SOT in 5 of last 7 home games (71.4%)</div>
+<div class="streak-line">&bull; 5+ corners allowed in 5 of last 7 home games (71.4%)</div>
+<div class="streak-line">&bull; 6+ corners in 5 of last 7 home games (71.4%)</div>
+<div class="streak-line">&bull; 2+ goals in 5 of last 7 home games (71.4%)</div>
+<div class="streak-line">&bull; 2+ goals conceded allowed in 5 of last 7 home games (71.4%)</div>
+<div class="streak-line">&bull; 5+ corners in 7 of last 10 home games (70.0%)</div>
+<div class="streak-line">&bull; 6+ corners in 9 of last 13 home games (69.2%)</div>
+<div class="streak-line">&bull; 5+ corners allowed in 4 of last 6 home games (66.7%)</div>
+<div class="streak-line">&bull; 6+ corners in 4 of last 6 home games (66.7%)</div>
+<div class="streak-line">&bull; 3+ goals in 12 of last 18 home games (66.7%)</div>
+<div class="streak-line">&bull; 3+ goals conceded allowed in 12 of last 18 home games (66.7%)</div>
+<div class="streak-line">&bull; 5+ corners allowed in 5 of last 8 home games (62.5%)</div>
+<div class="streak-line">&bull; 6+ corners in 5 of last 8 home games (62.5%)</div>
+<div class="streak-line">&bull; 3+ goals in 8 of last 13 home games (61.5%)</div>
+<div class="streak-line">&bull; 3+ goals conceded allowed in 8 of last 13 home games (61.5%)</div>
+<div class="streak-line">&bull; 6+ corners in 11 of last 18 home games (61.1%)</div>
+<div class="streak-line">&bull; 5+ corners allowed in 3 of last 5 home games (60.0%)</div>
+<div class="streak-line">&bull; 5+ corners allowed in 6 of last 10 home games (60.0%)</div>
+<div class="streak-line">&bull; 6+ corners in 3 of last 5 home games (60.0%)</div>
+<div class="streak-line">&bull; 6+ corners in 6 of last 10 home games (60.0%)</div>
+<div class="streak-line">&bull; 3+ goals in 6 of last 10 home games (60.0%)</div>
+<div class="streak-line">&bull; 3+ goals conceded allowed in 6 of last 10 home games (60.0%)</div>
+    
+      </div>
+    </details>
+    
+
+    <details class="match-details">
+      <summary>
+        <span class="match-teams"><strong>La Coruna vs Sevilla</strong></span>
+        <span class="badge">0 mismatches &middot; 48 streaks</span>
+      </summary>
+      <div class="match-body">
+        
+    <h4 class="section-heading">📊 Recent Form Streaks</h4>
+    <div class="streak-team-name">Sevilla (Away Form)</div><div class="streak-line">&bull; 3+ SOT allowed in 5 of last 5 away games (100.0%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 6 of last 6 away games (100.0%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 7 of last 7 away games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 5 of last 5 away games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 6 of last 6 away games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 7 of last 7 away games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 8 of last 8 away games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 5 of last 5 away games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 6 of last 6 away games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 7 of last 7 away games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 8 of last 8 away games (100.0%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 17 of last 18 away games (94.4%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 12 of last 13 away games (92.3%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 12 of last 13 away games (92.3%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 12 of last 13 away games (92.3%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 9 of last 10 away games (90.0%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 9 of last 10 away games (90.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 9 of last 10 away games (90.0%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 16 of last 18 away games (88.9%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 16 of last 18 away games (88.9%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 7 of last 8 away games (87.5%)</div>
+<div class="streak-line">&bull; 1+ goals in 13 of last 18 away games (72.2%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 13 of last 18 away games (72.2%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 5 of last 7 away games (71.4%)</div>
+<div class="streak-line">&bull; 1+ goals in 7 of last 10 away games (70.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 7 of last 10 away games (70.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 9 of last 13 away games (69.2%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 9 of last 13 away games (69.2%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 4 of last 6 away games (66.7%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 12 of last 18 away games (66.7%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 5 of last 8 away games (62.5%)</div>
+<div class="streak-line">&bull; 1+ goals in 5 of last 8 away games (62.5%)</div>
+<div class="streak-line">&bull; 2+ goals allowed in 5 of last 8 away games (62.5%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 5 of last 8 away games (62.5%)</div>
+<div class="streak-line">&bull; 2+ goals conceded in 5 of last 8 away games (62.5%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 8 of last 13 away games (61.5%)</div>
+<div class="streak-line">&bull; 2+ goals allowed in 8 of last 13 away games (61.5%)</div>
+<div class="streak-line">&bull; 2+ goals conceded in 8 of last 13 away games (61.5%)</div>
+<div class="streak-line">&bull; 2+ goals allowed in 11 of last 18 away games (61.1%)</div>
+<div class="streak-line">&bull; 2+ goals conceded in 11 of last 18 away games (61.1%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 6 of last 10 away games (60.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 2+ goals allowed in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 2+ goals allowed in 6 of last 10 away games (60.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 2+ goals conceded in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 2+ goals conceded in 6 of last 10 away games (60.0%)</div>
+    
+      </div>
+    </details>
+    
+    </div>
+    
+    </div>
+    
+
+    <div class="day-section">
+      <h2 class="day-heading">📅 Day After Tomorrow — 2026-09-17 (Thursday)</h2>
+      
+    <div class="league-section">
+      <h3 class="league-heading">La Liga</h3>
+      
+    <details class="match-details">
+      <summary>
+        <span class="match-teams">🚀 <strong>Betis vs Getafe</strong></span>
+        <span class="badge">9 mismatches &middot; 100 streaks</span>
+      </summary>
+      <div class="match-body">
+        
+    <h4 class="section-heading">🔍 Mismatches Found (9)</h4>
+    
+    <div class="mismatch-card strength-strong">
+      <div class="mismatch-title">🚀 STRONG MISMATCH</div>
+      
+      <div class="mismatch-subheading">Recent Form:</div>
+      <div class="mismatch-line">Betis: 3+ SOT in 16 of last 18 home games (88.9%)</div>
+      <div class="mismatch-line">Getafe allowed: 3+ SOT allowed in 17 of last 18 away games (94.4%)</div>
+      <div class="mismatch-subheading">Head-to-Head:</div>
+      <div class="mismatch-line">Betis: 3+ SOT in 9 of last 10 head-to-head games vs Getafe (90.0%) &larr; Aligned</div>
+      <div class="mismatch-alignment alignment-aligned">🚀 ALIGNED</div>
+        
+      <div class="mismatch-combined">Combined confidence: 91.7% &rarr; Strong</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Betis Total SOT Over 2.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-strong">
+      <div class="mismatch-title">🚀 STRONG MISMATCH</div>
+      
+      <div class="mismatch-subheading">Recent Form:</div>
+      <div class="mismatch-line">Betis: 4+ SOT in 15 of last 18 home games (83.3%)</div>
+      <div class="mismatch-line">Getafe allowed: 4+ SOT allowed in 15 of last 18 away games (83.3%)</div>
+      <div class="mismatch-subheading">Head-to-Head:</div>
+      <div class="mismatch-line">Betis: 4+ SOT in 7 of last 10 head-to-head games vs Getafe (70.0%) &larr; Aligned</div>
+      <div class="mismatch-alignment alignment-aligned">🚀 ALIGNED</div>
+        
+      <div class="mismatch-combined">Combined confidence: 83.3% &rarr; Strong</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Betis Total SOT Over 3.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-strong">
+      <div class="mismatch-title">🚀 STRONG MISMATCH</div>
+      
+      <div class="mismatch-subheading">Recent Form:</div>
+      <div class="mismatch-line">Betis: 1+ goals in 16 of last 18 home games (88.9%)</div>
+      <div class="mismatch-line">Getafe allowed: 1+ goals allowed in 13 of last 18 away games (72.2%)</div>
+      <div class="mismatch-subheading">Head-to-Head:</div>
+      <div class="mismatch-line">Betis: 1+ goals in 7 of last 10 head-to-head games vs Getafe (70.0%) &larr; Aligned</div>
+      <div class="mismatch-alignment alignment-aligned">🚀 ALIGNED</div>
+        
+      <div class="mismatch-combined">Combined confidence: 80.6% &rarr; Strong</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Betis Total goals Over 0.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-strong">
+      <div class="mismatch-title">🚀 STRONG MISMATCH</div>
+      
+      <div class="mismatch-subheading">Recent Form:</div>
+      <div class="mismatch-line">Getafe: 1+ goals conceded in 13 of last 18 away games (72.2%)</div>
+      <div class="mismatch-line">Betis allowed: 1+ goals conceded allowed in 16 of last 18 home games (88.9%)</div>
+      <div class="mismatch-subheading">Head-to-Head:</div>
+      <div class="mismatch-line">Getafe: 1+ goals conceded in 7 of last 10 head-to-head games vs Betis (70.0%) &larr; Aligned</div>
+      <div class="mismatch-alignment alignment-aligned">🚀 ALIGNED</div>
+        
+      <div class="mismatch-combined">Combined confidence: 80.6% &rarr; Strong</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Getafe Total goals conceded Over 0.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-solid">
+      <div class="mismatch-title">✅ SOLID MISMATCH (H2H)</div>
+      
+      <div class="mismatch-line">Betis: 5+ SOT in 4 of last 5 head-to-head games vs Getafe (80.0%)</div>
+      <div class="mismatch-line">Getafe allowed: 5+ SOT allowed in 4 of last 5 head-to-head games vs Betis (80.0%)</div>
+        
+      <div class="mismatch-combined">Combined confidence: 80.0% &rarr; Solid</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Betis Total SOT Over 4.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-solid">
+      <div class="mismatch-title">✅ SOLID MISMATCH (H2H)</div>
+      
+      <div class="mismatch-line">Betis: 5+ corners in 4 of last 5 head-to-head games vs Getafe (80.0%)</div>
+      <div class="mismatch-line">Getafe allowed: 5+ corners allowed in 4 of last 5 head-to-head games vs Betis (80.0%)</div>
+        
+      <div class="mismatch-combined">Combined confidence: 80.0% &rarr; Solid</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Betis Total corners Over 4.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-watch">
+      <div class="mismatch-title">👀 WATCH MISMATCH (H2H)</div>
+      
+      <div class="mismatch-line">Getafe: 3+ SOT in 6 of last 10 head-to-head games vs Betis (60.0%)</div>
+      <div class="mismatch-line">Betis allowed: 3+ SOT allowed in 6 of last 10 head-to-head games vs Getafe (60.0%)</div>
+        
+      <div class="mismatch-combined">Combined confidence: 60.0% &rarr; Watch</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Getafe Total SOT Over 2.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-watch">
+      <div class="mismatch-title">👀 WATCH MISMATCH (H2H)</div>
+      
+      <div class="mismatch-line">Getafe: 1+ goals in 6 of last 10 head-to-head games vs Betis (60.0%)</div>
+      <div class="mismatch-line">Betis allowed: 1+ goals allowed in 6 of last 10 head-to-head games vs Getafe (60.0%)</div>
+        
+      <div class="mismatch-combined">Combined confidence: 60.0% &rarr; Watch</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Getafe Total goals Over 0.5</div>
+    </div>
+    
+
+    <div class="mismatch-card strength-watch">
+      <div class="mismatch-title">👀 WATCH MISMATCH (H2H)</div>
+      
+      <div class="mismatch-line">Betis: 1+ goals conceded in 6 of last 10 head-to-head games vs Getafe (60.0%)</div>
+      <div class="mismatch-line">Getafe allowed: 1+ goals conceded allowed in 6 of last 10 head-to-head games vs Betis (60.0%)</div>
+        
+      <div class="mismatch-combined">Combined confidence: 60.0% &rarr; Watch</div>
+      <div class="mismatch-opportunity">Potential Opportunity: Betis Total goals conceded Over 0.5</div>
+    </div>
+    
+    
+    <h4 class="section-heading">📊 Recent Form Streaks</h4>
+    <div class="streak-team-name">Betis (Home Form)</div><div class="streak-line">&bull; 3+ SOT in 5 of last 5 home games (100.0%)</div>
+<div class="streak-line">&bull; 3+ SOT in 6 of last 6 home games (100.0%)</div>
+<div class="streak-line">&bull; 3+ SOT in 7 of last 7 home games (100.0%)</div>
+<div class="streak-line">&bull; 4+ SOT in 5 of last 5 home games (100.0%)</div>
+<div class="streak-line">&bull; 4+ SOT in 6 of last 6 home games (100.0%)</div>
+<div class="streak-line">&bull; 4+ SOT in 7 of last 7 home games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 5 of last 5 home games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 5 of last 5 home games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 12 of last 13 home games (92.3%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 12 of last 13 home games (92.3%)</div>
+<div class="streak-line">&bull; 1+ goals in 9 of last 10 home games (90.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 9 of last 10 home games (90.0%)</div>
+<div class="streak-line">&bull; 3+ SOT in 16 of last 18 home games (88.9%)</div>
+<div class="streak-line">&bull; 1+ goals in 16 of last 18 home games (88.9%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 16 of last 18 home games (88.9%)</div>
+<div class="streak-line">&bull; 3+ SOT in 7 of last 8 home games (87.5%)</div>
+<div class="streak-line">&bull; 4+ SOT in 7 of last 8 home games (87.5%)</div>
+<div class="streak-line">&bull; 1+ goals in 7 of last 8 home games (87.5%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 7 of last 8 home games (87.5%)</div>
+<div class="streak-line">&bull; 5+ SOT in 6 of last 7 home games (85.7%)</div>
+<div class="streak-line">&bull; 1+ goals in 6 of last 7 home games (85.7%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 6 of last 7 home games (85.7%)</div>
+<div class="streak-line">&bull; 3+ SOT in 11 of last 13 home games (84.6%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 11 of last 13 home games (84.6%)</div>
+<div class="streak-line">&bull; 4+ SOT in 15 of last 18 home games (83.3%)</div>
+<div class="streak-line">&bull; 5+ SOT in 5 of last 6 home games (83.3%)</div>
+<div class="streak-line">&bull; 1+ goals in 5 of last 6 home games (83.3%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 5 of last 6 home games (83.3%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 4 of last 5 home games (80.0%)</div>
+<div class="streak-line">&bull; 3+ SOT in 8 of last 10 home games (80.0%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 8 of last 10 home games (80.0%)</div>
+<div class="streak-line">&bull; 5+ SOT in 4 of last 5 home games (80.0%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 14 of last 18 home games (77.8%)</div>
+<div class="streak-line">&bull; 5+ SOT in 14 of last 18 home games (77.8%)</div>
+<div class="streak-line">&bull; 4+ SOT in 10 of last 13 home games (76.9%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 6 of last 8 home games (75.0%)</div>
+<div class="streak-line">&bull; 5+ SOT in 6 of last 8 home games (75.0%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 5 of last 7 home games (71.4%)</div>
+<div class="streak-line">&bull; 6+ SOT in 5 of last 7 home games (71.4%)</div>
+<div class="streak-line">&bull; 4+ SOT in 7 of last 10 home games (70.0%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 7 of last 10 home games (70.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 7 of last 10 home games (70.0%)</div>
+<div class="streak-line">&bull; 5+ SOT in 9 of last 13 home games (69.2%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 4 of last 6 home games (66.7%)</div>
+<div class="streak-line">&bull; 6+ SOT in 4 of last 6 home games (66.7%)</div>
+<div class="streak-line">&bull; 6+ SOT in 5 of last 8 home games (62.5%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 5 of last 8 home games (62.5%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 5 of last 8 home games (62.5%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 8 of last 13 home games (61.5%)</div>
+<div class="streak-line">&bull; 2+ goals in 8 of last 13 home games (61.5%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 8 of last 13 home games (61.5%)</div>
+<div class="streak-line">&bull; 2+ goals conceded allowed in 8 of last 13 home games (61.5%)</div>
+<div class="streak-line">&bull; 6+ SOT in 11 of last 18 home games (61.1%)</div>
+<div class="streak-line">&bull; 5+ corners allowed in 11 of last 18 home games (61.1%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 11 of last 18 home games (61.1%)</div>
+<div class="streak-line">&bull; 2+ goals in 11 of last 18 home games (61.1%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 11 of last 18 home games (61.1%)</div>
+<div class="streak-line">&bull; 2+ goals conceded allowed in 11 of last 18 home games (61.1%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 3 of last 5 home games (60.0%)</div>
+<div class="streak-line">&bull; 5+ SOT allowed in 3 of last 5 home games (60.0%)</div>
+<div class="streak-line">&bull; 5+ SOT in 6 of last 10 home games (60.0%)</div>
+<div class="streak-line">&bull; 6+ SOT in 3 of last 5 home games (60.0%)</div>
+<div class="streak-line">&bull; 5+ corners in 3 of last 5 home games (60.0%)</div>
+<div class="streak-line">&bull; 5+ corners allowed in 3 of last 5 home games (60.0%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 3 of last 5 home games (60.0%)</div>
+<div class="streak-line">&bull; 2+ goals in 3 of last 5 home games (60.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 3 of last 5 home games (60.0%)</div>
+<div class="streak-line">&bull; 2+ goals conceded allowed in 3 of last 5 home games (60.0%)</div><div class="streak-team-name">Getafe (Away Form)</div><div class="streak-line">&bull; 3+ SOT allowed in 17 of last 18 away games (94.4%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 12 of last 13 away games (92.3%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 9 of last 10 away games (90.0%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 7 of last 8 away games (87.5%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 6 of last 7 away games (85.7%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 11 of last 13 away games (84.6%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 5 of last 6 away games (83.3%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 15 of last 18 away games (83.3%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 4 of last 5 away games (80.0%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 8 of last 10 away games (80.0%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 6 of last 8 away games (75.0%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 6 of last 8 away games (75.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 6 of last 8 away games (75.0%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 13 of last 18 away games (72.2%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 13 of last 18 away games (72.2%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 5 of last 7 away games (71.4%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 5 of last 7 away games (71.4%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 5 of last 7 away games (71.4%)</div>
+<div class="streak-line">&bull; 5+ corners allowed in 7 of last 10 away games (70.0%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 9 of last 13 away games (69.2%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 9 of last 13 away games (69.2%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 4 of last 6 away games (66.7%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 4 of last 6 away games (66.7%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 4 of last 6 away games (66.7%)</div>
+<div class="streak-line">&bull; 5+ corners allowed in 5 of last 8 away games (62.5%)</div>
+<div class="streak-line">&bull; 5+ corners allowed in 8 of last 13 away games (61.5%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 6+ corners allowed in 6 of last 10 away games (60.0%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 6 of last 10 away games (60.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 6 of last 10 away games (60.0%)</div>
+    
+      </div>
+    </details>
+    
+
+    <details class="match-details">
+      <summary>
+        <span class="match-teams"><strong>Malaga vs Villarreal</strong></span>
+        <span class="badge">0 mismatches &middot; 65 streaks</span>
+      </summary>
+      <div class="match-body">
+        
+    <h4 class="section-heading">📊 Recent Form Streaks</h4>
+    <div class="streak-team-name">Villarreal (Away Form)</div><div class="streak-line">&bull; 1+ goals allowed in 5 of last 5 away games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 6 of last 6 away games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 7 of last 7 away games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 8 of last 8 away games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 10 of last 10 away games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 5 of last 5 away games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 6 of last 6 away games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 7 of last 7 away games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 8 of last 8 away games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 10 of last 10 away games (100.0%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 12 of last 13 away games (92.3%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 12 of last 13 away games (92.3%)</div>
+<div class="streak-line">&bull; 5+ corners allowed in 7 of last 8 away games (87.5%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 6 of last 7 away games (85.7%)</div>
+<div class="streak-line">&bull; 5+ corners allowed in 6 of last 7 away games (85.7%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 5 of last 6 away games (83.3%)</div>
+<div class="streak-line">&bull; 5+ corners allowed in 5 of last 6 away games (83.3%)</div>
+<div class="streak-line">&bull; 1+ goals allowed in 15 of last 18 away games (83.3%)</div>
+<div class="streak-line">&bull; 1+ goals conceded in 15 of last 18 away games (83.3%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 4 of last 5 away games (80.0%)</div>
+<div class="streak-line">&bull; 5+ corners allowed in 4 of last 5 away games (80.0%)</div>
+<div class="streak-line">&bull; 5+ corners allowed in 8 of last 10 away games (80.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 14 of last 18 away games (77.8%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 14 of last 18 away games (77.8%)</div>
+<div class="streak-line">&bull; 1+ goals in 10 of last 13 away games (76.9%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 10 of last 13 away games (76.9%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 6 of last 8 away games (75.0%)</div>
+<div class="streak-line">&bull; 3+ SOT in 13 of last 18 away games (72.2%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 13 of last 18 away games (72.2%)</div>
+<div class="streak-line">&bull; 3+ SOT in 5 of last 7 away games (71.4%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 5 of last 7 away games (71.4%)</div>
+<div class="streak-line">&bull; 1+ goals in 5 of last 7 away games (71.4%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 5 of last 7 away games (71.4%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 7 of last 10 away games (70.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 7 of last 10 away games (70.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 7 of last 10 away games (70.0%)</div>
+<div class="streak-line">&bull; 3+ SOT allowed in 9 of last 13 away games (69.2%)</div>
+<div class="streak-line">&bull; 5+ corners allowed in 9 of last 13 away games (69.2%)</div>
+<div class="streak-line">&bull; 3+ SOT in 4 of last 6 away games (66.7%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 4 of last 6 away games (66.7%)</div>
+<div class="streak-line">&bull; 5+ corners allowed in 12 of last 18 away games (66.7%)</div>
+<div class="streak-line">&bull; 1+ goals in 4 of last 6 away games (66.7%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 4 of last 6 away games (66.7%)</div>
+<div class="streak-line">&bull; 3+ SOT in 5 of last 8 away games (62.5%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 5 of last 8 away games (62.5%)</div>
+<div class="streak-line">&bull; 1+ goals in 5 of last 8 away games (62.5%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 5 of last 8 away games (62.5%)</div>
+<div class="streak-line">&bull; 3+ SOT in 8 of last 13 away games (61.5%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 8 of last 13 away games (61.5%)</div>
+<div class="streak-line">&bull; 3+ SOT in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 3+ SOT in 6 of last 10 away games (60.0%)</div>
+<div class="streak-line">&bull; 4+ SOT in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 4+ SOT allowed in 6 of last 10 away games (60.0%)</div>
+<div class="streak-line">&bull; 5+ SOT in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 6+ SOT in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 5+ corners in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 6+ corners in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 7+ corners in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 8+ corners in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 9+ corners in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 1+ goals in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 2+ goals allowed in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 1+ goals conceded allowed in 3 of last 5 away games (60.0%)</div>
+<div class="streak-line">&bull; 2+ goals conceded in 3 of last 5 away games (60.0%)</div>
+    
+      </div>
+    </details>
+    
+    </div>
+    
+    </div>
+    
+
+</body>
+</html>
