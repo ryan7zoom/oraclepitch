@@ -148,6 +148,21 @@
     color: var(--text-dim);
     margin: 2px 0 2px 12px;
   }
+
+  .ev-stat { margin: 0 0 10px 0; }
+  .ev-stat-name { font-size: 0.72rem; text-transform: uppercase; letter-spacing: .06em; color: var(--text-dim); margin-bottom: 2px; }
+  .ev-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; font-size: 0.82rem; padding: 2px 0; }
+  .ev-team { min-width: 92px; color: var(--text); }
+  .ev-num { min-width: 34px; font-weight: 700; color: var(--accent); }
+  .ev-line { color: var(--text-dim); white-space: nowrap; }
+  .ev-line b { color: var(--text); font-weight: 600; }
+  .ev-h2h { font-size: 0.74rem; color: var(--text-dim); padding: 1px 0 0 0; }
+  .streak-details { margin-top: 10px; }
+  .streak-details > summary { cursor: pointer; font-size: 0.8rem; color: var(--text-dim); }
+
+  .kickoff { display: inline-block; min-width: 44px; margin-right: 8px; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
+  .kickoff.tbc { color: var(--text-dim); font-weight: 400; }
+
 </style>
 </head>
 <body>
@@ -157,18 +172,18 @@
 
 
     <div class="day-section">
-      <h2 class="day-heading">📅 Today — 2026-10-27 (Tuesday)</h2>
+      <h2 class="day-heading">📅 Today — 27/10/2026 (Tuesday)</h2>
       
     <div class="league-section">
       <h3 class="league-heading">Serie A</h3>
       
     <details class="match-details">
       <summary>
-        <span class="match-teams">🚀 <strong>Roma vs Cagliari</strong></span>
+        <span class="match-teams"><span class="kickoff tbc">TBC</span>🚀 <strong>Roma vs Cagliari</strong></span>
         <span class="badge">4 mismatches &middot; 104 streaks</span>
       </summary>
       <div class="match-body">
-        
+        <div class="ev-stat"><div class="ev-stat-name">Shots on target</div><div class="ev-row"><span class="ev-team">Roma</span><span class="ev-num">5.2</span><span class="ev-line">Over 4.5 <b>59%</b></span><span class="ev-line">Under 5.5 <b>58%</b></span><span class="ev-line">Under 6.5 <b>73%</b></span></div><div class="ev-row"><span class="ev-team">Cagliari</span><span class="ev-num">3.0</span><span class="ev-line">Over 1.5 <b>79%</b></span><span class="ev-line">Over 2.5 <b>57%</b></span><span class="ev-line">Under 3.5 <b>66%</b></span></div><div class="ev-row"><span class="ev-team">Total</span><span class="ev-num">8.1</span><span class="ev-line">Over 7.5 <b>57%</b></span><span class="ev-line">Under 8.5 <b>57%</b></span><span class="ev-line">Under 9.5 <b>70%</b></span></div><div class="ev-h2h">H2H at this venue, last 4: Roma 4.8 &ndash; Cagliari 2.8</div></div><div class="ev-stat"><div class="ev-stat-name">Corners</div><div class="ev-row"><span class="ev-team">Roma</span><span class="ev-num">5.2</span><span class="ev-line">Over 4.5 <b>59%</b></span><span class="ev-line">Under 5.5 <b>59%</b></span><span class="ev-line">Under 6.5 <b>74%</b></span></div><div class="ev-row"><span class="ev-team">Cagliari</span><span class="ev-num">2.8</span><span class="ev-line">Over 1.5 <b>77%</b></span><span class="ev-line">Over 2.5 <b>54%</b></span><span class="ev-line">Under 3.5 <b>69%</b></span></div><div class="ev-row"><span class="ev-team">Total</span><span class="ev-num">8.0</span><span class="ev-line">Over 6.5 <b>69%</b></span><span class="ev-line">Over 7.5 <b>55%</b></span><span class="ev-line">Under 8.5 <b>59%</b></span></div><div class="ev-h2h">H2H at this venue, last 4: Roma 5.8 &ndash; Cagliari 2.5</div></div><div class="ev-stat"><div class="ev-stat-name">Goals</div><div class="ev-row"><span class="ev-team">Roma</span><span class="ev-num">2.6</span><span class="ev-line">Over 1.5 <b>72%</b></span><span class="ev-line">Under 2.5 <b>53%</b></span><span class="ev-line">Under 3.5 <b>74%</b></span></div><div class="ev-row"><span class="ev-team">Cagliari</span><span class="ev-num">0.5</span><span class="ev-line">Under 0.5 <b>61%</b></span><span class="ev-line">Under 1.5 <b>91%</b></span><span class="ev-line">Under 2.5 <b>99%</b></span></div><div class="ev-row"><span class="ev-team">Total</span><span class="ev-num">3.1</span><span class="ev-line">Over 2.5 <b>59%</b></span><span class="ev-line">Under 3.5 <b>64%</b></span><span class="ev-line">Under 4.5 <b>81%</b></span></div><div class="ev-h2h">H2H at this venue, last 4: Roma 2.0 &ndash; Cagliari 0.0</div></div><details class="streak-details"><summary>Streak details</summary>
     <h4 class="section-heading">🔍 Mismatches Found (4)</h4>
     
     <div class="mismatch-card strength-strong">
@@ -335,18 +350,18 @@
 <div class="streak-line">&bull; 1+ goals conceded in 3 of last 5 away games (60.0%)</div>
 <div class="streak-line">&bull; 1+ goals conceded allowed in 3 of last 5 away games (60.0%)</div>
 <div class="streak-line">&bull; 1+ goals conceded allowed in 6 of last 10 away games (60.0%)</div>
-    
+    </details>
       </div>
     </details>
     
 
     <details class="match-details">
       <summary>
-        <span class="match-teams">🚀 <strong>Sassuolo vs Lazio</strong></span>
+        <span class="match-teams"><span class="kickoff tbc">TBC</span>🚀 <strong>Sassuolo vs Lazio</strong></span>
         <span class="badge">11 mismatches &middot; 101 streaks</span>
       </summary>
       <div class="match-body">
-        
+        <div class="ev-stat"><div class="ev-stat-name">Shots on target</div><div class="ev-row"><span class="ev-team">Sassuolo</span><span class="ev-num">4.1</span><span class="ev-line">Over 3.5 <b>58%</b></span><span class="ev-line">Under 4.5 <b>61%</b></span><span class="ev-line">Under 5.5 <b>77%</b></span></div><div class="ev-row"><span class="ev-team">Lazio</span><span class="ev-num">4.0</span><span class="ev-line">Over 2.5 <b>76%</b></span><span class="ev-line">Over 3.5 <b>56%</b></span><span class="ev-line">Under 4.5 <b>63%</b></span></div><div class="ev-row"><span class="ev-team">Total</span><span class="ev-num">8.1</span><span class="ev-line">Over 7.5 <b>56%</b></span><span class="ev-line">Under 8.5 <b>58%</b></span><span class="ev-line">Under 9.5 <b>71%</b></span></div><div class="ev-h2h">H2H at this venue, last 4: Sassuolo 3.2 &ndash; Lazio 3.5</div></div><div class="ev-stat"><div class="ev-stat-name">Corners</div><div class="ev-row"><span class="ev-team">Sassuolo</span><span class="ev-num">4.8</span><span class="ev-line">Over 3.5 <b>70%</b></span><span class="ev-line">Over 4.5 <b>52%</b></span><span class="ev-line">Under 5.5 <b>65%</b></span></div><div class="ev-row"><span class="ev-team">Lazio</span><span class="ev-num">4.7</span><span class="ev-line">Over 3.5 <b>69%</b></span><span class="ev-line">Over 4.5 <b>51%</b></span><span class="ev-line">Under 5.5 <b>67%</b></span></div><div class="ev-row"><span class="ev-team">Total</span><span class="ev-num">9.5</span><span class="ev-line">Over 8.5 <b>61%</b></span><span class="ev-line">Under 9.5 <b>52%</b></span><span class="ev-line">Under 10.5 <b>65%</b></span></div><div class="ev-h2h">H2H at this venue, last 4: Sassuolo 5.2 &ndash; Lazio 4.2</div></div><div class="ev-stat"><div class="ev-stat-name">Goals</div><div class="ev-row"><span class="ev-team">Sassuolo</span><span class="ev-num">1.1</span><span class="ev-line">Over 0.5 <b>66%</b></span><span class="ev-line">Under 1.5 <b>70%</b></span><span class="ev-line">Under 2.5 <b>90%</b></span></div><div class="ev-row"><span class="ev-team">Lazio</span><span class="ev-num">1.0</span><span class="ev-line">Over 0.5 <b>64%</b></span><span class="ev-line">Under 1.5 <b>72%</b></span><span class="ev-line">Under 2.5 <b>91%</b></span></div><div class="ev-row"><span class="ev-team">Total</span><span class="ev-num">2.1</span><span class="ev-line">Over 1.5 <b>63%</b></span><span class="ev-line">Under 2.5 <b>64%</b></span><span class="ev-line">Under 3.5 <b>83%</b></span></div><div class="ev-h2h">H2H at this venue, last 4: Sassuolo 0.8 &ndash; Lazio 1.2</div></div><details class="streak-details"><summary>Streak details</summary>
     <h4 class="section-heading">🔍 Mismatches Found (11)</h4>
     
     <div class="mismatch-card strength-strong">
@@ -583,18 +598,18 @@
 <div class="streak-line">&bull; 1+ goals allowed in 3 of last 5 away games (60.0%)</div>
 <div class="streak-line">&bull; 1+ goals conceded in 3 of last 5 away games (60.0%)</div>
 <div class="streak-line">&bull; 1+ goals conceded allowed in 3 of last 5 away games (60.0%)</div>
-    
+    </details>
       </div>
     </details>
     
 
     <details class="match-details">
       <summary>
-        <span class="match-teams">🚀 <strong>Torino vs Como</strong></span>
+        <span class="match-teams"><span class="kickoff tbc">TBC</span>🚀 <strong>Torino vs Como</strong></span>
         <span class="badge">8 mismatches &middot; 118 streaks</span>
       </summary>
       <div class="match-body">
-        
+        <div class="ev-stat"><div class="ev-stat-name">Shots on target</div><div class="ev-row"><span class="ev-team">Torino</span><span class="ev-num">2.7</span><span class="ev-line">Over 1.5 <b>76%</b></span><span class="ev-line">Over 2.5 <b>51%</b></span><span class="ev-line">Under 3.5 <b>71%</b></span></div><div class="ev-row"><span class="ev-team">Como</span><span class="ev-num">4.3</span><span class="ev-line">Over 3.5 <b>63%</b></span><span class="ev-line">Under 4.5 <b>56%</b></span><span class="ev-line">Under 5.5 <b>73%</b></span></div><div class="ev-row"><span class="ev-team">Total</span><span class="ev-num">7.1</span><span class="ev-line">Over 6.5 <b>56%</b></span><span class="ev-line">Under 7.5 <b>59%</b></span><span class="ev-line">Under 8.5 <b>72%</b></span></div></div><div class="ev-stat"><div class="ev-stat-name">Corners</div><div class="ev-row"><span class="ev-team">Torino</span><span class="ev-num">3.5</span><span class="ev-line">Over 2.5 <b>68%</b></span><span class="ev-line">Under 3.5 <b>54%</b></span><span class="ev-line">Under 4.5 <b>73%</b></span></div><div class="ev-row"><span class="ev-team">Como</span><span class="ev-num">6.1</span><span class="ev-line">Over 5.5 <b>57%</b></span><span class="ev-line">Under 6.5 <b>59%</b></span><span class="ev-line">Under 7.5 <b>73%</b></span></div><div class="ev-row"><span class="ev-team">Total</span><span class="ev-num">9.6</span><span class="ev-line">Over 8.5 <b>62%</b></span><span class="ev-line">Under 9.5 <b>51%</b></span><span class="ev-line">Under 10.5 <b>63%</b></span></div></div><div class="ev-stat"><div class="ev-stat-name">Goals</div><div class="ev-row"><span class="ev-team">Torino</span><span class="ev-num">1.0</span><span class="ev-line">Over 0.5 <b>65%</b></span><span class="ev-line">Under 1.5 <b>72%</b></span><span class="ev-line">Under 2.5 <b>91%</b></span></div><div class="ev-row"><span class="ev-team">Como</span><span class="ev-num">1.6</span><span class="ev-line">Over 0.5 <b>80%</b></span><span class="ev-line">Under 1.5 <b>52%</b></span><span class="ev-line">Under 2.5 <b>78%</b></span></div><div class="ev-row"><span class="ev-team">Total</span><span class="ev-num">2.7</span><span class="ev-line">Over 1.5 <b>74%</b></span><span class="ev-line">Under 2.5 <b>50%</b></span><span class="ev-line">Under 3.5 <b>72%</b></span></div></div><details class="streak-details"><summary>Streak details</summary>
     <h4 class="section-heading">🔍 Mismatches Found (8)</h4>
     
     <div class="mismatch-card strength-strong">
@@ -803,7 +818,7 @@
 <div class="streak-line">&bull; 1+ goals conceded in 3 of last 5 away games (60.0%)</div>
 <div class="streak-line">&bull; 1+ goals conceded in 6 of last 10 away games (60.0%)</div>
 <div class="streak-line">&bull; 2+ goals conceded allowed in 3 of last 5 away games (60.0%)</div>
-    
+    </details>
       </div>
     </details>
     
@@ -813,18 +828,18 @@
     
 
     <div class="day-section">
-      <h2 class="day-heading">📅 Tomorrow — 2026-10-28 (Wednesday)</h2>
+      <h2 class="day-heading">📅 Tomorrow — 28/10/2026 (Wednesday)</h2>
       
     <div class="league-section">
       <h3 class="league-heading">Serie A</h3>
       
     <details class="match-details">
       <summary>
-        <span class="match-teams">🚀 <strong>Genoa vs Juventus</strong></span>
+        <span class="match-teams"><span class="kickoff tbc">TBC</span>🚀 <strong>Genoa vs Juventus</strong></span>
         <span class="badge">5 mismatches &middot; 88 streaks</span>
       </summary>
       <div class="match-body">
-        
+        <div class="ev-stat"><div class="ev-stat-name">Shots on target</div><div class="ev-row"><span class="ev-team">Genoa</span><span class="ev-num">3.4</span><span class="ev-line">Over 2.5 <b>67%</b></span><span class="ev-line">Under 3.5 <b>55%</b></span><span class="ev-line">Under 4.5 <b>74%</b></span></div><div class="ev-row"><span class="ev-team">Juventus</span><span class="ev-num">5.2</span><span class="ev-line">Over 4.5 <b>59%</b></span><span class="ev-line">Under 5.5 <b>59%</b></span><span class="ev-line">Under 6.5 <b>74%</b></span></div><div class="ev-row"><span class="ev-team">Total</span><span class="ev-num">8.6</span><span class="ev-line">Over 7.5 <b>63%</b></span><span class="ev-line">Under 8.5 <b>51%</b></span><span class="ev-line">Under 9.5 <b>64%</b></span></div><div class="ev-h2h">H2H at this venue, last 4: Genoa 3.0 &ndash; Juventus 3.5</div></div><div class="ev-stat"><div class="ev-stat-name">Corners</div><div class="ev-row"><span class="ev-team">Genoa</span><span class="ev-num">3.5</span><span class="ev-line">Over 2.5 <b>68%</b></span><span class="ev-line">Under 3.5 <b>54%</b></span><span class="ev-line">Under 4.5 <b>73%</b></span></div><div class="ev-row"><span class="ev-team">Juventus</span><span class="ev-num">4.8</span><span class="ev-line">Over 3.5 <b>71%</b></span><span class="ev-line">Over 4.5 <b>53%</b></span><span class="ev-line">Under 5.5 <b>65%</b></span></div><div class="ev-row"><span class="ev-team">Total</span><span class="ev-num">8.3</span><span class="ev-line">Over 7.5 <b>59%</b></span><span class="ev-line">Under 8.5 <b>55%</b></span><span class="ev-line">Under 9.5 <b>68%</b></span></div><div class="ev-h2h">H2H at this venue, last 4: Genoa 5.8 &ndash; Juventus 4.2</div></div><div class="ev-stat"><div class="ev-stat-name">Goals</div><div class="ev-row"><span class="ev-team">Genoa</span><span class="ev-num">1.3</span><span class="ev-line">Over 0.5 <b>72%</b></span><span class="ev-line">Under 1.5 <b>64%</b></span><span class="ev-line">Under 2.5 <b>86%</b></span></div><div class="ev-row"><span class="ev-team">Juventus</span><span class="ev-num">1.7</span><span class="ev-line">Over 0.5 <b>82%</b></span><span class="ev-line">Over 1.5 <b>51%</b></span><span class="ev-line">Under 2.5 <b>75%</b></span></div><div class="ev-row"><span class="ev-team">Total</span><span class="ev-num">3.0</span><span class="ev-line">Over 1.5 <b>80%</b></span><span class="ev-line">Over 2.5 <b>57%</b></span><span class="ev-line">Under 3.5 <b>65%</b></span></div><div class="ev-h2h">H2H at this venue, last 4: Genoa 0.8 &ndash; Juventus 1.5</div></div><details class="streak-details"><summary>Streak details</summary>
     <h4 class="section-heading">🔍 Mismatches Found (5)</h4>
     
     <div class="mismatch-card strength-strong">
@@ -986,18 +1001,18 @@
 <div class="streak-line">&bull; 5+ SOT in 3 of last 5 away games (60.0%)</div>
 <div class="streak-line">&bull; 5+ corners in 3 of last 5 away games (60.0%)</div>
 <div class="streak-line">&bull; 6+ corners in 3 of last 5 away games (60.0%)</div>
-    
+    </details>
       </div>
     </details>
     
 
     <details class="match-details">
       <summary>
-        <span class="match-teams">🚀 <strong>Milan vs Bologna</strong></span>
+        <span class="match-teams"><span class="kickoff tbc">TBC</span>🚀 <strong>Milan vs Bologna</strong></span>
         <span class="badge">12 mismatches &middot; 98 streaks</span>
       </summary>
       <div class="match-body">
-        
+        <div class="ev-stat"><div class="ev-stat-name">Shots on target</div><div class="ev-row"><span class="ev-team">Milan</span><span class="ev-num">3.7</span><span class="ev-line">Over 2.5 <b>71%</b></span><span class="ev-line">Over 3.5 <b>50%</b></span><span class="ev-line">Under 4.5 <b>69%</b></span></div><div class="ev-row"><span class="ev-team">Bologna</span><span class="ev-num">4.2</span><span class="ev-line">Over 3.5 <b>61%</b></span><span class="ev-line">Under 4.5 <b>58%</b></span><span class="ev-line">Under 5.5 <b>75%</b></span></div><div class="ev-row"><span class="ev-team">Total</span><span class="ev-num">7.9</span><span class="ev-line">Over 6.5 <b>68%</b></span><span class="ev-line">Over 7.5 <b>54%</b></span><span class="ev-line">Under 8.5 <b>60%</b></span></div><div class="ev-h2h">H2H at this venue, last 5: Milan 5.2 &ndash; Bologna 2.4</div></div><div class="ev-stat"><div class="ev-stat-name">Corners</div><div class="ev-row"><span class="ev-team">Milan</span><span class="ev-num">3.8</span><span class="ev-line">Over 2.5 <b>73%</b></span><span class="ev-line">Over 3.5 <b>53%</b></span><span class="ev-line">Under 4.5 <b>67%</b></span></div><div class="ev-row"><span class="ev-team">Bologna</span><span class="ev-num">3.0</span><span class="ev-line">Over 2.5 <b>59%</b></span><span class="ev-line">Under 3.5 <b>64%</b></span><span class="ev-line">Under 4.5 <b>81%</b></span></div><div class="ev-row"><span class="ev-team">Total</span><span class="ev-num">6.8</span><span class="ev-line">Over 5.5 <b>68%</b></span><span class="ev-line">Over 6.5 <b>53%</b></span><span class="ev-line">Under 7.5 <b>62%</b></span></div><div class="ev-h2h">H2H at this venue, last 5: Milan 5.6 &ndash; Bologna 2.4</div></div><div class="ev-stat"><div class="ev-stat-name">Goals</div><div class="ev-row"><span class="ev-team">Milan</span><span class="ev-num">1.1</span><span class="ev-line">Over 0.5 <b>66%</b></span><span class="ev-line">Under 1.5 <b>70%</b></span><span class="ev-line">Under 2.5 <b>90%</b></span></div><div class="ev-row"><span class="ev-team">Bologna</span><span class="ev-num">1.4</span><span class="ev-line">Over 0.5 <b>76%</b></span><span class="ev-line">Under 1.5 <b>58%</b></span><span class="ev-line">Under 2.5 <b>82%</b></span></div><div class="ev-row"><span class="ev-team">Total</span><span class="ev-num">2.5</span><span class="ev-line">Over 1.5 <b>72%</b></span><span class="ev-line">Under 2.5 <b>54%</b></span><span class="ev-line">Under 3.5 <b>75%</b></span></div><div class="ev-h2h">H2H at this venue, last 5: Milan 1.6 &ndash; Bologna 0.6</div></div><details class="streak-details"><summary>Streak details</summary>
     <h4 class="section-heading">🔍 Mismatches Found (12)</h4>
     
     <div class="mismatch-card strength-strong">
@@ -1254,18 +1269,18 @@
 <div class="streak-line">&bull; 4+ SOT in 3 of last 5 away games (60.0%)</div>
 <div class="streak-line">&bull; 1+ goals in 3 of last 5 away games (60.0%)</div>
 <div class="streak-line">&bull; 1+ goals conceded allowed in 3 of last 5 away games (60.0%)</div>
-    
+    </details>
       </div>
     </details>
     
 
     <details class="match-details">
       <summary>
-        <span class="match-teams">🚀 <strong>Monza vs Napoli</strong></span>
+        <span class="match-teams"><span class="kickoff tbc">TBC</span>🚀 <strong>Monza vs Napoli</strong></span>
         <span class="badge">8 mismatches &middot; 108 streaks</span>
       </summary>
       <div class="match-body">
-        
+        <div class="ev-stat"><div class="ev-stat-name">Shots on target</div><div class="ev-row"><span class="ev-team">Monza</span><span class="ev-num">2.9</span><span class="ev-line">Over 1.5 <b>79%</b></span><span class="ev-line">Over 2.5 <b>56%</b></span><span class="ev-line">Under 3.5 <b>66%</b></span></div><div class="ev-row"><span class="ev-team">Napoli</span><span class="ev-num">4.9</span><span class="ev-line">Over 3.5 <b>72%</b></span><span class="ev-line">Over 4.5 <b>54%</b></span><span class="ev-line">Under 5.5 <b>63%</b></span></div><div class="ev-row"><span class="ev-team">Total</span><span class="ev-num">7.8</span><span class="ev-line">Over 6.5 <b>66%</b></span><span class="ev-line">Over 7.5 <b>52%</b></span><span class="ev-line">Under 8.5 <b>62%</b></span></div><div class="ev-h2h">H2H at this venue, last 3: Monza 2.0 &ndash; Napoli 6.7</div></div><div class="ev-stat"><div class="ev-stat-name">Corners</div><div class="ev-row"><span class="ev-team">Monza</span><span class="ev-num">2.8</span><span class="ev-line">Over 1.5 <b>77%</b></span><span class="ev-line">Over 2.5 <b>53%</b></span><span class="ev-line">Under 3.5 <b>69%</b></span></div><div class="ev-row"><span class="ev-team">Napoli</span><span class="ev-num">4.5</span><span class="ev-line">Over 3.5 <b>65%</b></span><span class="ev-line">Under 4.5 <b>54%</b></span><span class="ev-line">Under 5.5 <b>71%</b></span></div><div class="ev-row"><span class="ev-team">Total</span><span class="ev-num">7.3</span><span class="ev-line">Over 6.5 <b>59%</b></span><span class="ev-line">Under 7.5 <b>56%</b></span><span class="ev-line">Under 8.5 <b>69%</b></span></div><div class="ev-h2h">H2H at this venue, last 3: Monza 4.3 &ndash; Napoli 7.7</div></div><div class="ev-stat"><div class="ev-stat-name">Goals</div><div class="ev-row"><span class="ev-team">Monza</span><span class="ev-num">0.7</span><span class="ev-line">Over 0.5 <b>53%</b></span><span class="ev-line">Under 1.5 <b>83%</b></span><span class="ev-line">Under 2.5 <b>96%</b></span></div><div class="ev-row"><span class="ev-team">Napoli</span><span class="ev-num">2.1</span><span class="ev-line">Over 1.5 <b>62%</b></span><span class="ev-line">Under 2.5 <b>65%</b></span><span class="ev-line">Under 3.5 <b>84%</b></span></div><div class="ev-row"><span class="ev-team">Total</span><span class="ev-num">2.8</span><span class="ev-line">Over 1.5 <b>77%</b></span><span class="ev-line">Over 2.5 <b>54%</b></span><span class="ev-line">Under 3.5 <b>69%</b></span></div><div class="ev-h2h">H2H at this venue, last 3: Monza 1.3 &ndash; Napoli 1.7</div></div><details class="streak-details"><summary>Streak details</summary>
     <h4 class="section-heading">🔍 Mismatches Found (8)</h4>
     
     <div class="mismatch-card strength-strong">
@@ -1480,18 +1495,18 @@
 <div class="streak-line">&bull; 6+ corners in 3 of last 5 away games (60.0%)</div>
 <div class="streak-line">&bull; 1+ goals allowed in 6 of last 10 away games (60.0%)</div>
 <div class="streak-line">&bull; 1+ goals conceded in 6 of last 10 away games (60.0%)</div>
-    
+    </details>
       </div>
     </details>
     
 
     <details class="match-details">
       <summary>
-        <span class="match-teams">🚀 <strong>Venezia vs Inter</strong></span>
+        <span class="match-teams"><span class="kickoff tbc">TBC</span>🚀 <strong>Venezia vs Inter</strong></span>
         <span class="badge">9 mismatches &middot; 111 streaks</span>
       </summary>
       <div class="match-body">
-        
+        <div class="ev-stat"><div class="ev-stat-name">Shots on target</div><div class="ev-row"><span class="ev-team">Venezia</span><span class="ev-num">2.9</span><span class="ev-line">Over 1.5 <b>78%</b></span><span class="ev-line">Over 2.5 <b>55%</b></span><span class="ev-line">Under 3.5 <b>68%</b></span></div><div class="ev-row"><span class="ev-team">Inter</span><span class="ev-num">5.6</span><span class="ev-line">Over 4.5 <b>65%</b></span><span class="ev-line">Under 5.5 <b>52%</b></span><span class="ev-line">Under 6.5 <b>68%</b></span></div><div class="ev-row"><span class="ev-team">Total</span><span class="ev-num">8.4</span><span class="ev-line">Over 7.5 <b>60%</b></span><span class="ev-line">Under 8.5 <b>53%</b></span><span class="ev-line">Under 9.5 <b>66%</b></span></div></div><div class="ev-stat"><div class="ev-stat-name">Corners</div><div class="ev-row"><span class="ev-team">Venezia</span><span class="ev-num">3.3</span><span class="ev-line">Over 2.5 <b>64%</b></span><span class="ev-line">Under 3.5 <b>58%</b></span><span class="ev-line">Under 4.5 <b>76%</b></span></div><div class="ev-row"><span class="ev-team">Inter</span><span class="ev-num">6.0</span><span class="ev-line">Over 5.5 <b>56%</b></span><span class="ev-line">Under 6.5 <b>60%</b></span><span class="ev-line">Under 7.5 <b>74%</b></span></div><div class="ev-row"><span class="ev-team">Total</span><span class="ev-num">9.3</span><span class="ev-line">Over 8.5 <b>59%</b></span><span class="ev-line">Under 9.5 <b>54%</b></span><span class="ev-line">Under 10.5 <b>67%</b></span></div></div><div class="ev-stat"><div class="ev-stat-name">Goals</div><div class="ev-row"><span class="ev-team">Venezia</span><span class="ev-num">0.6</span><span class="ev-line">Under 0.5 <b>53%</b></span><span class="ev-line">Under 1.5 <b>87%</b></span><span class="ev-line">Under 2.5 <b>97%</b></span></div><div class="ev-row"><span class="ev-team">Inter</span><span class="ev-num">1.9</span><span class="ev-line">Over 0.5 <b>85%</b></span><span class="ev-line">Over 1.5 <b>57%</b></span><span class="ev-line">Under 2.5 <b>70%</b></span></div><div class="ev-row"><span class="ev-team">Total</span><span class="ev-num">2.6</span><span class="ev-line">Over 1.5 <b>72%</b></span><span class="ev-line">Under 2.5 <b>53%</b></span><span class="ev-line">Under 3.5 <b>75%</b></span></div></div><details class="streak-details"><summary>Streak details</summary>
     <h4 class="section-heading">🔍 Mismatches Found (9)</h4>
     
     <div class="mismatch-card strength-strong">
@@ -1704,18 +1719,18 @@
 <div class="streak-line">&bull; 1+ goals conceded in 3 of last 5 away games (60.0%)</div>
 <div class="streak-line">&bull; 2+ goals conceded in 3 of last 5 away games (60.0%)</div>
 <div class="streak-line">&bull; 3+ goals conceded allowed in 3 of last 5 away games (60.0%)</div>
-    
+    </details>
       </div>
     </details>
     
 
     <details class="match-details">
       <summary>
-        <span class="match-teams"><strong>Parma vs Udinese</strong></span>
+        <span class="match-teams"><span class="kickoff tbc">TBC</span><strong>Parma vs Udinese</strong></span>
         <span class="badge">8 mismatches &middot; 117 streaks</span>
       </summary>
       <div class="match-body">
-        
+        <div class="ev-stat"><div class="ev-stat-name">Shots on target</div><div class="ev-row"><span class="ev-team">Parma</span><span class="ev-num">3.7</span><span class="ev-line">Over 2.5 <b>71%</b></span><span class="ev-line">Over 3.5 <b>50%</b></span><span class="ev-line">Under 4.5 <b>69%</b></span></div><div class="ev-row"><span class="ev-team">Udinese</span><span class="ev-num">4.8</span><span class="ev-line">Over 3.5 <b>70%</b></span><span class="ev-line">Over 4.5 <b>52%</b></span><span class="ev-line">Under 5.5 <b>66%</b></span></div><div class="ev-row"><span class="ev-team">Total</span><span class="ev-num">8.5</span><span class="ev-line">Over 7.5 <b>61%</b></span><span class="ev-line">Under 8.5 <b>53%</b></span><span class="ev-line">Under 9.5 <b>66%</b></span></div></div><div class="ev-stat"><div class="ev-stat-name">Corners</div><div class="ev-row"><span class="ev-team">Parma</span><span class="ev-num">5.4</span><span class="ev-line">Over 4.5 <b>62%</b></span><span class="ev-line">Under 5.5 <b>55%</b></span><span class="ev-line">Under 6.5 <b>71%</b></span></div><div class="ev-row"><span class="ev-team">Udinese</span><span class="ev-num">3.2</span><span class="ev-line">Over 2.5 <b>62%</b></span><span class="ev-line">Under 3.5 <b>61%</b></span><span class="ev-line">Under 4.5 <b>78%</b></span></div><div class="ev-row"><span class="ev-team">Total</span><span class="ev-num">8.5</span><span class="ev-line">Over 7.5 <b>62%</b></span><span class="ev-line">Under 8.5 <b>52%</b></span><span class="ev-line">Under 9.5 <b>65%</b></span></div></div><div class="ev-stat"><div class="ev-stat-name">Goals</div><div class="ev-row"><span class="ev-team">Parma</span><span class="ev-num">0.9</span><span class="ev-line">Over 0.5 <b>61%</b></span><span class="ev-line">Under 1.5 <b>76%</b></span><span class="ev-line">Under 2.5 <b>93%</b></span></div><div class="ev-row"><span class="ev-team">Udinese</span><span class="ev-num">1.9</span><span class="ev-line">Over 0.5 <b>84%</b></span><span class="ev-line">Over 1.5 <b>55%</b></span><span class="ev-line">Under 2.5 <b>71%</b></span></div><div class="ev-row"><span class="ev-team">Total</span><span class="ev-num">2.8</span><span class="ev-line">Over 1.5 <b>77%</b></span><span class="ev-line">Over 2.5 <b>53%</b></span><span class="ev-line">Under 3.5 <b>69%</b></span></div></div><details class="streak-details"><summary>Streak details</summary>
     <h4 class="section-heading">🔍 Mismatches Found (8)</h4>
     
     <div class="mismatch-card strength-solid">
@@ -1923,7 +1938,7 @@
 <div class="streak-line">&bull; 3+ goals in 3 of last 5 away games (60.0%)</div>
 <div class="streak-line">&bull; 1+ goals conceded in 3 of last 5 away games (60.0%)</div>
 <div class="streak-line">&bull; 3+ goals conceded allowed in 3 of last 5 away games (60.0%)</div>
-    
+    </details>
       </div>
     </details>
     
@@ -1933,18 +1948,18 @@
     
 
     <div class="day-section">
-      <h2 class="day-heading">📅 Day After Tomorrow — 2026-10-29 (Thursday)</h2>
+      <h2 class="day-heading">📅 Day After Tomorrow — 29/10/2026 (Thursday)</h2>
       
     <div class="league-section">
       <h3 class="league-heading">Serie A</h3>
       
     <details class="match-details">
       <summary>
-        <span class="match-teams">🚀 <strong>Fiorentina vs Atalanta</strong></span>
+        <span class="match-teams"><span class="kickoff tbc">TBC</span>🚀 <strong>Fiorentina vs Atalanta</strong></span>
         <span class="badge">9 mismatches &middot; 104 streaks</span>
       </summary>
       <div class="match-body">
-        
+        <div class="ev-stat"><div class="ev-stat-name">Shots on target</div><div class="ev-row"><span class="ev-team">Fiorentina</span><span class="ev-num">4.4</span><span class="ev-line">Over 3.5 <b>65%</b></span><span class="ev-line">Under 4.5 <b>54%</b></span><span class="ev-line">Under 5.5 <b>71%</b></span></div><div class="ev-row"><span class="ev-team">Atalanta</span><span class="ev-num">4.4</span><span class="ev-line">Over 3.5 <b>64%</b></span><span class="ev-line">Under 4.5 <b>55%</b></span><span class="ev-line">Under 5.5 <b>72%</b></span></div><div class="ev-row"><span class="ev-team">Total</span><span class="ev-num">8.8</span><span class="ev-line">Over 7.5 <b>65%</b></span><span class="ev-line">Over 8.5 <b>52%</b></span><span class="ev-line">Under 9.5 <b>61%</b></span></div><div class="ev-h2h">H2H at this venue, last 5: Fiorentina 5.2 &ndash; Atalanta 2.4</div></div><div class="ev-stat"><div class="ev-stat-name">Corners</div><div class="ev-row"><span class="ev-team">Fiorentina</span><span class="ev-num">5.2</span><span class="ev-line">Over 4.5 <b>60%</b></span><span class="ev-line">Under 5.5 <b>57%</b></span><span class="ev-line">Under 6.5 <b>73%</b></span></div><div class="ev-row"><span class="ev-team">Atalanta</span><span class="ev-num">3.9</span><span class="ev-line">Over 2.5 <b>74%</b></span><span class="ev-line">Over 3.5 <b>54%</b></span><span class="ev-line">Under 4.5 <b>66%</b></span></div><div class="ev-row"><span class="ev-team">Total</span><span class="ev-num">9.1</span><span class="ev-line">Over 8.5 <b>56%</b></span><span class="ev-line">Under 9.5 <b>58%</b></span><span class="ev-line">Under 10.5 <b>69%</b></span></div><div class="ev-h2h">H2H at this venue, last 5: Fiorentina 3.0 &ndash; Atalanta 2.6</div></div><div class="ev-stat"><div class="ev-stat-name">Goals</div><div class="ev-row"><span class="ev-team">Fiorentina</span><span class="ev-num">0.7</span><span class="ev-line">Over 0.5 <b>52%</b></span><span class="ev-line">Under 1.5 <b>83%</b></span><span class="ev-line">Under 2.5 <b>96%</b></span></div><div class="ev-row"><span class="ev-team">Atalanta</span><span class="ev-num">1.2</span><span class="ev-line">Over 0.5 <b>69%</b></span><span class="ev-line">Under 1.5 <b>68%</b></span><span class="ev-line">Under 2.5 <b>89%</b></span></div><div class="ev-row"><span class="ev-team">Total</span><span class="ev-num">1.9</span><span class="ev-line">Over 0.5 <b>85%</b></span><span class="ev-line">Over 1.5 <b>57%</b></span><span class="ev-line">Under 2.5 <b>70%</b></span></div><div class="ev-h2h">H2H at this venue, last 5: Fiorentina 1.4 &ndash; Atalanta 0.8</div></div><details class="streak-details"><summary>Streak details</summary>
     <h4 class="section-heading">🔍 Mismatches Found (9)</h4>
     
     <div class="mismatch-card strength-strong">
@@ -2182,18 +2197,18 @@
 <div class="streak-line">&bull; 5+ corners in 3 of last 5 away games (60.0%)</div>
 <div class="streak-line">&bull; 2+ goals in 3 of last 5 away games (60.0%)</div>
 <div class="streak-line">&bull; 2+ goals conceded allowed in 3 of last 5 away games (60.0%)</div>
-    
+    </details>
       </div>
     </details>
     
 
     <details class="match-details">
       <summary>
-        <span class="match-teams">🚀 <strong>Frosinone vs Lecce</strong></span>
+        <span class="match-teams"><span class="kickoff tbc">TBC</span>🚀 <strong>Frosinone vs Lecce</strong></span>
         <span class="badge">11 mismatches &middot; 127 streaks</span>
       </summary>
       <div class="match-body">
-        
+        <div class="ev-stat"><div class="ev-stat-name">Shots on target</div><div class="ev-row"><span class="ev-team">Frosinone</span><span class="ev-num">5.2</span><span class="ev-line">Over 4.5 <b>60%</b></span><span class="ev-line">Under 5.5 <b>57%</b></span><span class="ev-line">Under 6.5 <b>73%</b></span></div><div class="ev-row"><span class="ev-team">Lecce</span><span class="ev-num">3.9</span><span class="ev-line">Over 2.5 <b>75%</b></span><span class="ev-line">Over 3.5 <b>55%</b></span><span class="ev-line">Under 4.5 <b>65%</b></span></div><div class="ev-row"><span class="ev-team">Total</span><span class="ev-num">9.2</span><span class="ev-line">Over 8.5 <b>56%</b></span><span class="ev-line">Under 9.5 <b>57%</b></span><span class="ev-line">Under 10.5 <b>69%</b></span></div></div><div class="ev-stat"><div class="ev-stat-name">Corners</div><div class="ev-row"><span class="ev-team">Frosinone</span><span class="ev-num">7.7</span><span class="ev-line">Over 6.5 <b>64%</b></span><span class="ev-line">Under 7.5 <b>50%</b></span><span class="ev-line">Under 8.5 <b>64%</b></span></div><div class="ev-row"><span class="ev-team">Lecce</span><span class="ev-num">4.6</span><span class="ev-line">Over 3.5 <b>67%</b></span><span class="ev-line">Under 4.5 <b>52%</b></span><span class="ev-line">Under 5.5 <b>69%</b></span></div><div class="ev-row"><span class="ev-team">Total</span><span class="ev-num">12.2</span><span class="ev-line">Over 11.5 <b>57%</b></span><span class="ev-line">Under 12.5 <b>55%</b></span><span class="ev-line">Under 13.5 <b>66%</b></span></div></div><div class="ev-stat"><div class="ev-stat-name">Goals</div><div class="ev-row"><span class="ev-team">Frosinone</span><span class="ev-num">1.1</span><span class="ev-line">Over 0.5 <b>66%</b></span><span class="ev-line">Under 1.5 <b>70%</b></span><span class="ev-line">Under 2.5 <b>90%</b></span></div><div class="ev-row"><span class="ev-team">Lecce</span><span class="ev-num">1.6</span><span class="ev-line">Over 0.5 <b>79%</b></span><span class="ev-line">Under 1.5 <b>54%</b></span><span class="ev-line">Under 2.5 <b>79%</b></span></div><div class="ev-row"><span class="ev-team">Total</span><span class="ev-num">2.6</span><span class="ev-line">Over 1.5 <b>74%</b></span><span class="ev-line">Under 2.5 <b>51%</b></span><span class="ev-line">Under 3.5 <b>73%</b></span></div></div><details class="streak-details"><summary>Streak details</summary>
     <h4 class="section-heading">🔍 Mismatches Found (11)</h4>
     
     <div class="mismatch-card strength-strong">
@@ -2444,7 +2459,7 @@
 <div class="streak-line">&bull; 1+ goals conceded allowed in 3 of last 5 away games (60.0%)</div>
 <div class="streak-line">&bull; 1+ goals conceded allowed in 6 of last 10 away games (60.0%)</div>
 <div class="streak-line">&bull; 2+ goals conceded allowed in 3 of last 5 away games (60.0%)</div>
-    
+    </details>
       </div>
     </details>
     
