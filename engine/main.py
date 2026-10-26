@@ -23,9 +23,10 @@ into the fixture_label string and parsing it back out at render time
 correctly). See engine/output/generate_html.py for how this nested
 structure is rendered.
 
-TIMEZONE FIX: uses _today_bd() (Bangladesh, UTC+6) rather than
-date.today() (which returns the GitHub Actions runner's UTC date) -
-see that function's docstring for why this matters.
+TIMEZONE: "today" is computed in GMT+8 (China Standard Time) via
+_today_local() rather than date.today() (which returns the GitHub
+Actions runner's UTC date) - see that function's docstring for why
+this matters.
 
 MULTI-DAY WINDOW: fixture fetching covers a 3-day window (today,
 tomorrow, day after tomorrow) via OpenFootballSource's window_days
@@ -56,6 +57,7 @@ from engine.sources.openfootball_source import OpenFootballSource, LEAGUE_CODES
 from engine.sources.xgabora_match_data_source import XgaboraMatchDataSource
 from engine.output.generate_html import write_html
 from engine.streaks.analyzer import StreakAnalyzer
+from engine.streaks.expected import compute_expected
 
 logging.basicConfig(
     level=logging.INFO,
@@ -82,14 +84,15 @@ LEAGUE_DISPLAY_NAMES = {
     "ligue_1": "Ligue 1",
 }
 
-BD_TZ = timezone(timedelta(hours=6))
+LOCAL_TZ = timezone(timedelta(hours=8))  # GMT+8 (China Standard Time)
 
 
-def _today_bd() -> date:
-    """Return the current date in Bangladesh time (UTC+6), NOT the
-    system/runner's local date - see module docstring's TIMEZONE FIX.
+def _today_local() -> date:
+    """Return the current date in GMT+8, NOT the system/runner's local
+    date (GitHub Actions runs in UTC, which is 8 hours behind) - see
+    module docstring's TIMEZONE note.
     """
-    return datetime.now(BD_TZ).date()
+    return datetime.now(LOCAL_TZ).date()
 
 
 def _compute_recent_form_streaks(analyzer: StreakAnalyzer, home_team: str, away_team: str, as_of: date) -> dict:
@@ -210,11 +213,17 @@ def run(target_date: date, leagues: list = None, window_days: int = FIXTURE_WIND
                 except Exception as e:
                     logger.warning(f"[{league_name}] Recent-form computation failed for {fixture_label}: {e}")
                     recent_form = {"home": [], "away": []}
-                if recent_form["home"] or recent_form["away"]:
+                try:
+                    expected = compute_expected(analyzer, fixture.home_team, fixture.away_team, fixture.date)
+                except Exception as e:
+                    logger.warning(f"[{league_name}] Expected-value computation failed for {fixture_label}: {e}")
+                    expected = None
+                if recent_form["home"] or recent_form["away"] or expected:
                     all_recent_form[fixture_date][league][fixture_label] = {
                         "home_team": fixture.home_team,
                         "away_team": fixture.away_team,
                         **recent_form,
+                        "expected": expected,
                     }
 
     total_mismatches = sum(
@@ -270,7 +279,7 @@ def main():
     parser = argparse.ArgumentParser(description="Run the multi-league trend-surfacing dashboard")
     parser.add_argument(
         "--date", default="today",
-        help="Target date (YYYY-MM-DD) or 'today' (uses Bangladesh local date, not UTC)",
+        help="Target date (YYYY-MM-DD) or 'today' (uses GMT+8 local date, not UTC)",
     )
     parser.add_argument(
         "--leagues", default=None,
@@ -283,7 +292,7 @@ def main():
     args = parser.parse_args()
 
     if args.date == "today":
-        target_date = _today_bd()
+        target_date = _today_local()
     else:
         target_date = datetime.strptime(args.date, "%Y-%m-%d").date()
 
