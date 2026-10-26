@@ -33,6 +33,11 @@ from datetime import datetime, timezone
 from typing import Optional
 
 import config
+from engine.output.expected_html import expected_block_html, EXPECTED_CSS
+from engine.kickoff import format_kickoff, KICKOFF_CSS
+
+# How dates are shown on the page: dd/mm/yyyy. Change here to change everywhere.
+DATE_FORMAT = "%d/%m/%Y"
 
 
 def _fmt_pct(value: Optional[float]) -> str:
@@ -154,14 +159,21 @@ def _match_details_html(fixture_label: str, mismatches: list, recent_form: dict)
 
     mismatches_html = _mismatches_section_html(mismatches)
     recent_form_html = _recent_form_section_html(recent_form)
-    body = mismatches_html + recent_form_html
+    streak_body = mismatches_html + recent_form_html
+    expected_html = expected_block_html(recent_form.get("expected"))
+    if expected_html:
+        body = expected_html
+        if streak_body:
+            body += f'<details class="streak-details"><summary>Streak details</summary>{streak_body}</details>'
+    else:
+        body = streak_body
     if not body:
         body = '<div class="no-matches">No qualifying trends found for this match.</div>'
 
     return f"""
     <details class="match-details">
       <summary>
-        <span class="match-teams">{strong_icon}<strong>{fixture_label}</strong></span>
+        <span class="match-teams">{format_kickoff(recent_form.get("kickoff"))}{strong_icon}<strong>{fixture_label}</strong></span>
         <span class="badge">{badge_text}</span>
       </summary>
       <div class="match-body">
@@ -188,6 +200,15 @@ def _match_sort_key(fixture_label: str, mismatches: list) -> tuple:
     return (tier, home_team)
 
 
+def _chrono_sort_key(fixture_label: str, mismatches: list, kickoff) -> tuple:
+    """Sort matches by GMT+8 kickoff time (earliest first). Matches with
+    no known kickoff time go last, in the old strength/alphabetical order.
+    """
+    if kickoff is not None:
+        return (0, kickoff.timestamp(), fixture_label)
+    return (1,) + _match_sort_key(fixture_label, mismatches)
+
+
 def _league_section_html(league_name: str, fixtures_dict: dict, recent_form_dict: dict) -> str:
     """Render one league's fixtures for one day: a subheading followed
     by each match as a collapsed <details> block, sorted per
@@ -199,7 +220,12 @@ def _league_section_html(league_name: str, fixtures_dict: dict, recent_form_dict
     if not all_labels:
         return ""
 
-    ordered_labels = sorted(all_labels, key=lambda label: _match_sort_key(label, fixtures_dict.get(label, [])))
+    ordered_labels = sorted(
+        all_labels,
+        key=lambda label: _chrono_sort_key(
+            label, fixtures_dict.get(label, []), recent_form_dict.get(label, {}).get("kickoff"),
+        ),
+    )
 
     matches_html = "\n".join(
         _match_details_html(label, fixtures_dict.get(label, []), recent_form_dict.get(label, {}))
@@ -218,17 +244,19 @@ def _day_label(d, target_date) -> str:
     """Return a human label for a date relative to target_date: "Today",
     "Tomorrow", "Day After Tomorrow" for the first three days of the
     window, falling back to a plain weekday+date format beyond that.
+    Dates are shown as dd/mm/yyyy (see DATE_FORMAT).
     """
     offset = (d - target_date).days
     weekday = d.strftime("%A")
+    shown = d.strftime(DATE_FORMAT)
     if offset == 0:
-        return f"Today \u2014 {d.isoformat()} ({weekday})"
+        return f"Today \u2014 {shown} ({weekday})"
     elif offset == 1:
-        return f"Tomorrow \u2014 {d.isoformat()} ({weekday})"
+        return f"Tomorrow \u2014 {shown} ({weekday})"
     elif offset == 2:
-        return f"Day After Tomorrow \u2014 {d.isoformat()} ({weekday})"
+        return f"Day After Tomorrow \u2014 {shown} ({weekday})"
     else:
-        return f"{d.isoformat()} ({weekday})"
+        return f"{shown} ({weekday})"
 
 
 def _day_section_html(
@@ -481,6 +509,7 @@ def generate_html(
     color: var(--text-dim);
     margin: 2px 0 2px 12px;
   }}
+{EXPECTED_CSS}{KICKOFF_CSS}
 </style>
 </head>
 <body>
