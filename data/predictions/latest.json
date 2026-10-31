@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-10-31T10:17:23.532539",
-  "target_date": "2026-10-31",
+  "generated_at": "2026-10-31T16:44:05.170381",
+  "target_date": "2026-11-01",
   "window_days": 2,
-  "fixture_count": 45,
-  "total_mismatches": 400
+  "fixture_count": 24,
+  "total_mismatches": 203
 }
