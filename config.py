@@ -66,3 +66,30 @@ MISMATCH_MIN_PERCENTAGE = 0.60
 # Minimum number of matches with usable data a streak must have before
 # it's considered reliable enough to contribute to a mismatch.
 MISMATCH_MIN_WINDOW = 5
+
+# ---------------------------------------------------------------------------
+# Match data layer (engine/data/) - football-data.co.uk + ESPN
+# ---------------------------------------------------------------------------
+# One CSV per league lives here and is committed by the update workflow, so
+# the ESPN-only stats (offsides) accumulate over time instead of being
+# re-fetched.
+MATCH_DATA_DIR = "data/matches"
+
+# Seasons of football-data.co.uk history kept per league (current + N back).
+DATA_SEASONS_BACK = 5
+
+# ESPN is the only free source of offsides. It needs one request per match,
+# so it is only used for the most recent seasons (current + N-1 back).
+OFFSIDES_SEASONS = 2
+
+# Max ESPN HTTP requests per run (scoreboard + summary). The daily run needs
+# a few dozen; the first backfill is spread over several runs.
+ESPN_REQUEST_BUDGET = 600
+
+# A match ESPN could not supply data for is retried this many times, then
+# left alone (avoids wasting the budget on matches ESPN does not have).
+ESPN_MAX_TRIES = 2
+
+# Days back from today always re-checked on ESPN (catches matches that
+# football-data.co.uk has not posted yet).
+ESPN_RECENT_DAYS = 10
