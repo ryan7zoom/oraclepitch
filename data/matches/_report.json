@@ -1,0 +1,104 @@
+{
+  "run_at": "2026-11-21T22:48:22.468473+00:00",
+  "epl": {
+    "errors": [],
+    "budget_exhausted": true,
+    "espn_filled": 447,
+    "espn_created": 7,
+    "unmatched_espn_names": [],
+    "rows_total": 2007,
+    "latest_match": "2026-11-21",
+    "coverage_last_2_seasons_pct": {
+      "ft_h": 100.0,
+      "ht_h": 100.0,
+      "sh_h": 100.0,
+      "sot_h": 100.0,
+      "co_h": 100.0,
+      "yc_h": 100.0,
+      "rc_h": 100.0,
+      "of_h": 93.2
+    },
+    "offsides_missing_last_2_seasons": 33
+  },
+  "la_liga": {
+    "errors": [],
+    "budget_exhausted": true,
+    "espn_filled": 0,
+    "espn_created": 0,
+    "unmatched_espn_names": [],
+    "rows_total": 2019,
+    "latest_match": "2026-11-08",
+    "coverage_last_2_seasons_pct": {
+      "ft_h": 100.0,
+      "ht_h": 100.0,
+      "sh_h": 100.0,
+      "sot_h": 100.0,
+      "co_h": 100.0,
+      "yc_h": 100.0,
+      "rc_h": 100.0,
+      "of_h": 0.0
+    },
+    "offsides_missing_last_2_seasons": 499
+  },
+  "bundesliga": {
+    "errors": [],
+    "budget_exhausted": true,
+    "espn_filled": 0,
+    "espn_created": 0,
+    "unmatched_espn_names": [],
+    "rows_total": 1611,
+    "latest_match": "2026-11-08",
+    "coverage_last_2_seasons_pct": {
+      "ft_h": 100.0,
+      "ht_h": 100.0,
+      "sh_h": 100.0,
+      "sot_h": 100.0,
+      "co_h": 100.0,
+      "yc_h": 100.0,
+      "rc_h": 100.0,
+      "of_h": 0.0
+    },
+    "offsides_missing_last_2_seasons": 387
+  },
+  "serie_a": {
+    "errors": [],
+    "budget_exhausted": true,
+    "espn_filled": 0,
+    "espn_created": 0,
+    "unmatched_espn_names": [],
+    "rows_total": 2010,
+    "latest_match": "2026-11-08",
+    "coverage_last_2_seasons_pct": {
+      "ft_h": 100.0,
+      "ht_h": 100.0,
+      "sh_h": 100.0,
+      "sot_h": 100.0,
+      "co_h": 100.0,
+      "yc_h": 100.0,
+      "rc_h": 100.0,
+      "of_h": 0.0
+    },
+    "offsides_missing_last_2_seasons": 490
+  },
+  "ligue_1": {
+    "errors": [],
+    "budget_exhausted": true,
+    "espn_filled": 0,
+    "espn_created": 0,
+    "unmatched_espn_names": [],
+    "rows_total": 1768,
+    "latest_match": "2026-11-08",
+    "coverage_last_2_seasons_pct": {
+      "ft_h": 100.0,
+      "ht_h": 100.0,
+      "sh_h": 100.0,
+      "sot_h": 100.0,
+      "co_h": 100.0,
+      "yc_h": 100.0,
+      "rc_h": 100.0,
+      "of_h": 0.0
+    },
+    "offsides_missing_last_2_seasons": 396
+  },
+  "_espn_requests_used": 600
+}
