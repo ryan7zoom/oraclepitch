@@ -1,0 +1,22 @@
+name: Source check (one-off test)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Test data sources
+        run: python scripts/source_check.py
+      - name: Save full report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: source-check-report
+          path: source_check_report.json
