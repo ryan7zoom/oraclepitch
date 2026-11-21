@@ -140,36 +140,55 @@ def stat_lookup(team_block):
     return {s.get("name"): s.get("displayValue") for s in team_block.get("statistics", [])}
 
 
+def espn_day(slug, day):
+    """One day's scoreboard. Returns (status, body_start, events)."""
+    r = get(f"{ESPN_BASE}/{slug}/scoreboard?dates={day:%Y%m%d}")
+    if r.status_code != 200:
+        return r.status_code, r.text[:200], []
+    return 200, "", r.json().get("events", [])
+
+
 def check_espn(league, slug):
+    """v2: one request per day (the range query returned 400 in the first
+    test), walking back up to 21 days to collect finished matches."""
     res = {}
     try:
-        d1, d0 = today, today - timedelta(days=14)
-        url = f"{ESPN_BASE}/{slug}/scoreboard?dates={d0:%Y%m%d}-{d1:%Y%m%d}&limit=200"
-        r = get(url)
-        res["scoreboard_status"] = r.status_code
-        if r.status_code != 200:
+        finished = []
+        first_error = None
+        for back in range(0, 22):
+            day = today - timedelta(days=back)
+            status, body, events = espn_day(slug, day)
+            if status != 200:
+                first_error = first_error or (status, body, day.isoformat())
+                if back == 0:
+                    break  # same failure would repeat for every day
+                continue
+            for e in events:
+                if e.get("status", {}).get("type", {}).get("completed"):
+                    finished.append(e)
+        res["scoreboard_status"] = 200 if not first_error else first_error[0]
+        if first_error:
+            res["error_body"] = first_error[1]
+            res["error_day"] = first_error[2]
             return res
-        events = r.json().get("events", [])
-        done = [e for e in events if e.get("status", {}).get("type", {}).get("completed")]
-        res["events_14d"] = len(events)
-        res["finished_14d"] = len(done)
-        if not done:
+        res["finished_21d"] = len(finished)
+        if not finished:
             return res
-        ev = sorted(done, key=lambda e: e.get("date", ""))[-1]
+        finished.sort(key=lambda e: e.get("date", ""))
+        res["latest_finished_date"] = finished[-1].get("date")
+        ev = finished[-1]
         res["sample_match"] = ev.get("name")
-        res["sample_date"] = ev.get("date")
         comp = ev["competitions"][0]
         res["linescores"] = {c["homeAway"]: [ls.get("value") for ls in c.get("linescores", [])]
                              for c in comp.get("competitors", [])}
-
         r2 = get(f"{ESPN_BASE}/{slug}/summary?event={ev['id']}")
         res["summary_status"] = r2.status_code
         if r2.status_code != 200:
+            res["error_body"] = r2.text[:200]
             return res
         teams = r2.json().get("boxscore", {}).get("teams", [])
         res["teams_in_boxscore"] = len(teams)
-        found = {}
-        names_seen = set()
+        found, names_seen = {}, set()
         for t in teams:
             stats = stat_lookup(t)
             names_seen.update(k for k in stats if k)
@@ -192,17 +211,20 @@ for league, c in LEAGUES.items():
     res = check_espn(league, c["espn"])
     report["espn"][league] = res
     if res.get("error") or res.get("scoreboard_status") != 200:
-        out(f"[{league}] FAILED: {res.get('scoreboard_status')} {res.get('error', '')}")
+        out(f"[{league}] FAILED: status={res.get('scoreboard_status')} {res.get('error', '')} "
+            f"body={res.get('error_body', '')!r}")
         continue
-    out(f"[{league}] events(14d)={res.get('events_14d')} finished={res.get('finished_14d')}  "
-        f"sample='{res.get('sample_match')}'")
+    fd_latest = report["football_data"].get(league, {}).get("latest_match")
+    out(f"[{league}] finished(21d)={res.get('finished_21d')}  "
+        f"latest_finished={res.get('latest_finished_date')}  "
+        f"(football-data latest: {fd_latest})  sample='{res.get('sample_match')}'")
     if "found" in res:
         for label in ESPN_STATS:
             v = res["found"].get(label)
             out(f"    {label:16} {'ok   ' + str(v) if v else 'MISSING'}")
         out(f"    half-by-half linescores: {res.get('linescores')}")
     else:
-        out(f"    summary status: {res.get('summary_status')}")
+        out(f"    summary status: {res.get('summary_status')} {res.get('error_body', '')!r}")
 
 # ---------------------------------------------------------------------------
 # 3. Sofascore (information only)
@@ -228,7 +250,11 @@ out(f"football-data.co.uk reachable: {len(fd_ok)}/5 leagues")
 out(f"ESPN match stats reachable:    {len(espn_ok)}/5 leagues")
 fresh = [l for l in fd_ok if (report["football_data"][l].get("days_behind") or 99) <= 7]
 out(f"football-data.co.uk fresh (<=7 days): {len(fresh)}/{len(fd_ok)}")
-out("(days_behind can be large during international breaks - read it with that in mind.)")
+out("FRESHNESS: compare 'latest_finished' (ESPN) with 'football-data latest' above.")
+out("If ESPN's date is later than football-data's, football-data is lagging.")
+out("If they match, the gap is just a break in the calendar.")
+off = [l for l, r in report["espn"].items() if r.get("found", {}).get("offsides")]
+out(f"Offsides available (ESPN): {len(off)}/5 leagues")
 
 with open("source_check_report.json", "w") as f:
     json.dump(report, f, indent=2)
