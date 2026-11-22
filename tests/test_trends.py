@@ -357,12 +357,45 @@ class TestFixturesAndPage(unittest.TestCase):
             out = run(date(2026, 11, 22), 0, FakeScoreboardEspn(board), tmp,
                       os.path.join(tmp, "t.json"), os.path.join(tmp, "index.html"), now=self.NOW)
             self.assertEqual(len(out["fixtures"]), 1)
-            html = open(os.path.join(tmp, "index.html"), encoding="utf-8").read()
+            with open(os.path.join(tmp, "index.html"), encoding="utf-8") as fh:
+                html = fh.read()
             self.assertIn("A v B", html)
             self.assertIn("21:00", html)                      # 13:00 UTC shown in GMT+8
             self.assertIn("A to win", html)
-            saved = json.load(open(os.path.join(tmp, "t.json")))
+            with open(os.path.join(tmp, "t.json"), encoding="utf-8") as fh:
+                saved = json.load(fh)
             self.assertEqual(saved["fixtures"][0]["home"], "A")
+
+    def test_name_aliases_from_real_run_resolve(self):
+        from engine.data.teams import TeamResolver
+        bl = TeamResolver("bundesliga", {"FC Koln", "Hamburg", "Dortmund"})
+        self.assertEqual(bl.resolve("FC Cologne"), "FC Koln")
+        self.assertEqual(bl.resolve("Hamburger SV"), "Hamburg")
+        self.assertEqual(bl.resolve("Borussia Dortmund"), "Dortmund")
+        for canon in ("La Coruna", "Deportivo"):                    # whichever spelling the data uses
+            self.assertEqual(TeamResolver("la_liga", {canon, "Barcelona"}).resolve("Deportivo"), canon)
+        self.assertIsNone(TeamResolver("la_liga", {"Barcelona"}).resolve("Deportivo"))   # never invented
+
+    def test_display_names_on_page_but_canonical_in_data(self):
+        from engine.trends.names import display
+        from engine.trends.page import render_page
+        self.assertEqual(display("Ath Madrid"), "Atlético Madrid")
+        self.assertEqual(display("Barcelona"), "Barcelona")
+        f = {"league": "la_liga", "date": "2026-11-22", "kickoff": None, "home": "Ath Madrid",
+             "away": "Celta", "raw_trend_count": 0, "bets": []}
+        html = render_page({"fixtures": [f], "skipped": []}, self.NOW)
+        self.assertIn("Atlético Madrid v Celta Vigo", html)
+
+    def test_page_light_default_with_dark_toggle_and_skipped_note(self):
+        from engine.trends.page import render_page
+        html = render_page({"fixtures": [], "skipped": [{"league": "epl", "home": "X", "away": "Y",
+                                                         "reason": "team name not matched"}]},
+                           self.NOW, {"epl": "2026-11-21"})
+        self.assertIn('id="theme"', html)
+        self.assertIn("Dark mode", html)
+        self.assertNotIn("prefers-color-scheme", html)            # light unless the button is clicked
+        self.assertIn("21/11/2026", html)
+        self.assertIn("Not shown (team name not matched): X v Y", html)
 
     def test_page_escapes_and_handles_no_fixtures(self):
         from engine.trends.page import render_page
