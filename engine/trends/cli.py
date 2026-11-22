@@ -33,7 +33,7 @@ def _d(s: str) -> date:
 def print_fixture(fx: Fixture, trends, group=None, raw=False, per_bet=6) -> None:
     from engine.trends.select import select_bets
     print(f"\n{fx.home} v {fx.away}  ({S.LEAGUE_LABELS.get(fx.league, fx.league)}, {fx.date})")
-    if raw:                                   # every trend that passed the streak rule
+    if raw:                                   # every trend that passed the hit-rate rule (chalk included)
         by_group = defaultdict(lambda: defaultdict(list))
         for t in trends:
             by_group[t.group][t.bet].append(t)
@@ -43,8 +43,9 @@ def print_fixture(fx: Fixture, trends, group=None, raw=False, per_bet=6) -> None
             print(f"\n== {S.GROUP_LABELS[g].upper()} (raw) ==")
             for bet, ts in by_group[g].items():
                 print(bet)
-                for t in sorted(ts, key=lambda t: (t.p, -t.window))[:per_bet]:
-                    print(f"    {t.text}   [p={t.p:.1e}]")
+                for t in sorted(ts, key=lambda t: (-t.hits / t.window, -t.window))[:per_bet]:
+                    mp = f"{t.model_p:.0%}" if t.model_p is not None else "n/a"
+                    print(f"    {t.hits}/{t.window}  {t.text}   [model {mp}]")
         return
     bets = select_bets(trends)
     if not bets:
@@ -60,10 +61,10 @@ def print_fixture(fx: Fixture, trends, group=None, raw=False, per_bet=6) -> None
                 continue
             print(f"\n== {S.GROUP_LABELS[g].upper()} ==")
             for b in gb:
-                tail = f"   [league avg {b.base_rate:.0%}]" if b.base_rate is not None else ""
+                tail = f"   [fair line ~ {b.fair:.1f}]" if b.fair is not None else ""
                 print(f"{b.label}{tail}")
                 for t in b.trends:
-                    print(f"    {t.text}")
+                    print(f"    {t.hits}/{t.window}  {t.text}")
 
 
 def main() -> None:

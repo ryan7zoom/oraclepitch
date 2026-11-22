@@ -2,7 +2,7 @@
 engine/trends/engine.py
 
 TrendEngine: reads the match history (data/matches/<league>.csv) and, for one
-upcoming fixture, returns every trend that passes the streak rule.
+upcoming fixture, returns every trend that holds up as "hits/games".
 
 For fixture HOME v AWAY it looks at, for each team:
     form_all   all of the team's league games
@@ -11,16 +11,16 @@ For fixture HOME v AWAY it looks at, for each team:
     h2h_venue  meetings at this venue (HOME at home v AWAY)
 and for every market in the catalogue (win, half wins, double chance, goals,
 conceded, BTTS, corners, yellow cards, shots, shots on target, offsides; total
-and per team; over AND under for a range of lines) keeps the longest
-"N of last M" window that passes engine.trends.rules.
+and per team; over AND under for a range of lines) keeps one fixed window per
+scope (see engine.trends.rules).
 
 Only games BEFORE the fixture date are used. Unknown stats (None) are skipped,
 never counted as zero or as a miss.
 
-Noise control: the base rate - how often the event happens in the league
-anyway (last 3 seasons). Near-certain events (>= MAX_BASE_RATE) are dropped, and
-the rate plus a luck probability `p` is attached to every trend. This module
-returns ALL qualifying trends; engine/trends/select.py picks the few that matter.
+Chalk control: the fair-line model (engine.trends.fair) gives every trend the
+probability of the bet it supports and, for count bets, the fair line. This module
+returns ALL qualifying trends with those numbers attached;
+engine/trends/select.py drops the chalk and picks what to show.
 """
 
 import os
@@ -33,8 +33,9 @@ from engine.data.model import Match
 from engine.data.store import Store
 from engine.trends import settings as S
 from engine.trends.names import display as D
+from engine.trends.fair import FairModel, bet_probability
 from engine.trends.markets import Market, SeqData, build_catalog, market_flags
-from engine.trends.rules import find_window, tail_p
+from engine.trends.rules import pick_window
 from engine.trends.text import about_side, bet_label, trend_text
 
 SCOPE_ORDER = {"form_all": 0, "form_home": 1, "form_away": 1, "h2h_all": 2, "h2h_venue": 3}
@@ -68,19 +69,20 @@ class Trend:
     hits: int
     window: int
     misses: int
-    base_rate: Optional[float]   # how often this happens in the league anyway (0-1)
     skipped_unknown: int         # games with unknown data skipped inside the window
     text: str
-    p: float = 1.0               # chance of a streak this good by luck (league rate); small = unusual
+    model_p: Optional[float] = None   # fair-line model: chance the bet lands in THIS match (None = no model)
+    fair: Optional[float] = None      # fair line (expected count) for count bets
     bet_key: str = ""            # same bet => same key ("allowed" trends merge into the other team's bet)
     role: str = ""               # for | against (team bets) ; home | away (total / BTTS bets)
     target_kind: str = ""        # kind of the bet this trend supports (result | team | total | btts)
 
     def to_dict(self) -> dict:
         d = asdict(self)
-        if d["base_rate"] is not None:
-            d["base_rate"] = round(d["base_rate"], 3)
-        d["p"] = float(f"{d['p']:.3g}")
+        if d["model_p"] is not None:
+            d["model_p"] = round(d["model_p"], 3)
+        if d["fair"] is not None:
+            d["fair"] = round(d["fair"], 2)
         return d
 
 
@@ -102,7 +104,7 @@ class TrendEngine:
                 idx[m.home].append(m)
                 idx[m.away].append(m)
             self.by_team[league] = idx
-        self._base: Dict[str, dict] = {}
+        self._fair: Dict[tuple, FairModel] = {}
 
     @classmethod
     def from_dir(cls, directory: str, leagues=None) -> "TrendEngine":
@@ -118,39 +120,18 @@ class TrendEngine:
     def teams(self, league: str):
         return sorted(self.by_team.get(league, {}))
 
-    # ---- base rates ------------------------------------------------------
-    def _base_table(self, league: str) -> dict:
-        if league not in self._base:
-            ms = self.league_matches.get(league, [])
-            tab = {}
-            if ms:
-                latest = max(m.season for m in ms)
-                sample = [m for m in ms if m.season > latest - S.BASE_RATE_SEASONS]
-                for side in ("home", "away"):
-                    sd = SeqData([(m, side) for m in sample])
-                    d = {}
-                    for mk in self.markets:
-                        known = [f for f in market_flags(mk, sd) if f is not None]
-                        d[mk.key] = (sum(known), len(known))
-                    tab[side] = d
-            self._base[league] = tab
-        return self._base[league]
-
-    def base_rate(self, league: str, side_key: str, key: str) -> Optional[float]:
-        tab = self._base_table(league)
-        if not tab:
-            return None
-        if side_key == "both":
-            h = tab["home"][key][0] + tab["away"][key][0]
-            k = tab["home"][key][1] + tab["away"][key][1]
-        else:
-            h, k = tab[side_key][key]
-        return h / k if k >= S.MIN_BASE_SAMPLE else None
+    # ---- fair-line model -------------------------------------------------
+    def fair_model(self, league: str, as_of: date) -> FairModel:
+        key = (league, as_of)
+        if key not in self._fair:
+            self._fair[key] = FairModel(self.league_matches.get(league, []), as_of)
+        return self._fair[key]
 
     # ---- main entry point ------------------------------------------------
     def trends_for_fixture(self, fx: Fixture) -> List[Trend]:
         found: List[Trend] = []
         history = self.by_team.get(fx.league, {})
+        expect = self.fair_model(fx.league, fx.date).expect(fx.home, fx.away)
         for subject, side, opp in ((fx.home, "home", fx.away), (fx.away, "away", fx.home)):
             games = [(m, "home" if m.home == subject else "away")
                      for m in history.get(subject, []) if m.date < fx.date]
@@ -158,35 +139,36 @@ class TrendEngine:
                 continue
             h2h = [g for g in games if opp in (g[0].home, g[0].away)]
             scopes = {
-                "form_all": games,
-                f"form_{side}": [g for g in games if g[1] == side],
-                "h2h_all": h2h,
-                "h2h_venue": [g for g in h2h if g[0].home == fx.home],
+                "form_all": (games, S.FORM_WINDOWS),
+                f"form_{side}": ([g for g in games if g[1] == side], S.FORM_WINDOWS),
+                "h2h_all": (h2h, S.H2H_WINDOWS),
+                "h2h_venue": ([g for g in h2h if g[0].home == fx.home], S.H2H_VENUE_WINDOWS),
             }
-            for scope, seq in scopes.items():
-                if len(seq) < S.MIN_WINDOW:
+            for scope, (seq, windows) in scopes.items():
+                seq = seq[:S.MAX_SEQ]
+                if len(seq) < windows[0]:
                     continue
                 sd = SeqData(seq)
                 for mk in self.markets:
                     # totals/BTTS are identical for both teams' head-to-head: do it once
                     if mk.shared and scope.startswith("h2h") and side != "home":
                         continue
-                    w = find_window(market_flags(mk, sd))
+                    w = pick_window(market_flags(mk, sd), windows)
                     if w is None:
-                        continue
-                    base = self.base_rate(fx.league, _side_key(scope, side), mk.key)
-                    if base is not None and base >= S.MAX_BASE_RATE:
                         continue
                     about = about_side(mk, side)
                     about_name = fx.home if about == "home" else fx.away
+                    fair = None
+                    if expect is not None and mk.line is not None and mk.kind != "result":
+                        fair = expect.mu(mk.stat, about)
                     found.append(Trend(
                         league=fx.league, home=fx.home, away=fx.away, group=mk.group,
                         market=mk.key, bet=bet_label(mk, D(about_name)), about=about,
                         subject=subject, scope=scope, stat=mk.stat, kind=mk.kind,
                         direction=mk.direction, line=mk.line, hits=w.hits, window=w.size,
-                        misses=w.misses, base_rate=base, skipped_unknown=w.skipped,
+                        misses=w.misses, skipped_unknown=w.skipped,
                         text=trend_text(mk, D(subject), D(opp), side, scope, w.hits, w.size, fx.league),
-                        p=tail_p(w.size, w.hits, base),
+                        model_p=bet_probability(expect, mk, about), fair=fair,
                         bet_key=f"{mk.target_key}|{about}",
                         role=side if mk.shared else ("against" if mk.kind == "against" else "for"),
                         target_kind=mk.target_kind,

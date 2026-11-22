@@ -28,6 +28,9 @@ h1{margin:0;font-size:34px;line-height:1.15;font-weight:800;letter-spacing:-.01e
 #theme{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:10px 18px;border-radius:999px;
 cursor:pointer;font:inherit;font-size:16px;white-space:nowrap;box-shadow:var(--shadow)}
 .banner{margin:14px 0 10px;padding:16px 20px;border-radius:14px;background:var(--banner);color:var(--banner-ink);font-size:17px}
+.stale{display:none;margin-left:8px;font-weight:800;color:#b42318}
+.stale.on{display:inline}
+:root[data-theme=dark] .stale{color:#fda29b}
 .note{color:var(--mute);margin:0 0 16px;font-size:16px}
 details.card{background:var(--card);border:1px solid var(--line);border-radius:14px;margin:12px 0;box-shadow:var(--shadow);overflow:hidden}
 details.fx{border-left:5px solid var(--accent)}
@@ -70,9 +73,14 @@ var r=document.documentElement,b=document.getElementById('theme');
 function lab(){b.textContent=r.getAttribute('data-theme')==='dark'?'\\u2600 Light mode':'\\u263E Dark mode'}
 b.onclick=function(){var n=r.getAttribute('data-theme')==='dark'?'light':'dark';r.setAttribute('data-theme',n);
 try{localStorage.setItem('op-theme',n)}catch(e){}lab()};lab();
-var ago=document.getElementById('ago');
-if(ago){var h=Math.floor((Date.now()-Date.parse(ago.dataset.ts))/36e5);
-ago.textContent=h<1?'less than an hour ago':h===1?'1 hour ago':h<48?h+' hours ago':Math.floor(h/24)+' days ago'}
+var ago=document.getElementById('ago'),stale=document.getElementById('stale');
+function agoText(){var m=Math.max(0,Math.floor((Date.now()-Date.parse(ago.dataset.ts))/6e4));
+if(m<1)return 'just now';if(m<60)return m+' min ago';
+var h=Math.floor(m/60),r=m%60;if(h<48)return h+(h===1?' hour ':' hours ')+(r?r+' min ':'')+'ago';
+return Math.floor(h/24)+' days ago'}
+function tick(){if(!ago)return;ago.textContent=agoText();
+if(stale)stale.classList.toggle('on',(Date.now()-Date.parse(ago.dataset.ts))/36e5>=parseFloat(stale.dataset.hours))}
+tick();setInterval(tick,30000);
 var league='all',q='';
 function apply(){
 document.querySelectorAll('details.fx').forEach(function(e){
@@ -97,8 +105,9 @@ def _kick(f):
 
 
 def _bet_html(b) -> str:
-    avg = (f'<span class="avg" title="How often this happens in the league anyway">'
-           f'league avg {b["base_rate"]:.0%}</span>') if b.get("base_rate") is not None else ""
+    avg = (f'<span class="avg" title="Expected value for this match from both teams\' strength and the '
+           f'opponent\'s level. Bookmaker lines sit near this number.">fair line &asymp; {b["fair"]:g}</span>'
+           ) if b.get("fair") is not None else ""
     rows = "".join(
         f'<div class="tr"><span class="hit" title="happened in {t["hits"]} of the last {t["window"]} games">'
         f'{t["hits"]}/{t["window"]}</span><span>{escape(t["text"])}</span></div>' for t in b["trends"])
@@ -183,14 +192,16 @@ def render_page(report: dict, generated_at: datetime, data_through: dict = None)
 <script>{HEAD_JS}</script><style>{CSS}</style></head>
 <body><div class="wrap">
 <div class="top"><h1>OraclePitch</h1><button id="theme" type="button">&#9790; Dark mode</button></div>
-<div class="banner">Trends built {gen:%d/%m/%Y %H:%M} (GMT+8){played}. Updated <span id="ago" data-ts="{generated_at.astimezone(timezone.utc).isoformat()}"></span>.</div>
+<div class="banner">Trends built {gen:%d/%m/%Y %H:%M} (GMT+8){played}. Updated <span id="ago" data-ts="{generated_at.astimezone(timezone.utc).isoformat()}"></span>.<span id="stale" class="stale" data-hours="{S.STALE_AFTER_HOURS}">&#9888; Data is more than {S.STALE_AFTER_HOURS} hours old - the update may have failed.</span></div>
 <p class="note">Streaks from league games only, for the next few days of EPL, La Liga, Bundesliga, Serie A and Ligue 1.
-Not predictions or betting advice.</p>
+Lines the match is almost certain to clear are left out. Not predictions or betting advice.</p>
 <details class="card"><summary><span class="ttl">Filters &middot; {n_fx} match{"es" if n_fx != 1 else ""}</span></summary>
 <div class="chips">{chips}<input id="search" type="search" placeholder="Search team"></div></details>
 {''.join(parts)}
 {skipped_html}
-<div class="foot">Each line reads "hits/games": 15/16 means it happened in 15 of the last 16 qualifying games.
-"League avg" is how often it happens in that league anyway - a streak means more when that number is low.
+<div class="foot">Each line reads "hits/games": 9/12 means it happened in 9 of the last 12 qualifying games.
+"Fair line" is the number the model expects for this match, from each team's recent form and the opponent's level
+(a team's attack is raised against a defence that allows a lot, and lowered against one that allows little).
+Lines too easy to clear are hidden; each ladder lists up to three lines, best hit rate first.
 Streaks can happen by chance; use your own judgment.</div>
 </div><script>{JS}</script></body></html>"""

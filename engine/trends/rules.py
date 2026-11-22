@@ -1,62 +1,52 @@
 """
 engine/trends/rules.py
 
-The streak-selection rule (see settings.py for how it was inferred).
+How one trend row is chosen: a FIXED-size sample, reported as "hits/games".
 
-find_window() takes a list of flags, NEWEST GAME FIRST:
+pick_window() takes a list of flags, NEWEST GAME FIRST:
     True  = the event happened in that game
     False = it did not
     None  = the stat is unknown for that game (skipped, never counted as a miss)
-and returns the longest window "N of last M" that passes, or None.
+and returns the window to show, or None.
+
+The windows are fixed (settings.FORM_WINDOWS, e.g. 8, 10, 12, 15, 20, 30 games), so
+a trend is never "the stretch that happens to look best". Of the windows that fit
+the available games, the longest one with a hit rate of at least GOOD_HIT_RATE
+(70%) wins; if none reaches that, the longest one with at least MIN_HIT_RATE
+(5/8) is used.
 """
 
 from dataclasses import dataclass
-from math import comb
-from typing import List, Optional
+from typing import List, Optional, Sequence
 
 from engine.trends import settings as S
 
 
 @dataclass(frozen=True)
 class Window:
-    size: int        # M  in "N of last M"
-    hits: int        # N
-    skipped: int     # games with unknown data that were skipped inside the window
+    size: int        # games in the sample
+    hits: int        # games where it happened
+    skipped: int = 0     # games with unknown data that were skipped on the way
 
     @property
     def misses(self) -> int:
         return self.size - self.hits
 
-
-def allowed_misses(size: int) -> int:
-    for upto, misses in S.MISS_TIERS:
-        if size <= upto:
-            return misses
-    return S.MISS_CAP
+    @property
+    def rate(self) -> float:
+        return self.hits / self.size
 
 
-def passes(size: int, hits: int) -> bool:
-    return size >= S.MIN_WINDOW and size - hits <= allowed_misses(size)
-
-
-def find_window(flags: List[Optional[bool]]) -> Optional[Window]:
-    size = hits = skipped = 0
-    best = None
-    for f in flags:
-        if f is None:
-            skipped += 1
-            continue
-        if size >= S.MAX_WINDOW:
+def pick_window(flags: List[Optional[bool]], windows: Sequence[int]) -> Optional[Window]:
+    known = [f for f in flags if f is not None]
+    good = floor = None
+    for size in windows:
+        if size > len(known):
             break
-        size += 1
-        hits += 1 if f else 0
-        if f and passes(size, hits):          # oldest game of the window must be a hit
-            best = Window(size, hits, skipped)
-    return best
-
-
-def tail_p(size: int, hits: int, base: Optional[float]) -> float:
-    """Chance of >= `hits` hits in `size` games if the event happens with
-    probability `base` every game (the league-wide rate). Small = unusual."""
-    b = min(max(0.5 if base is None else base, 0.01), 0.99)
-    return min(1.0, sum(comb(size, k) * b ** k * (1 - b) ** (size - k) for k in range(hits, size + 1)))
+        hits = sum(known[:size])
+        rate = hits / size
+        if rate >= S.GOOD_HIT_RATE:
+            good = Window(size, hits)
+        if rate >= S.MIN_HIT_RATE:
+            floor = Window(size, hits)
+    return good or floor

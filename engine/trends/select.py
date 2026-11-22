@@ -1,32 +1,36 @@
 """
 engine/trends/select.py
 
-Turns the raw trend list of a fixture into the few BETS worth showing,
-shaped like the reference page: one bet = one line (e.g. "Total corners
-Under 13.5"), with every trend that supports that exact line listed under it.
+Turns the raw trend list of a fixture into the BETS worth showing.
 
-Two kinds of bet, shown in two sections:
+  1. CHALK IS REMOVED. Every trend carries the fair-line model's chance for the bet it
+     supports (engine/trends/fair.py). Above settings.CHALK_MAX_P the bet is dropped: a
+     line that lands that often is one a bookmaker will not offer or prices at nothing.
+     Below settings.MIN_MODEL_P it is dropped too: the matchup says it is a long shot, so
+     a streak behind it is more likely a fluke than a pattern.
 
-  MATCHING - both sides line up. Team A's own streak and the opponent's
-  "allowed" streak back the same line (Juventus score / Venezia concede;
-  Juventus 5+ shots on target / Venezia allow 5+). For totals and BTTS: both
-  teams' own form backs the same line. Each side must pass the streak rule on
-  its own (form games only - head-to-head lines are the same games seen from
-  both teams, so they cannot count as a second opinion) with luck-probability
-  <= MATCH_P, and the two probabilities are multiplied (different teams'
-  games): the product must be <= MATCH_JOINT_P.
+  2. One bet = one line (e.g. "Juventus shots Over 17.5") with the trends behind it,
+     each shown as hits/games.
 
-  GENERAL - one strong streak (p <= MAX_P). Per team/scope/stat/direction only
-  the most unusual line is kept, which removes the pile of overlapping lines.
+  3. Lines of the same team / stat / direction form a LADDER. Only the most aggressive
+     LADDER_MAX_LINES lines that still hold are kept (highest lines for overs, lowest for
+     unders), and they are listed from the best hit rate to the worst.
 
-Both sections respect the per-category caps (settings.BET_CAPS), at most
-MAX_PER_DIRECTION bets per category/stat/team/direction, and never contradict
-each other (over 9.5 and under 9.5 corners, both teams to win, ...).
+Two sections:
+
+  MATCHING - both sides line up: Team A's own form and the opponent's "allowed" form back
+  the same line (Juventus shots / Venezia allow shots). For totals and BTTS: both teams' own
+  form backs it. Each side needs a form row (head-to-head rows are the same games seen from
+  both teams, so they cannot count as a second opinion).
+
+  GENERAL - one side has a strong row (>= 7/10) and the other does not back it.
+
+Both sections respect per-category ladder caps and never contradict each other.
 """
 
 from collections import defaultdict
 from dataclasses import dataclass, field
-from typing import List
+from typing import List, Optional
 
 from engine.trends import settings as S
 from engine.trends.engine import Trend
@@ -42,18 +46,18 @@ class Bet:
     stat: str
     direction: str
     line: object
-    p: float
-    base_rate: object
+    strength: float                  # hit rate used for ordering (matching: mean of both sides)
+    fair: Optional[float] = None     # fair line (expected count), when the model has one
     trends: List[Trend] = field(default_factory=list)
     matching: bool = False
+    ladder: str = ""
 
     def to_dict(self) -> dict:
         return {
             "group": self.group, "label": self.label, "about": self.about,
             "stat": self.stat, "direction": self.direction, "line": self.line,
             "matching": self.matching,
-            "p": float(f"{self.p:.3g}"),
-            "base_rate": None if self.base_rate is None else round(self.base_rate, 3),
+            "fair": None if self.fair is None else round(self.fair, 1),
             "trends": [{"text": t.text, "hits": t.hits, "window": t.window,
                         "scope": t.scope, "subject": t.subject, "role": t.role} for t in self.trends],
         }
@@ -82,96 +86,114 @@ def conflicts(a: Bet, b: Bet) -> bool:
     return False
 
 
-def _tight(t: Trend) -> float:                 # higher = tighter line (over: high, under: low)
-    return 0 if t.line is None else (t.line if t.direction == "over" else -t.line)
-
-
-def _make_bet(key: str, ts: List[Trend], p: float, matching: bool, limit: int) -> Bet:
-    t0 = ts[0]
-    return Bet(key=key, group=t0.group, label=t0.bet, about=t0.about, kind=t0.target_kind,
-               stat=t0.stat, direction=t0.direction, line=t0.line, p=p,
-               base_rate=t0.base_rate, trends=ts[:limit], matching=matching)
+def rate(t: Trend) -> float:
+    return t.hits / t.window
 
 
 def _is_form(t: Trend) -> bool:
     return t.scope.startswith("form")
 
 
-def _matching_bets(loose: List[Trend]) -> List[Bet]:
+def _row_order(t: Trend):
+    return (-rate(t), -t.window)
+
+
+def _aggressive(b: Bet) -> float:
+    """Higher = more aggressive line (overs: high line, unders: low line)."""
+    if b.line is None:
+        return 0.0
+    return b.line if b.direction == "over" else -b.line
+
+
+def _make_bet(key: str, ts: List[Trend], first: List[Trend], strength: float, matching: bool) -> Bet:
+    t0 = ts[0]
+    rest = sorted((t for t in ts if t not in first), key=_row_order)
+    return Bet(key=key, group=t0.group, label=t0.bet, about=t0.about, kind=t0.target_kind,
+               stat=t0.stat, direction=t0.direction, line=t0.line, strength=strength,
+               fair=t0.fair, trends=(first + rest)[:S.MAX_TRENDS_PER_BET], matching=matching,
+               ladder=_ladder_key(t0))
+
+
+def _ladder_key(t: Trend) -> str:
+    if t.line is None or t.target_kind not in ("team", "total"):
+        return f"{t.bet_key}"
+    return f"{t.about}|{t.target_kind}|{t.stat}|{t.direction}"
+
+
+def _candidates(trends: List[Trend]):
+    """(matching bets, general bets) after the chalk filter."""
+    kept = [t for t in trends
+            if t.model_p is None or S.MIN_MODEL_P <= t.model_p <= S.CHALK_MAX_P]
     by_key = defaultdict(list)
-    for t in loose:
+    for t in kept:
         by_key[t.bet_key].append(t)
-    out = []
+    matching, general = [], []
     for key, ts in by_key.items():
+        form = [t for t in ts if _is_form(t) and t.window >= S.MIN_FORM_WINDOW]
         shared = ts[0].kind in ("total", "btts")
         roles = ("home", "away") if shared else ("for", "against")
         best = {}
-        for t in ts:
-            if _is_form(t) and t.role in roles and (t.role not in best or t.p < best[t.role].p):
+        for t in form:
+            if t.role in roles and (t.role not in best or _row_order(t) < _row_order(best[t.role])):
                 best[t.role] = t
-        if len(best) < 2:
+        if len(best) == 2:
+            first = [best[roles[0]], best[roles[1]]]
+            matching.append(_make_bet(key, ts, first, sum(rate(t) for t in first) / 2, True))
             continue
-        joint = best[roles[0]].p * best[roles[1]].p
-        if joint > S.MATCH_JOINT_P:
-            continue
-        first = [best[roles[0]], best[roles[1]]]
-        rest = sorted((t for t in ts if t not in first), key=lambda t: (t.p, -t.window))
-        out.append(_make_bet(key, first + rest, joint, True, S.MAX_TRENDS_PER_MATCHING_BET))
-    return out
+        strong = [t for t in form if t.window >= S.GENERAL_MIN_WINDOW and rate(t) >= S.GENERAL_MIN_RATE]
+        if strong:
+            top = min(strong, key=_row_order)
+            general.append(_make_bet(key, ts, [top], rate(top), False))
+    return matching, general
 
 
-def _general_bets(strict: List[Trend]) -> List[Bet]:
-    best = {}
-    for t in strict:                          # most unusual line per team / scope / stat / direction
-        k = (t.subject, t.scope, t.target_kind, t.stat, t.direction, t.about, t.role)
-        if k not in best or (t.p, -_tight(t)) < (best[k].p, -_tight(best[k])):
-            best[k] = t
-    wanted = {t.bet_key for t in best.values()}
-    by_key = defaultdict(list)
-    for t in strict:
-        if t.bet_key in wanted:
-            by_key[t.bet_key].append(t)
-    out = []
-    for key, ts in by_key.items():
-        ts.sort(key=lambda t: (t.p, -t.window))
-        out.append(_make_bet(key, ts, ts[0].p, False, S.MAX_TRENDS_PER_BET))
-    return out
-
-
-def _take(bets: List[Bet], chosen: List[Bet], per_group, per_dir, limit=None) -> None:
-    taken = 0
+def _ladders(bets: List[Bet]) -> List[List[Bet]]:
+    """Group bets into ladders; keep the most aggressive lines; list them best hit rate first."""
+    by_ladder = defaultdict(list)
     for b in bets:
+        by_ladder[b.ladder].append(b)
+    out = []
+    for lines in by_ladder.values():
+        lines.sort(key=lambda b: -_aggressive(b))
+        lines = lines[:S.LADDER_MAX_LINES]
+        lines.sort(key=lambda b: (-b.strength, -_aggressive(b)))
+        out.append(lines)
+    out.sort(key=lambda ls: -ls[0].strength)
+    return out
+
+
+def _take(ladders: List[List[Bet]], chosen: List[Bet], per_group, limit=None) -> None:
+    taken = 0
+    for lines in ladders:
         if limit is not None and taken >= limit:
             break
-        dkey = (b.group, b.stat, b.about, b.direction)
-        if per_group[b.group] >= S.BET_CAPS.get(b.group, 3):
+        g = lines[0].group
+        if per_group[g] >= S.BET_CAPS.get(g, 3):
             continue
-        if b.line is not None and per_dir[dkey] >= S.MAX_PER_DIRECTION:
+        ok = [b for b in lines if not any(conflicts(b, c) for c in chosen)]
+        ok = [b for i, b in enumerate(ok) if not any(conflicts(b, o) for o in ok[:i])]
+        if not ok:
             continue
-        if any(conflicts(b, c) for c in chosen):
-            continue
-        chosen.append(b)
-        per_group[b.group] += 1
-        per_dir[dkey] += 1
+        chosen.extend(ok)
+        per_group[g] += 1
         taken += 1
 
 
 def select_bets(trends: List[Trend]) -> List[Bet]:
-    """Matching bets first (strongest first), then general bets; each section ordered by category."""
-    loose = [t for t in trends if t.p <= S.MATCH_P]
-    strict = [t for t in loose if t.p <= S.MAX_P]
-
+    """Matching ladders first, then general ones; each section ordered by category, then strength."""
+    matching, general = _candidates(trends)
     chosen: List[Bet] = []
-    per_group, per_dir = defaultdict(int), defaultdict(int)
+    per_group = defaultdict(int)
 
-    matching = sorted(_matching_bets(loose), key=lambda b: (b.p, -len(b.trends)))
-    _take(matching, chosen, per_group, per_dir, S.MATCH_MAX)
+    _take(_ladders(matching), chosen, per_group, S.MATCH_MAX)
     taken_keys = {b.key for b in chosen}
-
-    general = sorted((b for b in _general_bets(strict) if b.key not in taken_keys),
-                     key=lambda b: (b.p, -len(b.trends)))
-    _take(general, chosen, per_group, per_dir)
+    _take(_ladders([b for b in general if b.key not in taken_keys]), chosen, per_group)
 
     gi = {g: i for i, g in enumerate(S.GROUP_ORDER)}
-    chosen.sort(key=lambda b: (not b.matching, gi.get(b.group, 99), b.p))
+    best_in_ladder = defaultdict(float)
+    for b in chosen:
+        best_in_ladder[(b.matching, b.ladder)] = max(best_in_ladder[(b.matching, b.ladder)], b.strength)
+    chosen.sort(key=lambda b: (not b.matching, gi.get(b.group, 99),
+                               -best_in_ladder[(b.matching, b.ladder)], b.ladder, -b.strength,
+                               -_aggressive(b)))
     return chosen
