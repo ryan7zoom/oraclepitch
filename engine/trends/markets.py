@@ -10,7 +10,8 @@ the SUBJECT team played in that game. Stat values that are None stay None.
 kinds
   result  win / not_lose, on full time, 1st half or 2nd half goals
   team    the subject team's own count over/under a line
-  against the subject team's opponent's count (used for goals conceded)
+  against what the subject team's OPPONENT did in the subject's games (goals conceded, shots
+          allowed, ... and the subject losing): evidence for the opponent's bet
   total   both teams added together, over/under a line
   btts    both teams to score yes / no
 """
@@ -42,6 +43,21 @@ class Market:
     line: Optional[float] = None
 
     @property
+    def target_kind(self) -> str:
+        """The kind of BET this market supports (an 'against' market supports the other team's bet)."""
+        if self.kind == "against":
+            return "result" if self.direction in ("win", "not_lose") else "team"
+        return self.kind
+
+    @property
+    def target_key(self) -> str:
+        """Key of the bet this market supports: 'against:goals:over:0.5' -> 'team:goals:over:0.5'."""
+        if self.kind != "against":
+            return self.key
+        rest = self.key.split(":", 1)[1]
+        return rest if self.direction in ("win", "not_lose") else "team:" + rest
+
+    @property
     def shared(self) -> bool:
         """Same answer for both teams (total / btts): computed once per fixture side."""
         return self.kind in ("total", "btts")
@@ -52,6 +68,10 @@ def build_catalog() -> List[Market]:
     for stat in ("goals", "goals_1h", "goals_2h"):
         ms.append(Market(f"win:{stat}", "result", "result", stat, "win"))
     ms.append(Market("not_lose", "double_chance", "result", "goals", "not_lose"))
+    # evidence from the OTHER side: the subject lost / did not win -> supports the opponent's result bet
+    for stat in ("goals", "goals_1h", "goals_2h"):
+        ms.append(Market(f"against:win:{stat}", "result", "against", stat, "win"))
+    ms.append(Market("against:not_lose", "double_chance", "against", "goals", "not_lose"))
     for stat, lines in S.TEAM_LINES.items():
         for line in lines:
             for d in ("over", "under"):
@@ -124,6 +144,11 @@ def market_flags(mk: Market, sd: SeqData) -> List[Optional[bool]]:
         yes = mk.direction == "yes"
         return [None if a is None or b is None else ((a > 0 and b > 0) == yes)
                 for a, b in zip(o, p)]
+    if mk.kind == "against" and mk.direction in ("win", "not_lose"):
+        o, p = sd.other(mk.stat), sd.own(mk.stat)          # seen from the opponent's side
+        if mk.direction == "win":
+            return [None if a is None or b is None else a > b for a, b in zip(o, p)]
+        return [None if a is None or b is None else a >= b for a, b in zip(o, p)]
     vals = {"team": sd.own, "against": sd.other, "total": sd.total}[mk.kind](mk.stat)
     line = mk.line
     if mk.direction == "over":

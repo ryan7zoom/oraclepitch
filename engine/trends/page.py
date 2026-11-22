@@ -40,6 +40,10 @@ details.card[open]>summary::before{transform:rotate(90deg)}
 .sub{display:block;font-size:13px;font-weight:500;color:var(--mute);margin-top:3px}
 .lg{font-weight:700;color:var(--accent)}
 .body{padding:2px 22px 18px;border-top:1px solid var(--line)}
+.sec{margin:18px -22px 2px;padding:10px 22px;font-weight:800;font-size:14px;background:var(--chip);color:var(--accent)}
+.sec.gen{background:var(--bg);color:var(--mute)}
+.sec small{display:block;font-weight:500;font-size:12px;opacity:.85;margin-top:1px}
+.pill{display:inline-block;font-weight:700;color:var(--accent);background:var(--chip);border-radius:999px;padding:0 8px;margin-right:4px}
 .grp{margin:16px 0 6px;font-size:12px;font-weight:800;color:var(--mute);text-transform:uppercase;letter-spacing:.06em}
 .bet{margin:8px 0 14px}.bl{font-weight:700;font-size:16px}
 .avg{font-weight:400;color:var(--mute);font-size:12px;margin-left:8px}
@@ -101,26 +105,45 @@ def _bet_html(b) -> str:
     return f'<div class="bet"><div class="bl">{escape(b["label"])}{avg}</div>{rows}</div>'
 
 
+def _groups_html(bets) -> str:
+    by_group = {}
+    for b in bets:
+        by_group.setdefault(b["group"], []).append(b)
+    out = ""
+    for g in S.GROUP_ORDER:
+        if g in by_group:
+            out += f'<div class="grp">{escape(S.GROUP_LABELS[g])}</div>' + "".join(_bet_html(b) for b in by_group[g])
+    return out
+
+
 def _fixture_html(f) -> str:
     k = _kick(f)
     home, away = display(f["home"]), display(f["away"])
-    by_group = {}
-    for b in f["bets"]:
-        by_group.setdefault(b["group"], []).append(b)
+    match = [b for b in f["bets"] if b.get("matching")]
+    other = [b for b in f["bets"] if not b.get("matching")]
     body = ""
-    for g in S.GROUP_ORDER:
-        if g in by_group:
-            body += f'<div class="grp">{escape(S.GROUP_LABELS[g])}</div>' + "".join(_bet_html(b) for b in by_group[g])
+    if match:
+        body += ('<div class="sec">&#9733; Highest matching trends'
+                 '<small>One team does it and the opponent allows it (or both teams\' form agrees)</small></div>'
+                 + _groups_html(match))
+    if other:
+        body += ('<div class="sec gen">General trends'
+                 '<small>One side has a strong streak; the other side is unknown or does not agree</small></div>'
+                 + _groups_html(other))
     if not body:
         body = '<div class="empty">No strong trends for this match.</div>'
     label = S.LEAGUE_LABELS.get(f["league"], f["league"])
-    n = len(f["bets"])
     ko = f"{k:%H:%M} &middot; " if k else ""
+    bits = []
+    if match:
+        bits.append(f'<span class="pill">&#9733; {len(match)} matching</span>')
+    if other:
+        bits.append(f"{len(other)} other")
+    counts = " ".join(bits) if bits else "no strong trends"
     teams = escape(f"{home} {away} {f['home']} {f['away']}".lower())
     return (f'<details class="card fx" data-league="{escape(f["league"])}" data-teams="{teams}"><summary>'
             f'<div><span class="ttl">{escape(home)} v {escape(away)}</span>'
-            f'<span class="sub"><span class="lg">{escape(label)}</span> &middot; {ko}'
-            f'{n} bet{"s" if n != 1 else ""}</span></div></summary>'
+            f'<span class="sub"><span class="lg">{escape(label)}</span> &middot; {ko}{counts}</span></div></summary>'
             f'<div class="body">{body}</div></details>')
 
 

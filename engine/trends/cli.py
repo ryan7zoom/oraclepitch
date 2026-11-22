@@ -49,16 +49,21 @@ def print_fixture(fx: Fixture, trends, group=None, raw=False, per_bet=6) -> None
     bets = select_bets(trends)
     if not bets:
         print("  no strong trends")
-    for g in S.GROUP_ORDER:
-        gb = [b for b in bets if b.group == g]
-        if not gb or (group and g != group):
+    for matching, title in ((True, "HIGHEST MATCHING TRENDS (both sides line up)"), (False, "GENERAL TRENDS")):
+        section = [b for b in bets if b.matching == matching and (not group or b.group == group)]
+        if not section:
             continue
-        print(f"\n== {S.GROUP_LABELS[g].upper()} ==")
-        for b in gb:
-            tail = f"   [league avg {b.base_rate:.0%}]" if b.base_rate is not None else ""
-            print(f"{b.label}{tail}")
-            for t in b.trends:
-                print(f"    {t.text}")
+        print(f"\n######## {title} ########")
+        for g in S.GROUP_ORDER:
+            gb = [b for b in section if b.group == g]
+            if not gb:
+                continue
+            print(f"\n== {S.GROUP_LABELS[g].upper()} ==")
+            for b in gb:
+                tail = f"   [league avg {b.base_rate:.0%}]" if b.base_rate is not None else ""
+                print(f"{b.label}{tail}")
+                for t in b.trends:
+                    print(f"    {t.text}")
 
 
 def main() -> None:

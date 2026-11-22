@@ -72,7 +72,9 @@ class Trend:
     skipped_unknown: int         # games with unknown data skipped inside the window
     text: str
     p: float = 1.0               # chance of a streak this good by luck (league rate); small = unusual
-    bet_key: str = ""            # same bet => same key (conceded-goals trends merge into team goals)
+    bet_key: str = ""            # same bet => same key ("allowed" trends merge into the other team's bet)
+    role: str = ""               # for | against (team bets) ; home | away (total / BTTS bets)
+    target_kind: str = ""        # kind of the bet this trend supports (result | team | total | btts)
 
     def to_dict(self) -> dict:
         d = asdict(self)
@@ -185,7 +187,9 @@ class TrendEngine:
                         misses=w.misses, base_rate=base, skipped_unknown=w.skipped,
                         text=trend_text(mk, D(subject), D(opp), side, scope, w.hits, w.size, fx.league),
                         p=tail_p(w.size, w.hits, base),
-                        bet_key=f"{mk.key.replace('against:', 'team:', 1)}|{about}",
+                        bet_key=f"{mk.target_key}|{about}",
+                        role=side if mk.shared else ("against" if mk.kind == "against" else "for"),
+                        target_kind=mk.target_kind,
                     ))
         return self._order(found)
 

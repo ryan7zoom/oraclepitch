@@ -35,10 +35,22 @@ def condition(mk: Market, name: str) -> str:
         return "Both teams scored" if mk.direction == "yes" else "At least one team did not score"
     if mk.kind == "total":
         return f"{'Over' if over else 'Under'} {num(mk.line)} {STAT_NAME[mk.stat]}"
-    if mk.kind == "against":                      # goals conceded
-        if mk.line == 0.5:
-            return f"{name} conceded" if over else f"{name} kept a clean sheet"
-        return f"{name} conceded {'over' if over else 'under'} {num(mk.line)} goals"
+    if mk.kind == "against":
+        if mk.direction == "win":
+            return {"goals": f"{name} lost", "goals_1h": f"{name} lost the 1st half",
+                    "goals_2h": f"{name} lost the 2nd half"}[mk.stat]
+        if mk.direction == "not_lose":
+            return f"{name} did not win"
+        d = "over" if over else "under"
+        if mk.stat in ("goals", "goals_1h", "goals_2h"):
+            when = f" in the {_HALF[mk.stat]}" if mk.stat in _HALF else ""
+            if mk.line == 0.5:
+                return (f"{name} conceded{when}" if over else
+                        (f"{name} did not concede{when}" if when else f"{name} kept a clean sheet"))
+            return f"{name} conceded {d} {num(mk.line)} goals"
+        if mk.stat in ("shots", "sot", "corners"):
+            return f"{name} allowed {d} {num(mk.line)} {STAT_NAME[mk.stat]}"
+        return f"{name}'s opponents had {d} {num(mk.line)} {STAT_NAME[mk.stat]}"
     # team
     if mk.stat in _HALF:
         return (f"{name} scored in the {_HALF[mk.stat]}" if over
@@ -60,7 +72,7 @@ def about_side(mk: Market, side: str) -> str:
 def bet_label(mk: Market, name: str) -> str:
     """The bet the trend supports. `name` = team the bet is about (ignored for totals)."""
     over = mk.direction == "over"
-    if mk.kind == "result":
+    if mk.kind == "result" or (mk.kind == "against" and mk.direction in ("win", "not_lose")):
         if mk.direction == "not_lose":
             return f"{name} not to lose"
         return {"goals": f"{name} to win", "goals_1h": f"{name} to win the 1st half",

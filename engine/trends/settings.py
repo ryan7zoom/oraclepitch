@@ -49,7 +49,9 @@ TEAM_LINES = {                       # a single team's own count
     "yellow": _rng(0, 3),
     "offsides": _rng(0, 4),
 }
-CONCEDED_LINES = {"goals": _rng(0, 3)}   # goals the subject team CONCEDED
+# What the subject team ALLOWED its opponents (goals conceded, shots allowed, ...): same lines as
+# TEAM_LINES. These are the "other half" of a matching trend (Team A does X / Team B allows X).
+CONCEDED_LINES = dict(TEAM_LINES)
 TOTAL_LINES = {                      # both teams added together
     "goals": _rng(1, 5),
     "shots": _rng(15, 30),
@@ -88,6 +90,16 @@ BET_CAPS = {
     "result": 3, "double_chance": 2, "goals": 8, "btts": 1, "corners": 8,
     "cards": 3, "shots": 3, "shots_on_target": 3, "offsides": 3,
 }
+# MATCHING trends: one team's own streak AND the opponent's "allowed" streak back the same line
+# (e.g. Juventus score / Venezia concede). Both sides must pass the streak rule on their own
+# (form games only, so head-to-head lines cannot count as a second opinion), each with
+# luck-probability <= MATCH_P, and since they are different teams' games the two probabilities are
+# multiplied: that product must be <= MATCH_JOINT_P.
+MATCH_P = 0.05
+MATCH_JOINT_P = 0.005
+MATCH_MAX = 8              # matching bets shown per match
+MAX_TRENDS_PER_MATCHING_BET = 6
+
 MAX_PER_DIRECTION = 2      # per (category, stat, team/total, over|under)
 MAX_TRENDS_PER_BET = 4     # trend lines listed under one bet
 
