@@ -63,6 +63,11 @@ class Market:
         return self.kind in ("total", "btts")
 
 
+def _directions(stat: str):
+    """Over and under, except stats the bookmaker has no under for (settings.NO_UNDER_STATS)."""
+    return ("over",) if stat in S.NO_UNDER_STATS else ("over", "under")
+
+
 def build_catalog() -> List[Market]:
     ms: List[Market] = []
     for stat in ("goals", "goals_1h", "goals_2h"):
@@ -74,15 +79,15 @@ def build_catalog() -> List[Market]:
     ms.append(Market("against:not_lose", "double_chance", "against", "goals", "not_lose"))
     for stat, lines in S.TEAM_LINES.items():
         for line in lines:
-            for d in ("over", "under"):
+            for d in _directions(stat):
                 ms.append(Market(f"team:{stat}:{d}:{line}", GROUP_OF_STAT[stat], "team", stat, d, line))
     for stat, lines in S.CONCEDED_LINES.items():
         for line in lines:
-            for d in ("over", "under"):
+            for d in _directions(stat):
                 ms.append(Market(f"against:{stat}:{d}:{line}", GROUP_OF_STAT[stat], "against", stat, d, line))
     for stat, lines in S.TOTAL_LINES.items():
         for line in lines:
-            for d in ("over", "under"):
+            for d in _directions(stat):
                 ms.append(Market(f"total:{stat}:{d}:{line}", GROUP_OF_STAT[stat], "total", stat, d, line))
     for d in ("yes", "no"):
         ms.append(Market(f"btts:{d}", "btts", "btts", "goals", d))

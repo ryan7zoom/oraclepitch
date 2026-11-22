@@ -99,6 +99,20 @@ FAIR_USE_TIER = False
 CHALK_MAX_P = 0.90
 MIN_MODEL_P = 0.25
 
+# STANDARD NUMBER + LINE BAND (engine/trends/standard.py)
+# For every team, stat and match we work out the team's "standard number": the average of
+#   its own average at this venue, its own average over all games,
+#   what the opponent allows at ITS venue, and what the opponent allows over all games
+# (last STD_GAMES games each). A bet is only shown when its line is one a bookmaker would really
+# offer: not more than BAND_UP above the standard number, not more than BAND_DOWN below it.
+#   Juventus corners, standard 6.3  ->  lines from 2.5 (over) up to 9.5 (under).
+STD_GAMES = 30
+BAND_UP = 0.50                   # highest line = standard x 1.50
+BAND_DOWN = 0.60                 # lowest line  = standard x 0.40
+BAND_EXEMPT = {("goals", 0.5)}   # (stat, line) always allowed: "to score" is a normal market
+# Stats where the bookmaker has no Under market: never shown as an under.
+NO_UNDER_STATS = ("shots", "sot")
+
 # MATCHING bets: both sides back the same line (Team A does it, the opponent allows it; or
 # both teams' own form agrees for totals / BTTS). Each side needs a form row (>= 5/8 over >= 8 games).
 MIN_FORM_WINDOW = 8

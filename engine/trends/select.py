@@ -3,6 +3,9 @@ engine/trends/select.py
 
 Turns the raw trend list of a fixture into the BETS worth showing.
 
+  0. LINES A BOOKMAKER WOULD NOT OFFER ARE REMOVED. Each trend carries the standard number of the
+     team (engine/trends/standard.py); a line too far above or below it is dropped.
+
   1. CHALK IS REMOVED. Every trend carries the fair-line model's chance for the bet it
      supports (engine/trends/fair.py). Above settings.CHALK_MAX_P the bet is dropped: a
      line that lands that often is one a bookmaker will not offer or prices at nothing.
@@ -38,6 +41,7 @@ from typing import List, Optional
 
 from engine.trends import settings as S
 from engine.trends.engine import Trend
+from engine.trends.standard import line_in_band
 
 
 @dataclass
@@ -140,7 +144,8 @@ def _ladder_key(t: Trend) -> str:
 def _candidates(trends: List[Trend]):
     """(matching bets, general bets) after the chalk filter."""
     kept = [t for t in trends
-            if t.model_p is None or S.MIN_MODEL_P <= t.model_p <= S.CHALK_MAX_P]
+            if (t.model_p is None or S.MIN_MODEL_P <= t.model_p <= S.CHALK_MAX_P)
+            and line_in_band(t.stat, t.line, t.std)]
     by_key = defaultdict(list)
     for t in kept:
         by_key[t.bet_key].append(t)
@@ -202,8 +207,9 @@ def select_bets(trends: List[Trend]) -> List[Bet]:
     per_group = defaultdict(int)
 
     _take(_ladders(matching), chosen, per_group, S.MATCH_MAX)
-    taken_keys = {b.key for b in chosen}
-    _take(_ladders([b for b in general if b.key not in taken_keys]), chosen, per_group)
+    # a ladder already shown as a matching bet is not shown again, at another line, as a general one
+    taken_ladders = {b.ladder for b in chosen}
+    _take(_ladders([b for b in general if b.ladder not in taken_ladders]), chosen, per_group)
 
     gi = {g: i for i, g in enumerate(S.GROUP_ORDER)}
     best_in_ladder = defaultdict(float)
