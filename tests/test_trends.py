@@ -17,22 +17,10 @@ from engine.data.model import Match
 from engine.trends import rules
 from datetime import datetime, timezone
 from engine.trends.engine import Fixture, Trend, TrendEngine, build_report
+from engine.trends.fair import FairModel, Expect, p_over, pmf
 from engine.trends.select import Bet, conflicts, select_bets
 from engine.trends import settings as S
 from engine.trends.markets import SeqData, build_catalog, market_flags
-
-# Every "N of last M" line on the Scores24 Barcelona - Villarreal page.
-REFERENCE_LINES = [
-    (15, 16), (14, 16), (11, 12), (14, 15), (11, 12), (8, 9), (15, 16), (11, 12),
-    (27, 28), (25, 26), (20, 21), (18, 19), (32, 33), (22, 23), (18, 18), (16, 16),
-    (24, 26), (15, 16), (13, 13), (7, 8), (26, 27), (15, 17), (15, 16), (13, 14),
-    (12, 13), (7, 8), (14, 16), (11, 12), (18, 18), (14, 14), (9, 9), (7, 7),
-    (12, 12), (8, 8), (6, 7), (5, 6), (7, 8), (6, 7), (17, 19), (9, 10), (9, 10),
-    (7, 8), (6, 7), (5, 5), (18, 18), (10, 11), (8, 8), (9, 10), (6, 7), (9, 9),
-    (6, 6), (7, 7), (5, 5), (5, 5), (6, 6), (5, 5), (9, 10), (8, 9), (8, 9), (5, 5),
-    (17, 18), (11, 12), (16, 18), (12, 13), (8, 9), (13, 15), (11, 12), (13, 15), (11, 12),
-]
-
 
 def mk(d, home, away, ft=(1, 1), ht=(0, 0), **kw):
     m = Match(league="la_liga", season=d.year if d.month >= 7 else d.year - 1,
@@ -55,29 +43,32 @@ def find(trends, **cond):
 
 
 class TestRule(unittest.TestCase):
-    def test_every_reference_page_line_passes(self):
-        for hits, size in REFERENCE_LINES:
-            self.assertTrue(rules.passes(size, hits), f"{hits} of {size} should pass")
+    def test_longest_good_window_wins(self):
+        w = rules.pick_window([True] * 9 + [False] * 3, S.FORM_WINDOWS)       # 12 games, 9 hits
+        self.assertEqual((w.size, w.hits), (12, 9))
 
-    def test_rejects_what_the_page_never_shows(self):
-        self.assertFalse(rules.passes(4, 4))      # below minimum window
-        self.assertFalse(rules.passes(5, 4))      # a miss in a 5-game window
-        self.assertFalse(rules.passes(10, 8))     # 2 misses before game 15
-        self.assertFalse(rules.passes(20, 17))    # 3 misses
+    def test_falls_back_to_the_five_of_eight_floor(self):
+        w = rules.pick_window([True] * 5 + [False] * 3, S.FORM_WINDOWS)       # 62.5%: not "good", still allowed
+        self.assertEqual((w.size, w.hits), (8, 5))
 
-    def test_longest_window_and_oldest_must_be_hit(self):
-        self.assertEqual(rules.find_window([True] * 5 + [False]).size, 5)
-        w = rules.find_window([True] * 10 + [False] + [True] * 8)
-        self.assertEqual((w.size, w.hits), (19, 18))
-        # the oldest game is a miss -> window is cut back to end on a hit
-        w = rules.find_window([True] * 8 + [False, False])
-        self.assertEqual((w.size, w.hits), (8, 8))
-        self.assertIsNone(rules.find_window([True] * 4))
-        self.assertIsNone(rules.find_window([False] * 10))
+    def test_a_good_window_beats_a_longer_weaker_one(self):
+        flags = [True] * 8 + [False] * 2 + [False] * 10       # 8/8, 8/10 (80%), 8/12 (67%), 8/15 ...
+        w = rules.pick_window(flags, S.FORM_WINDOWS)
+        self.assertEqual((w.size, w.hits), (10, 8))
+
+    def test_rejects_weak_and_small_samples(self):
+        self.assertIsNone(rules.pick_window([True] * 4 + [False] * 4, S.FORM_WINDOWS))     # 50%
+        self.assertIsNone(rules.pick_window([True] * 7, S.FORM_WINDOWS))                   # under 8 games
 
     def test_unknown_is_skipped_not_counted(self):
-        w = rules.find_window([True, None, True, True, None, True, True])
-        self.assertEqual((w.size, w.hits, w.skipped), (5, 5, 2))
+        w = rules.pick_window([True, None, True, True, None] + [True] * 6, S.FORM_WINDOWS)
+        self.assertEqual((w.size, w.hits), (8, 8))
+
+    def test_window_sizes_are_fixed(self):
+        for hits in range(0, 31):
+            w = rules.pick_window([True] * hits + [False] * (30 - hits), S.FORM_WINDOWS)
+            if w:
+                self.assertIn(w.size, S.FORM_WINDOWS)
 
 
 class TestMarkets(unittest.TestCase):
@@ -115,9 +106,9 @@ class TestMarkets(unittest.TestCase):
 
 
 def season_history():
-    """A home 8 games (won all, 2-0, 8 corners), away 8 games (lost all). B is poor. Other teams fill."""
-    ms, d = [], date(2026, 8, 1)
-    for i in range(8):
+    """A home 12 games (won all, 2-0, 8 corners), away 12 games (lost all). B is poor. Other teams fill."""
+    ms, d = [], date(2026, 6, 1)
+    for i in range(12):
         d += timedelta(days=7)
         ms.append(mk(d, "A", "C", ft=(2, 0), ht=(1, 0), co_h=8, co_a=3, yc_h=1, yc_a=2))
         d += timedelta(days=3)
@@ -135,52 +126,44 @@ class TestEngine(unittest.TestCase):
     def test_home_form_win_streak_found_with_exact_numbers(self):
         t = find(self.trends, market="win:goals", subject="A", scope="form_home")
         self.assertEqual(len(t), 1)
-        self.assertEqual((t[0].hits, t[0].window, t[0].about), (8, 8, "home"))
-        self.assertEqual(t[0].text, "A won in last 8 home games (La Liga)")
+        self.assertEqual((t[0].hits, t[0].window, t[0].about), (12, 12, "home"))
+        self.assertEqual(t[0].text, "A won in last 12 home games (La Liga)")
 
-    def test_all_games_win_streak_not_found_because_away_games_were_lost(self):
+    def test_all_games_win_not_found_because_away_games_were_lost(self):
         self.assertEqual(find(self.trends, market="win:goals", subject="A", scope="form_all"), [])
 
     def test_away_team_scopes(self):
-        t = find(self.trends, subject="B", scope="form_away", market="not_lose")
-        self.assertEqual(t, [])                                   # B lost nothing? it lost 0-1 ... as home only
         self.assertTrue(all(t.scope != "form_home" for t in find(self.trends, subject="B")))
 
     def test_text_style(self):
         t = find(self.trends, market="team:corners:over:7.5", subject="A", scope="form_home")
         self.assertEqual(len(t), 1)
-        self.assertEqual(t[0].text, "A took over 7.5 corners in last 8 home games (La Liga)")
+        self.assertEqual(t[0].text, "A took over 7.5 corners in last 12 home games (La Liga)")
         self.assertEqual(t[0].bet, "A corners Over 7.5")
 
     def test_total_text_has_team_name(self):
-        # A's home games had 11 corners each -> tightest line that holds is 10.5
         t = find(self.trends, market="total:corners:over:10.5", subject="A", scope="form_home")
-        self.assertEqual(t[0].text, "Over 10.5 corners in last 8 A home games (La Liga)")
+        self.assertEqual(t[0].text, "Over 10.5 corners in last 12 A home games (La Liga)")
         self.assertEqual((t[0].about, t[0].bet), ("total", "Total corners Over 10.5"))
 
     def test_conceded_maps_to_the_other_team(self):
-        # B's away games: not applicable; use D-free check on A: A conceded 0 at home
         t = find(self.trends, subject="A", scope="form_home", market="against:goals:under:0.5")
         self.assertEqual(len(t), 1)
         self.assertEqual(t[0].about, "away")                      # the bet is about B's goals
-        self.assertEqual(t[0].text, "A kept a clean sheet in last 8 home games (La Liga)")
+        self.assertEqual(t[0].text, "A kept a clean sheet in last 12 home games (La Liga)")
 
     def test_no_future_leakage(self):
-        late = Fixture("la_liga", date(2026, 8, 20), "A", "B")    # only the first 2 weeks exist
-        for t in self.engine.trends_for_fixture(late):
-            self.assertLessEqual(t.window, 3)                     # < MIN_WINDOW games existed
-        self.assertEqual(self.engine.trends_for_fixture(late), [])
+        early = Fixture("la_liga", date(2026, 6, 20), "A", "B")   # only the first 2 rounds exist
+        self.assertEqual(self.engine.trends_for_fixture(early), [])
 
-    def test_base_rate_attached_and_trivial_lines_dropped(self):
-        from unittest.mock import patch
-        with patch.object(S, "MIN_BASE_SAMPLE", 10):          # the tiny test league has only 24 matches
-            tr = TrendEngine({"la_liga": season_history()}).trends_for_fixture(fx())
-        self.assertTrue(all(t.base_rate is not None and t.base_rate < S.MAX_BASE_RATE for t in tr))
-        # nobody ever scores 5+ -> 'team goals under 4.5' is 100% in the league -> hidden
-        self.assertEqual(find(tr, market="team:goals:under:4.5"), [])
-        # a rare-in-league event that A does every time is kept, with its rate attached
+    def test_mixed_hit_rates_are_shown_as_counts(self):
+        ms = season_history()
+        for i, m in enumerate(m for m in ms if m.home == "A"):    # A's home corners: 8 in 9 games, 3 in 3
+            m.co_h = 8 if i % 4 else 3
+        tr = TrendEngine({"la_liga": ms}).trends_for_fixture(fx())
         t = find(tr, market="team:corners:over:7.5", subject="A", scope="form_home")[0]
-        self.assertLess(t.base_rate, 0.5)
+        self.assertEqual((t.hits, t.window), (9, 12))
+        self.assertEqual(t.text, "A took over 7.5 corners in 9 of last 12 home games (La Liga)")
 
     def test_h2h_scopes_and_orientation(self):
         ms = season_history()
@@ -190,15 +173,12 @@ class TestEngine(unittest.TestCase):
             home, away = ("A", "B") if i % 2 == 0 else ("B", "A")
             ft = (2, 0) if home == "A" else (0, 2)
             ms.append(mk(d, home, away, ft=ft, ht=(0, 0) if home == "A" else (0, 1)))
-        eng = TrendEngine({"la_liga": ms})
-        tr = eng.trends_for_fixture(fx())
+        tr = TrendEngine({"la_liga": ms}).trends_for_fixture(fx())
         w = find(tr, market="win:goals", subject="A", scope="h2h_all")
-        self.assertEqual((w[0].hits, w[0].window), (7, 7))
-        self.assertEqual(w[0].text, "A won in last 7 games against B (La Liga)")
+        self.assertEqual((w[0].hits, w[0].window), (6, 6))        # fixed windows: 5, 6, 8, 10
+        self.assertEqual(w[0].text, "A won in last 6 games against B (La Liga)")
         self.assertEqual(find(tr, market="win:goals", subject="B", scope="h2h_all"), [])
-        # only 4 meetings at A's ground (< 5) -> no venue trend
-        self.assertEqual(find(tr, scope="h2h_venue"), [])
-        # shared (total) markets appear once, under the home team
+        self.assertEqual(find(tr, scope="h2h_venue"), [])         # only 4 meetings at A's ground (< 5)
         shared = [t for t in tr if t.scope == "h2h_all" and t.kind == "total"]
         self.assertTrue(all(t.subject == "A" for t in shared))
 
@@ -214,60 +194,196 @@ class TestEngine(unittest.TestCase):
         for m in ms:
             m.of_h = m.of_a = 1 if "A" in (m.home, m.away) else 5
         ms[9].of_h = None                                          # a mid-history game, A at home
-        eng = TrendEngine({"la_liga": ms})
-        t = find(eng.trends_for_fixture(fx()), market="team:offsides:under:1.5",
+        t = find(TrendEngine({"la_liga": ms}).trends_for_fixture(fx()), market="team:offsides:under:1.5",
                  subject="A", scope="form_all")
         self.assertEqual(len(t), 1)
-        self.assertEqual(t[0].window, 15)                          # 16 A games, 1 unknown skipped
-        self.assertEqual(t[0].skipped_unknown, 1)
+        self.assertEqual(t[0].window, 20)                          # 24 A games, 1 unknown skipped, 23 known
+
+    def test_no_model_on_a_tiny_league_means_nothing_is_filtered(self):
+        self.assertTrue(all(t.model_p is None for t in self.trends))
 
 
-class TestWindowCapAndLuck(unittest.TestCase):
-    def test_window_never_exceeds_cap(self):
-        w = rules.find_window([True] * 100)
-        self.assertEqual(w.size, S.MAX_WINDOW)
+def league_history(att, dfn, rounds=2, base=12.0):
+    """Noise-free league: shots = base * attack(team) * defence(opponent). T0..T11, home and away."""
+    teams = [f"T{i}" for i in range(12)]
+    ms, d = [], FX_DATE - timedelta(days=330)
+    for _ in range(rounds):
+        for h in teams:
+            for a in teams:
+                if h == a:
+                    continue
+                d += timedelta(days=1)
+                ms.append(mk(d, h, a, ft=(1, 1), ht=(0, 0),
+                             sh_h=round(base * att.get(h, 1.0) * dfn.get(a, 1.0)),
+                             sh_a=round(base * att.get(a, 1.0) * dfn.get(h, 1.0))))
+    return ms
 
-    def test_tail_probability(self):
-        self.assertAlmostEqual(rules.tail_p(8, 8, 0.5), 0.5 ** 8)
-        self.assertLess(rules.tail_p(15, 15, 0.45), rules.tail_p(8, 8, 0.45))
-        self.assertGreater(rules.tail_p(10, 10, 0.97), 0.7)       # trivial event: not remarkable
+
+class TestFair(unittest.TestCase):
+    def setUp(self):
+        att = {"T0": 1.4, "T1": 0.7}                    # T0 attacks a lot, T1 hardly at all
+        dfn = {"T2": 1.3, "T3": 0.7}                    # T2 allows a lot, T3 allows little
+        self.model = FairModel(league_history(att, dfn), FX_DATE)
+
+    def test_opponent_changes_the_fair_line(self):
+        loose = self.model.expect("T0", "T2").mu("shots", "home")
+        tight = self.model.expect("T0", "T3").mu("shots", "home")
+        self.assertGreater(loose, tight + 5)             # same attack, very different opponent
+        self.assertAlmostEqual(loose, 12 * 1.4 * 1.3, delta=2.0)
+        self.assertAlmostEqual(tight, 12 * 1.4 * 0.7, delta=2.0)
+
+    def test_weak_attack_is_lower_than_strong_attack_against_the_same_opponent(self):
+        self.assertGreater(self.model.expect("T0", "T5").mu("shots", "home"),
+                           self.model.expect("T1", "T5").mu("shots", "home") + 5)
+
+    def test_stats_without_data_have_no_estimate(self):
+        self.assertIsNone(self.model.expect("T0", "T2").mu("corners", "home"))
+
+    def test_future_games_are_not_used(self):
+        ms = league_history({"T0": 1.4}, {"T2": 1.3})
+        before = FairModel(ms, FX_DATE).expect("T0", "T2").mu("shots", "home")
+        ms.append(mk(FX_DATE, "T0", "T2", ft=(9, 0), ht=(5, 0), sh_h=90, sh_a=0))
+        after = FairModel(ms, FX_DATE).expect("T0", "T2").mu("shots", "home")
+        self.assertEqual(before, after)
+
+    def test_too_little_history_gives_no_model(self):
+        self.assertIsNone(FairModel(season_history(), FX_DATE).expect("A", "B"))
+
+    def test_distributions(self):
+        for mu, alpha in ((0.5, 0.0), (7.0, 0.05), (18.0, 0.04)):
+            self.assertAlmostEqual(sum(pmf(mu, alpha, 120)), 1.0, places=6)
+        self.assertGreater(p_over(18, 0.04, 11.5), p_over(18, 0.04, 17.5))
+        self.assertGreater(p_over(18, 0.04, 17.5), p_over(18, 0.04, 22.5))
+        self.assertAlmostEqual(p_over(2.0, 0.0, 0.5), 1 - 2.718281828 ** -2, places=4)
+
+    def test_result_probabilities_add_up(self):
+        ex = self.model.expect("T0", "T2")
+        both = (ex.p_result("home", "not_lose", "goals") + ex.p_result("away", "win", "goals"))
+        self.assertAlmostEqual(both, 1.0, places=6)
+        self.assertAlmostEqual(ex.p_btts(True) + ex.p_btts(False), 1.0)
+
+    def test_chalk_is_flagged_on_real_trends_and_never_shown(self):
+        ms = league_history({"T0": 1.4}, {"T2": 1.3})
+        eng = TrendEngine({"la_liga": ms})
+        raw = eng.trends_for_fixture(Fixture("la_liga", FX_DATE, "T0", "T2"))
+        easy = find(raw, market="team:shots:over:6.5", subject="T0", scope="form_home")
+        self.assertTrue(easy and easy[0].model_p > 0.95)                  # T0 always has 10+ shots
+        self.assertGreater(easy[0].fair, 15)
+        shown = [b.label for b in select_bets(raw)]
+        self.assertNotIn("T0 shots Over 6.5", shown)
+        self.assertTrue(all(t.model_p is None or t.model_p >= 0 for t in raw))
+
+
+def tr(line=15.5, hits=9, window=12, role="for", scope="form_home", model_p=0.5, direction="over",
+       stat="shots", about="home", subject="A", kind="team", group="shots", fair=17.0, market=None):
+    """A hand-made Trend for testing selection rules."""
+    key = f"team:{stat}:{direction}:{line:g}|{about}"
+    return Trend(league="la_liga", home="A", away="B", group=group, market=market or f"team:{stat}:{direction}:{line}",
+                 bet=f"A {stat} {direction.title()} {line:g}", about=about, subject=subject, scope=scope, stat=stat,
+                 kind="against" if role == "against" else kind, direction=direction, line=line, hits=hits,
+                 window=window, misses=window - hits, skipped_unknown=0, text=f"{subject} {hits}/{window}",
+                 model_p=model_p, fair=fair, bet_key=key, role=role, target_kind="team")
 
 
 class TestSelection(unittest.TestCase):
-    def setUp(self):
-        self.engine = TrendEngine({"la_liga": season_history()})
-        self.raw = self.engine.trends_for_fixture(fx())
-        self.bets = select_bets(self.raw)
+    def labels(self, trends):
+        return [b.label for b in select_bets(trends)]
 
-    def test_far_fewer_bets_than_raw_trends(self):
-        self.assertGreater(len(self.raw), 3 * len(self.bets))
-        self.assertGreater(len(self.bets), 0)
+    # ---- chalk -------------------------------------------------------------
+    def test_chalk_is_dropped(self):
+        both = [tr(15.5, 11, 12, role="for", model_p=0.92), tr(15.5, 11, 12, role="against", scope="form_away", model_p=0.92)]
+        self.assertEqual(select_bets(both), [])
 
-    def test_one_line_per_team_scope_stat_direction(self):
-        # A's home corners: over 7.5 (tightest line holding 8 of 8) must be the one shown, not 6.5 / 5.5
-        labels = [b.label for b in self.bets]
-        self.assertIn("A corners Over 7.5", labels)
-        self.assertNotIn("A corners Over 6.5", labels)
+    def test_the_cutoff_is_inclusive_and_just_under_is_kept(self):
+        for p, kept in ((S.CHALK_MAX_P, True), (S.CHALK_MAX_P + 0.01, False)):
+            self.assertEqual(bool(select_bets([tr(17.5, 9, 12, role="for", model_p=p),
+                                               tr(17.5, 9, 12, role="against", scope="form_away", model_p=p)])), kept)
 
-    def test_bet_groups_all_trends_at_its_line(self):
-        b = [b for b in self.bets if b.label == "A to win"][0]
-        scopes = {t.scope for t in b.trends}
-        self.assertIn("form_home", scopes)
-        self.assertTrue(all(t.p <= S.MAX_P for t in b.trends))
+    def test_long_shots_the_matchup_contradicts_are_dropped(self):
+        weird = [tr(9.5, 8, 10, direction="under", role="against", scope="form_all", model_p=0.04)]
+        self.assertEqual(select_bets(weird), [])
 
-    def test_caps_respected(self):
-        for g, cap in S.BET_CAPS.items():
-            self.assertLessEqual(len([b for b in self.bets if b.group == g]), cap)
-        self.assertLessEqual(max(len(b.trends) for b in self.bets), S.MAX_TRENDS_PER_BET)
+    def test_no_model_means_no_filtering(self):
+        self.assertEqual(len(select_bets([tr(17.5, 9, 12, model_p=None, role="for"),
+                                          tr(17.5, 9, 12, model_p=None, role="against", scope="form_away")])), 1)
 
+    # ---- sections ------------------------------------------------------------
+    def test_matching_needs_both_sides_in_form(self):
+        both = select_bets([tr(17.5, 8, 12, role="for"), tr(17.5, 7, 10, role="against", scope="form_away")])
+        self.assertTrue(both[0].matching)
+        self.assertEqual({t.role for t in both[0].trends[:2]}, {"for", "against"})
+        one = select_bets([tr(17.5, 9, 12, role="for")])
+        self.assertTrue(one and not one[0].matching)
+
+    def test_head_to_head_alone_never_makes_a_bet_or_a_match(self):
+        h2h = [tr(17.5, 6, 6, role="for", scope="h2h_all"), tr(17.5, 6, 6, role="against", scope="h2h_all")]
+        self.assertEqual(select_bets(h2h), [])
+        b = select_bets([tr(17.5, 9, 12, role="for"), tr(17.5, 6, 6, role="against", scope="h2h_all")])
+        self.assertFalse(b[0].matching)                       # h2h cannot be the second opinion
+        self.assertEqual(len(b[0].trends), 2)                 # but it still shows as support
+
+    def test_general_needs_seven_of_ten_or_better(self):
+        self.assertEqual(select_bets([tr(17.5, 5, 8)]), [])                   # 5/8 is fine in a match, not alone
+        self.assertEqual(select_bets([tr(17.5, 6, 10)]), [])                  # 60%
+        self.assertEqual(len(select_bets([tr(17.5, 7, 10)])), 1)              # 7/10 is welcome
+        self.assertEqual(select_bets([tr(17.5, 7, 8)]), [])                   # too few games
+
+    def test_five_of_eight_is_enough_when_both_sides_agree(self):
+        b = select_bets([tr(17.5, 5, 8, role="for"), tr(17.5, 5, 8, role="against", scope="form_away")])
+        self.assertTrue(b and b[0].matching)
+
+    # ---- ladders ---------------------------------------------------------------
+    def ladder(self, lines, direction="over", **kw):
+        out = []
+        for line, hits, window in lines:
+            out += [tr(line, hits, window, direction=direction, role="for", **kw),
+                    tr(line, hits, window, direction=direction, role="against", scope="form_away", **kw)]
+        return out
+
+    def test_only_the_most_aggressive_lines_of_a_ladder_are_kept(self):
+        lines = [(13.5, 11, 12), (14.5, 10, 12), (15.5, 9, 12), (16.5, 8, 12), (17.5, 7, 12)]
+        got = [b.line for b in select_bets(self.ladder(lines))]
+        self.assertEqual(sorted(got), [15.5, 16.5, 17.5])     # overs: the highest three
+        self.assertEqual(len(got), S.LADDER_MAX_LINES)
+
+    def test_unders_keep_the_lowest_lines(self):
+        lines = [(18.5, 7, 10), (19.5, 8, 10), (20.5, 9, 10), (21.5, 10, 10)]
+        got = [b.line for b in select_bets(self.ladder(lines, direction="under"))]
+        self.assertEqual(sorted(got), [18.5, 19.5, 20.5])
+
+    def test_ladder_is_listed_best_hit_rate_first(self):
+        lines = [(15.5, 11, 12), (16.5, 9, 12), (17.5, 7, 10)]
+        bets = select_bets(self.ladder(lines))
+        rates = [b.strength for b in bets]
+        self.assertEqual(rates, sorted(rates, reverse=True))
+        self.assertEqual([b.line for b in bets], [15.5, 16.5, 17.5])
+        # an uneven ladder is ordered by hit rate, not by line
+        odd = select_bets(self.ladder([(15.5, 9, 12), (16.5, 8, 12), (17.5, 7, 10)]))
+        self.assertEqual([b.line for b in odd], [15.5, 17.5, 16.5])
+
+    def test_counts_not_percentages(self):
+        d = select_bets(self.ladder([(16.5, 9, 12)]))[0].to_dict()
+        self.assertEqual((d["trends"][0]["hits"], d["trends"][0]["window"]), (9, 12))
+        self.assertNotIn("p", d)
+        self.assertNotIn("base_rate", d)
+        self.assertEqual(d["fair"], 17.0)
+
+    def test_ladder_cap_does_not_hide_other_ladders(self):
+        a = self.ladder([(16.5, 9, 12)], about="home")
+        b = self.ladder([(8.5, 9, 12)], about="away", subject="B")
+        self.assertEqual(len(select_bets(a + b)), 2)
+
+    # ---- no contradictions -----------------------------------------------------
     def test_no_contradictions(self):
-        for i, a in enumerate(self.bets):
-            for b in self.bets[i + 1:]:
+        both_ways = (self.ladder([(16.5, 9, 12)]) + self.ladder([(17.5, 9, 12)], direction="under"))
+        bets = select_bets(both_ways)
+        for i, a in enumerate(bets):
+            for b in bets[i + 1:]:
                 self.assertFalse(conflicts(a, b), f"{a.label} vs {b.label}")
 
     def test_conflict_rules(self):
         def bet(kind, stat, direction, line, about):
-            return Bet("k", "g", "l", about, kind, stat, direction, line, 0.001, None)
+            return Bet("k", "g", "l", about, kind, stat, direction, line, 0.8)
         self.assertTrue(conflicts(bet("total", "corners", "over", 9.5, "total"),
                                   bet("total", "corners", "under", 9.5, "total")))
         self.assertTrue(conflicts(bet("total", "corners", "over", 9.5, "total"),
@@ -283,26 +399,18 @@ class TestSelection(unittest.TestCase):
         self.assertTrue(conflicts(bet("btts", "goals", "yes", None, "total"),
                                   bet("team", "goals", "under", 0.5, "away")))
 
-    def test_conceded_goals_merge_into_the_team_goals_bet(self):
-        # A kept clean sheets at home -> supports "B not to score"; same bet as B's own 'not score' trends
-        keys = {t.bet_key for t in self.raw if t.market == "against:goals:under:0.5"}
-        self.assertTrue(all(k.startswith("team:goals:under:0.5|") for k in keys))
-
-    def test_report_contains_bets_not_raw(self):
-        rep = build_report(self.engine, [fx()])
-        f = rep["fixtures"][0]
-        self.assertEqual(len(f["bets"]), len(self.bets))
-        self.assertGreater(f["raw_trend_count"], len(f["bets"]))
-        self.assertEqual(set(f["bets"][0]), {"group", "label", "about", "stat", "direction", "line",
-                                             "matching", "p", "base_rate", "trends"})
+    def test_sections_are_ordered_matching_first_then_by_category(self):
+        trends = (self.ladder([(16.5, 9, 12)]) + [tr(1.5, 8, 10, stat="goals", group="goals", about="away", subject="B")])
+        flags = [b.matching for b in select_bets(trends)]
+        self.assertEqual(flags, sorted(flags, reverse=True))
 
 
 def matching_history():
     """A wins every home game; B loses every away game; A has 6 shots on target at home."""
     ms = season_history()
     d = date(2026, 9, 1)
-    for i in range(8):
-        d += timedelta(days=5)
+    for i in range(12):
+        d += timedelta(days=3)
         ms.append(mk(d, "C", "B", ft=(2, 0), ht=(1, 0), co_h=6, co_a=3, yc_h=1, yc_a=2, sot_h=7, sot_a=2))
     for m in ms:
         if m.home == "A":
@@ -315,11 +423,9 @@ def matching_history():
 class TestMatching(unittest.TestCase):
     def setUp(self):
         from unittest.mock import patch
-        for name, value in (("MIN_BASE_SAMPLE", 10_000),     # no league rates in this tiny league ...
-                            ("MATCH_MAX", 1000)):            # ... so everything ties: lift the display cap
-            patcher = patch.object(S, name, value)
-            patcher.start()
-            self.addCleanup(patcher.stop)
+        patcher = patch.object(S, "MATCH_MAX", 1000)          # lift the display cap for these checks
+        patcher.start()
+        self.addCleanup(patcher.stop)
         self.engine = TrendEngine({"la_liga": matching_history()})
         self.raw = self.engine.trends_for_fixture(fx())
 
@@ -331,10 +437,14 @@ class TestMatching(unittest.TestCase):
 
     def test_allowed_trend_text_and_merge_with_the_other_teams_bet(self):
         lost = find(self.raw, market="against:win:goals", subject="B", scope="form_away")[0]
-        self.assertEqual(lost.text, "B lost in last 8 away games (La Liga)")
+        self.assertEqual(lost.text, "B lost in last 12 away games (La Liga)")
         own = find(self.raw, market="win:goals", subject="A", scope="form_home")[0]
         self.assertEqual(lost.bet_key, own.bet_key)                       # the same bet: "A to win"
         self.assertEqual((lost.about, lost.bet, lost.role, own.role), ("home", "A to win", "against", "for"))
+
+    def test_conceded_goals_merge_into_the_team_goals_bet(self):
+        keys = {t.bet_key for t in self.raw if t.market == "against:goals:under:0.5"}
+        self.assertTrue(all(k.startswith("team:goals:under:0.5|") for k in keys))
 
     def test_result_bet_is_matching_when_both_sides_agree(self):
         bets = select_bets(self.raw)
@@ -347,36 +457,21 @@ class TestMatching(unittest.TestCase):
 
     def test_shots_on_target_matching(self):
         sot = [b for b in select_bets(self.raw) if b.stat == "sot" and b.matching and b.about == "home"]
-        self.assertTrue(sot, "A's own SOT streak + B allowing SOT should match")
+        self.assertTrue(sot, "A's own SOT form + B allowing SOT should match")
         self.assertEqual({t.role for t in sot[0].trends if t.scope.startswith("form")}, {"for", "against"})
 
     def test_only_one_strong_side_is_not_matching(self):
         ms = season_history()                                              # B now WINS its away games
         d = date(2026, 9, 1)
-        for i in range(8):
-            d += timedelta(days=5)
+        for i in range(12):
+            d += timedelta(days=3)
             ms.append(mk(d, "C", "B", ft=(0, 3), ht=(0, 1)))
         win = [b for b in select_bets(TrendEngine({"la_liga": ms}).trends_for_fixture(fx()))
                if b.label == "A to win"]
         self.assertTrue(win and not win[0].matching)
 
-    def test_head_to_head_alone_cannot_make_a_match_and_joint_cap(self):
-        def t(role, scope, p):
-            return Trend(league="la_liga", home="A", away="B", group="result", market="win:goals",
-                         bet="A to win", about="home", subject="A", scope=scope, stat="goals",
-                         kind="result", direction="win", line=None, hits=8, window=8, misses=0,
-                         base_rate=None, skipped_unknown=0, text="x", p=p, bet_key="win:goals|home",
-                         role=role, target_kind="result")
-        from engine.trends.select import _matching_bets
-        self.assertEqual(_matching_bets([t("for", "h2h_all", 0.001), t("against", "h2h_all", 0.001)]), [])
-        self.assertEqual(len(_matching_bets([t("for", "form_home", 0.01), t("against", "form_away", 0.01)])), 1)
-        self.assertEqual(len(_matching_bets([t("for", "form_home", 0.05), t("against", "form_away", 0.05)])), 1)
-        self.assertEqual(_matching_bets([t("for", "form_home", 0.05), t("against", "form_away", 0.20)]), [])
-
     def test_totals_match_when_both_teams_form_agree(self):
-        ms = matching_history()                      # A home games: 11 corners; C-B games: 9 corners
-        tr = TrendEngine({"la_liga": ms}).trends_for_fixture(fx())
-        tot = [b for b in select_bets(tr) if b.about == "total" and b.matching]
+        tot = [b for b in select_bets(self.raw) if b.about == "total" and b.matching]
         for b in tot:
             self.assertEqual({t.role for t in b.trends[:2]}, {"home", "away"})
 
@@ -481,11 +576,19 @@ class TestFixturesAndPage(unittest.TestCase):
         self.assertIn("21/11/2026", html)
         self.assertIn("Not shown (team name not matched): X v Y", html)
 
+    def test_updated_label_is_live_and_stale_warning_is_20_hours(self):
+        from engine.trends.page import render_page
+        html = render_page({"fixtures": [], "skipped": []}, self.NOW)
+        self.assertIn("min ago", html)                       # "Updated 12 min ago", not "less than an hour"
+        self.assertNotIn("less than an hour", html)
+        self.assertIn('data-hours="20"', html)               # warning only after 20 hours
+        self.assertIn("setInterval(tick", html)              # keeps counting while the tab stays open
+
     def test_page_has_matching_section_first_then_general(self):
         from engine.trends.page import render_page
         def bet(label, matching):
             return {"group": "goals", "label": label, "about": "home", "stat": "goals", "direction": "over",
-                    "line": 0.5, "matching": matching, "p": 0.001, "base_rate": 0.7,
+                    "line": 0.5, "matching": matching, "fair": 1.7,
                     "trends": [{"text": "X scored in last 8 games (La Liga)", "hits": 8, "window": 8,
                                 "scope": "form_all", "subject": "X", "role": "for"}]}
         f = {"league": "serie_a", "date": "2026-11-22", "kickoff": None, "home": "Juventus", "away": "Venezia",
@@ -495,6 +598,8 @@ class TestFixturesAndPage(unittest.TestCase):
         self.assertLess(html.index("Juventus to score"), html.index("General trends"))
         self.assertGreater(html.index("Venezia goals Under 2.5"), html.index("General trends"))
         self.assertIn("1 matching", html)
+        self.assertIn("fair line", html)
+        self.assertNotIn("league avg", html)
 
     def test_page_escapes_and_handles_no_fixtures(self):
         from engine.trends.page import render_page
@@ -527,7 +632,13 @@ class TestSmoke(unittest.TestCase):
         a, b = eng.trends_for_fixture(f), eng.trends_for_fixture(f)
         self.assertEqual([t.text for t in a], [t.text for t in b])
         for t in a:
-            self.assertTrue(rules.passes(t.window, t.hits))
+            self.assertGreaterEqual(t.hits / t.window, S.MIN_HIT_RATE)
+            self.assertGreaterEqual(t.window, 5)
+        bets_a, bets_b = select_bets(a), select_bets(b)
+        self.assertEqual([x.label for x in bets_a], [x.label for x in bets_b])
+        for x in bets_a:
+            if x.fair is not None:
+                self.assertGreater(x.fair, 0)
 
 
 if __name__ == "__main__":
