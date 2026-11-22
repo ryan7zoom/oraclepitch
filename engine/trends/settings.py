@@ -7,8 +7,7 @@ WHAT COUNTS AS A TREND
 ----------------------
 A trend is a fixed-size sample, shown as "hits/games" (9/12, 7/8, 5/8). For each
 team, scope and market the engine looks at the last 8, 10, 12, 15, 20, 30 games
-and keeps ONE window: the longest one with a hit rate of at least 70%, otherwise
-the longest one with at least 5/8 (62.5%).
+and keeps ONE window: the longest one with a hit rate of at least 70%. Nothing below 70% is shown.
 
 WHAT GETS SHOWN (engine/trends/select.py)
 -----------------------------------------
@@ -20,7 +19,7 @@ shown as a ladder per team/stat/direction: the most aggressive lines that still 
 sorted by hit rate.
 """
 
-MIN_HIT_RATE = 5 / 8             # floor for any trend row
+MIN_HIT_RATE = 0.70              # floor for any trend row (7/10 or better; 5/8 is no longer shown)
 GOOD_HIT_RATE = 0.70             # preferred rate when choosing a window
 FORM_WINDOWS = (8, 10, 12, 15, 20, 30)
 H2H_WINDOWS = (5, 6, 8, 10)      # meetings of the two teams are rare
@@ -107,8 +106,9 @@ MIN_FORM_WINDOW = 8
 GENERAL_MIN_WINDOW = 10
 GENERAL_MIN_RATE = 0.70
 
-# Lines kept per ladder (team/stat/direction): the most aggressive ones that still hold.
-LADDER_MAX_LINES = 3
+# Lines kept per ladder (team/stat/direction): ONE, the line with the best hit rate (e.g. only
+# one of Under 4.5 / 3.5 / 2.5, not all three: they are the same games counted again).
+LADDER_MAX_LINES = 1
 MAX_TRENDS_PER_BET = 4           # trend rows listed under one line
 
 # Max ladders shown per category, per section.
@@ -116,7 +116,7 @@ BET_CAPS = {
     "result": 3, "double_chance": 2, "goals": 6, "btts": 1, "corners": 6,
     "cards": 4, "shots": 4, "shots_on_target": 4, "offsides": 3,
 }
-MATCH_MAX = 10                   # matching ladders shown per match
+MATCH_MAX = 99                   # overall cap on matching bets: off. BET_CAPS limits each category instead
 
 # A stale page is flagged after this many hours (data is rebuilt a few times a day).
 STALE_AFTER_HOURS = 20
