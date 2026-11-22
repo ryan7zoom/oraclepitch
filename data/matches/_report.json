@@ -1,10 +1,9 @@
 {
-  "run_at": "2026-11-21T22:48:22.468473+00:00",
+  "run_at": "2026-11-22T03:27:03.354412+00:00",
   "epl": {
     "errors": [],
-    "budget_exhausted": true,
-    "espn_filled": 447,
-    "espn_created": 7,
+    "espn_filled": 33,
+    "espn_created": 0,
     "unmatched_espn_names": [],
     "rows_total": 2007,
     "latest_match": "2026-11-21",
@@ -16,18 +15,20 @@
       "co_h": 100.0,
       "yc_h": 100.0,
       "rc_h": 100.0,
-      "of_h": 93.2
+      "of_h": 100.0
     },
-    "offsides_missing_last_2_seasons": 33
+    "offsides_missing_last_2_seasons": 0
   },
   "la_liga": {
     "errors": [],
     "budget_exhausted": true,
-    "espn_filled": 0,
-    "espn_created": 0,
-    "unmatched_espn_names": [],
-    "rows_total": 2019,
-    "latest_match": "2026-11-08",
+    "espn_filled": 378,
+    "espn_created": 4,
+    "unmatched_espn_names": [
+      "Deportivo"
+    ],
+    "rows_total": 2023,
+    "latest_match": "2026-11-21",
     "coverage_last_2_seasons_pct": {
       "ft_h": 100.0,
       "ht_h": 100.0,
@@ -36,9 +37,9 @@
       "co_h": 100.0,
       "yc_h": 100.0,
       "rc_h": 100.0,
-      "of_h": 0.0
+      "of_h": 75.9
     },
-    "offsides_missing_last_2_seasons": 499
+    "offsides_missing_last_2_seasons": 121
   },
   "bundesliga": {
     "errors": [],
