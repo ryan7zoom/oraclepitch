@@ -12,9 +12,13 @@ Turns the raw trend list of a fixture into the BETS worth showing.
   2. One bet = one line (e.g. "Juventus shots Over 17.5") with the trends behind it,
      each shown as hits/games.
 
-  3. Lines of the same team / stat / direction form a LADDER. Only the most aggressive
-     LADDER_MAX_LINES lines that still hold are kept (highest lines for overs, lowest for
-     unders), and they are listed from the best hit rate to the worst.
+  Inside every category the bets run from the most relevant to the least relevant that still
+  passed the filters. Relevance = half the rows' hit rate (big samples trusted more), half the
+  fair-line model's chance for this match.
+
+  3. Lines of the same team / stat / direction form a LADDER. Only the best LADDER_MAX_LINES
+     (one) is kept, the line with the best hit rate, so the same games are not shown again
+     at a neighbouring line. Rows inside a bet go from best to worst.
 
 Two sections:
 
@@ -46,7 +50,7 @@ class Bet:
     stat: str
     direction: str
     line: object
-    strength: float                  # hit rate used for ordering (matching: mean of both sides)
+    strength: float                  # relevance score used for ordering: best (highest) first
     fair: Optional[float] = None     # fair line (expected count), when the model has one
     trends: List[Trend] = field(default_factory=list)
     matching: bool = False
@@ -94,8 +98,21 @@ def _is_form(t: Trend) -> bool:
     return t.scope.startswith("form")
 
 
+def shrunk(t: Trend) -> float:
+    """Hit rate that trusts big samples more: 28/30 counts for more than 8/8."""
+    return (t.hits + 2) / (t.window + 4)
+
+
 def _row_order(t: Trend):
-    return (-rate(t), -t.window)
+    return (-shrunk(t), -t.window)
+
+
+def relevance(rows: List[Trend]) -> float:
+    """How likely the bet is to hit, by our numbers: half the trend rows' (size-adjusted) hit rate,
+    half the model's chance for THIS match. With no model, the hit rate alone."""
+    hist = sum(shrunk(t) for t in rows) / len(rows)
+    p = rows[0].model_p
+    return hist if p is None else 0.5 * hist + 0.5 * p
 
 
 def _aggressive(b: Bet) -> float:
@@ -138,12 +155,12 @@ def _candidates(trends: List[Trend]):
                 best[t.role] = t
         if len(best) == 2:
             first = [best[roles[0]], best[roles[1]]]
-            matching.append(_make_bet(key, ts, first, sum(rate(t) for t in first) / 2, True))
+            matching.append(_make_bet(key, ts, first, relevance(first), True))
             continue
         strong = [t for t in form if t.window >= S.GENERAL_MIN_WINDOW and rate(t) >= S.GENERAL_MIN_RATE]
         if strong:
             top = min(strong, key=_row_order)
-            general.append(_make_bet(key, ts, [top], rate(top), False))
+            general.append(_make_bet(key, ts, [top], relevance([top]), False))
     return matching, general
 
 
@@ -154,9 +171,8 @@ def _ladders(bets: List[Bet]) -> List[List[Bet]]:
         by_ladder[b.ladder].append(b)
     out = []
     for lines in by_ladder.values():
-        lines.sort(key=lambda b: -_aggressive(b))
+        lines.sort(key=lambda b: (-b.strength, -_aggressive(b)))   # best hit rate first
         lines = lines[:S.LADDER_MAX_LINES]
-        lines.sort(key=lambda b: (-b.strength, -_aggressive(b)))
         out.append(lines)
     out.sort(key=lambda ls: -ls[0].strength)
     return out
