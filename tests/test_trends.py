@@ -367,6 +367,40 @@ class TestSelection(unittest.TestCase):
         small = self.ladder([(14.5, 8, 8)], about="away", subject="B")
         self.assertEqual([x.line for x in select_bets(big + small)], [16.5, 14.5])
 
+    def test_a_ladder_is_not_shown_twice_as_matching_and_general(self):
+        matching = self.ladder([(11.5, 9, 12)])                             # both sides back 11.5
+        general = [tr(13.5, 9, 10, role="for", scope="form_all")]           # one side only backs 13.5
+        bets = select_bets(matching + general)
+        self.assertEqual([b.line for b in bets], [11.5])
+
+    def test_no_unders_for_shots_and_shots_on_target(self):
+        from engine.trends.markets import build_catalog
+        for mk in build_catalog():
+            if mk.stat in S.NO_UNDER_STATS and mk.line is not None:
+                self.assertEqual(mk.direction, "over", mk.key)
+        self.assertTrue(any(mk.key == "team:corners:under:4.5" for mk in build_catalog()))   # other stats keep unders
+
+    def test_line_band_around_the_standard_number(self):
+        from engine.trends.standard import line_in_band
+        self.assertTrue(line_in_band("corners", 8.5, 6.3))       # Juventus under 8.5: fine
+        self.assertFalse(line_in_band("corners", 11.5, 6.3))     # far above the standard: dropped
+        self.assertFalse(line_in_band("corners", 15.5, 9.9))
+        self.assertTrue(line_in_band("corners", 14.5, 9.9))
+        self.assertFalse(line_in_band("corners", 2.5, 6.3))      # too low: no bookmaker line
+        self.assertTrue(line_in_band("corners", 3.5, 6.3))
+        self.assertTrue(line_in_band("goals", 0.5, 1.6))         # "to score" is always a normal market
+        self.assertTrue(line_in_band("corners", 30.5, None))     # no standard number: not filtered
+
+    def test_select_drops_lines_outside_the_band(self):
+        far = self.ladder([(11.5, 9, 12)], direction="under", stat="corners", group="corners")
+        for t in far:
+            t.std = 6.3
+        self.assertEqual(select_bets(far), [])
+        near = self.ladder([(8.5, 9, 12)], direction="under", stat="corners", group="corners")
+        for t in near:
+            t.std = 6.3
+        self.assertEqual(len(select_bets(near)), 1)
+
     def test_the_kept_line_is_the_best_hit_rate_not_the_highest_line(self):
         odd = select_bets(self.ladder([(15.5, 9, 12), (16.5, 8, 12), (17.5, 7, 10)]))
         self.assertEqual([b.line for b in odd], [15.5])
