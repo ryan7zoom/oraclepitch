@@ -1,0 +1,65 @@
+name: Trend preview
+
+# Manual only. Shows the trends for ONE fixture using the committed
+# data/matches/*.csv, so you can compare with the Scores24 page.
+# Does not change the repo.
+
+on:
+  workflow_dispatch:
+    inputs:
+      league:
+        description: 'epl | la_liga | bundesliga | serie_a | ligue_1'
+        required: true
+        default: 'la_liga'
+      home:
+        description: 'Home team, football-data.co.uk spelling (e.g. Barcelona, Man United, Ath Madrid)'
+        required: true
+        default: 'Barcelona'
+      away:
+        description: 'Away team, same spelling (e.g. Villarreal)'
+        required: true
+        default: 'Villarreal'
+      date:
+        description: 'Fixture date YYYY-MM-DD (empty = today, UTC)'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run trend engine
+        env:
+          LEAGUE: ${{ github.event.inputs.league }}
+          HOME_TEAM: ${{ github.event.inputs.home }}
+          AWAY_TEAM: ${{ github.event.inputs.away }}
+          FIXTURE_DATE: ${{ github.event.inputs.date }}
+        run: |
+          ARGS=(--league "$LEAGUE" --home "$HOME_TEAM" --away "$AWAY_TEAM" --per-bet 4 --out trend_preview.json)
+          if [ -n "$FIXTURE_DATE" ]; then ARGS+=(--date "$FIXTURE_DATE"); fi
+          python -m engine.trends.cli "${ARGS[@]}" | tee trend_preview.txt
+
+      - name: Job summary
+        if: always()
+        run: |
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          cat trend_preview.txt >> "$GITHUB_STEP_SUMMARY" || true
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: trend-preview
+          path: |
+            trend_preview.txt
+            trend_preview.json

@@ -1,20 +1,24 @@
-name: Daily EPL Dashboard
+name: Daily trends dashboard
+
+# Rebuilds docs/index.html from data/matches/*.csv.
+# Runs right after "Update match data" finishes, with timed backups
+# (40 min after each data run) in case the chained trigger is missed.
 
 on:
+  workflow_run:
+    workflows: ["Update match data"]
+    types: [completed]
   schedule:
-    - cron: '0 4 * * *'   # UTC 04:00
-    - cron: '0 12 * * *'  # UTC 12:00
-  workflow_dispatch:       # Manual trigger
+    - cron: '10 0 * * *'
+    - cron: '10 5 * * *'
+    - cron: '10 13 * * *'
+  workflow_dispatch:
     inputs:
-      date:
-        description: 'Date to check (YYYY-MM-DD), or leave blank for today - useful for testing against a date known to have fixtures, e.g. a weekend'
+      today:
+        description: 'Pretend today is YYYY-MM-DD (testing only). Leave empty for the real date.'
         required: false
         default: ''
 
-# Required for peaceiris/actions-gh-pages to push to the gh-pages
-# branch. Without this, the default GITHUB_TOKEN is read-only on many
-# repos (a GitHub security default) and the deploy step fails with a
-# 403 Permission denied error - confirmed via a real production run.
 permissions:
   contents: write
 
@@ -25,7 +29,9 @@ concurrency:
 
 jobs:
   dashboard:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
@@ -35,23 +41,20 @@ jobs:
 
       - run: pip install -r requirements.txt
 
-      # No API keys needed - fixture discovery uses OpenFootballSource
-      # (free, no-key, GitHub-hosted) and historical data uses
-      # XgaboraMatchDataSource (also free, no-key, GitHub-hosted). This
-      # run downloads the full ~45MB xgabora CSV each time (no local
-      # caching since there's no per-fixture stats fetch to cache
-      # anymore after the project's pivot away from prediction models -
-      # see config.py's module docstring) - this is slower than an
-      # incremental fetch would be, but stays well within GitHub
-      # Actions' free-tier time limits for a job like this.
-      - name: Run daily dashboard generation
-        run: python -m engine.main --date "${{ github.event.inputs.date || 'today' }}"
+      - name: Build trends dashboard
+        env:
+          TODAY: ${{ github.event.inputs.today }}
+        run: |
+          ARGS=()
+          if [ -n "$TODAY" ]; then ARGS+=(--today "$TODAY"); fi
+          python -m engine.trends.run "${ARGS[@]}" | tee run_summary.txt
+          echo '```' >> "$GITHUB_STEP_SUMMARY"; cat run_summary.txt >> "$GITHUB_STEP_SUMMARY"; echo '```' >> "$GITHUB_STEP_SUMMARY"
 
       - name: Save dashboard to repo
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/index.html data/predictions/latest.json
+          git add docs/index.html data/trends/latest.json
           git diff --staged --quiet || git commit -m "Update dashboard [skip ci]"
           git pull --rebase origin "${GITHUB_REF_NAME}"
           git push
