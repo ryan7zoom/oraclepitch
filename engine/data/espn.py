@@ -18,7 +18,7 @@ import logging
 import re
 import time
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 
 from engine.data import http
@@ -61,6 +61,8 @@ class EspnEvent:
     home_score: Optional[int]
     away_score: Optional[int]
     ht: Optional[tuple]     # (home, away) half-time goals, or None
+    kickoff: Optional[datetime] = None   # aware UTC datetime of kickoff, when ESPN gives it
+    state: str = ""                      # ESPN status: "pre" (not started), "in", "post"
 
 
 class EspnClient:
@@ -154,10 +156,18 @@ def parse_event(ev: dict) -> Optional[EspnEvent]:
         if completed and hs is not None and as_ is not None:
             ht = half_time_from_details(
                 comp.get("details"), home["team"]["id"], away["team"]["id"], hs, as_)
+        kickoff = None
+        try:
+            kickoff = datetime.fromisoformat(str(ev["date"]).replace("Z", "+00:00"))
+            if kickoff.tzinfo is None:
+                kickoff = kickoff.replace(tzinfo=timezone.utc)
+        except ValueError:
+            pass
+        state = str(ev.get("status", {}).get("type", {}).get("state") or "")
         return EspnEvent(
             id=str(ev["id"]), date=d, completed=completed,
             home_name=home["team"]["displayName"], away_name=away["team"]["displayName"],
-            home_score=hs, away_score=as_, ht=ht,
+            home_score=hs, away_score=as_, ht=ht, kickoff=kickoff, state=state,
         )
     except (KeyError, IndexError, TypeError, ValueError):
         return None

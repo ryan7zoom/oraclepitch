@@ -23,7 +23,10 @@ import re
 import unicodedata
 from typing import Optional
 
-from engine.sources.openfootball_source import _TEAM_NAME_MAPPINGS
+try:                                    # old table: optional, used only if still present
+    from engine.sources.openfootball_source import _TEAM_NAME_MAPPINGS
+except Exception:                       # pragma: no cover
+    _TEAM_NAME_MAPPINGS = {}
 
 
 def norm(s: str) -> str:
