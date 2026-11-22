@@ -36,7 +36,6 @@ from engine.trends.names import display as D
 from engine.trends.fair import FairModel, bet_probability
 from engine.trends.markets import Market, SeqData, build_catalog, market_flags
 from engine.trends.rules import pick_window
-from engine.trends.standard import standard_numbers
 from engine.trends.text import about_side, bet_label, trend_text
 
 SCOPE_ORDER = {"form_all": 0, "form_home": 1, "form_away": 1, "h2h_all": 2, "h2h_venue": 3}
@@ -74,7 +73,6 @@ class Trend:
     text: str
     model_p: Optional[float] = None   # fair-line model: chance the bet lands in THIS match (None = no model)
     fair: Optional[float] = None      # fair line (expected count) for count bets
-    std: Optional[float] = None       # standard number (average blend) the line band is built on
     bet_key: str = ""            # same bet => same key ("allowed" trends merge into the other team's bet)
     role: str = ""               # for | against (team bets) ; home | away (total / BTTS bets)
     target_kind: str = ""        # kind of the bet this trend supports (result | team | total | btts)
@@ -85,8 +83,6 @@ class Trend:
             d["model_p"] = round(d["model_p"], 3)
         if d["fair"] is not None:
             d["fair"] = round(d["fair"], 2)
-        if d["std"] is not None:
-            d["std"] = round(d["std"], 2)
         return d
 
 
@@ -136,7 +132,6 @@ class TrendEngine:
         found: List[Trend] = []
         history = self.by_team.get(fx.league, {})
         expect = self.fair_model(fx.league, fx.date).expect(fx.home, fx.away)
-        stds = standard_numbers(history, fx.home, fx.away, fx.date)
         for subject, side, opp in ((fx.home, "home", fx.away), (fx.away, "away", fx.home)):
             games = [(m, "home" if m.home == subject else "away")
                      for m in history.get(subject, []) if m.date < fx.date]
@@ -174,7 +169,6 @@ class TrendEngine:
                         misses=w.misses, skipped_unknown=w.skipped,
                         text=trend_text(mk, D(subject), D(opp), side, scope, w.hits, w.size, fx.league),
                         model_p=bet_probability(expect, mk, about), fair=fair,
-                        std=(stds.get((mk.stat, about)) if mk.line is not None and mk.kind != "result" else None),
                         bet_key=f"{mk.target_key}|{about}",
                         role=side if mk.shared else ("against" if mk.kind == "against" else "for"),
                         target_kind=mk.target_kind,
