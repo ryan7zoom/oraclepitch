@@ -32,6 +32,7 @@ from typing import Dict, List, Optional
 from engine.data.model import Match
 from engine.data.store import Store
 from engine.trends import settings as S
+from engine.trends.names import display as D
 from engine.trends.markets import Market, SeqData, build_catalog, market_flags
 from engine.trends.rules import find_window, tail_p
 from engine.trends.text import about_side, bet_label, trend_text
@@ -178,11 +179,11 @@ class TrendEngine:
                     about_name = fx.home if about == "home" else fx.away
                     found.append(Trend(
                         league=fx.league, home=fx.home, away=fx.away, group=mk.group,
-                        market=mk.key, bet=bet_label(mk, about_name), about=about,
+                        market=mk.key, bet=bet_label(mk, D(about_name)), about=about,
                         subject=subject, scope=scope, stat=mk.stat, kind=mk.kind,
                         direction=mk.direction, line=mk.line, hits=w.hits, window=w.size,
                         misses=w.misses, base_rate=base, skipped_unknown=w.skipped,
-                        text=trend_text(mk, subject, opp, side, scope, w.hits, w.size, fx.league),
+                        text=trend_text(mk, D(subject), D(opp), side, scope, w.hits, w.size, fx.league),
                         p=tail_p(w.size, w.hits, base),
                         bet_key=f"{mk.key.replace('against:', 'team:', 1)}|{about}",
                     ))

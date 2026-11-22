@@ -2,6 +2,7 @@
 engine/trends/page.py
 
 Renders the dashboard (docs/index.html): one static, self-contained page.
+Light by default with a dark-mode button (choice is remembered in the browser).
 Kickoff times are shown in GMT+8.
 """
 
@@ -9,43 +10,79 @@ from datetime import datetime, timedelta, timezone
 from html import escape
 
 from engine.trends import settings as S
+from engine.trends.names import display
 
 TZ = timezone(timedelta(hours=S.TZ_OFFSET_HOURS))
 
 CSS = """
-:root{--bg:#f6f7f9;--card:#fff;--ink:#14181f;--mute:#667085;--line:#e4e7ec;--accent:#0b6b3a;--chip:#e8f3ec}
-@media (prefers-color-scheme:dark){:root{--bg:#0e1116;--card:#171b22;--ink:#e8ebf0;--mute:#9aa4b2;--line:#262c36;--accent:#4cc38a;--chip:#17301f}}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-.wrap{max-width:880px;margin:0 auto;padding:16px}
-h1{margin:8px 0 2px;font-size:22px}.sub{color:var(--mute);font-size:13px;margin-bottom:12px}
-.filters{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 14px}
-.filters button{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:6px 12px;border-radius:999px;cursor:pointer;font:inherit;font-size:13px}
-.filters button.on{background:var(--accent);border-color:var(--accent);color:#fff}
-.day{margin:18px 0 6px;font-weight:600;color:var(--mute);font-size:13px;text-transform:uppercase;letter-spacing:.04em}
-details.fx{background:var(--card);border:1px solid var(--line);border-radius:12px;margin:8px 0;overflow:hidden}
-details.fx>summary{list-style:none;cursor:pointer;padding:12px 14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-details.fx>summary::-webkit-details-marker{display:none}
-.lg{font-size:11px;font-weight:700;color:var(--accent);background:var(--chip);padding:2px 8px;border-radius:999px}
-.ko{color:var(--mute);font-size:13px;min-width:44px}.teams{font-weight:600}.cnt{margin-left:auto;color:var(--mute);font-size:12px}
-.body{padding:0 14px 12px;border-top:1px solid var(--line)}
-.grp{margin:12px 0 4px;font-size:12px;font-weight:700;color:var(--mute);text-transform:uppercase;letter-spacing:.04em}
-.bet{margin:6px 0 10px}.bl{font-weight:600}.avg{font-weight:400;color:var(--mute);font-size:12px;margin-left:6px}
-.tr{display:flex;gap:8px;align-items:baseline;color:var(--ink);font-size:14px;margin:2px 0 0 2px}
-.hit{flex:none;min-width:46px;text-align:center;font-size:12px;font-weight:700;color:var(--accent);background:var(--chip);border-radius:6px;padding:1px 6px}
-.none{color:var(--mute);padding:10px 0}.foot{color:var(--mute);font-size:12px;margin:22px 0 8px}
+:root{--bg:#eef1f6;--card:#fff;--ink:#101828;--mute:#5b6b7f;--line:#dfe5ee;--accent:#0f766e;
+--chip:#e3f3f0;--banner:#d9f1ee;--banner-ink:#16403b;--shadow:0 1px 2px rgba(16,24,40,.04)}
+:root[data-theme=dark]{--bg:#0d1319;--card:#161d26;--ink:#e8edf3;--mute:#93a1b3;--line:#263140;--accent:#2dd4bf;
+--chip:#133a37;--banner:#123432;--banner-ink:#cdeee9;--shadow:none}
+*{box-sizing:border-box}
+html{color-scheme:light}html[data-theme=dark]{color-scheme:dark}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:880px;margin:0 auto;padding:28px 16px 48px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+h1{margin:0;font-size:34px;line-height:1.15;font-weight:800;letter-spacing:-.01em}
+#theme{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:10px 18px;border-radius:999px;
+cursor:pointer;font:inherit;font-size:16px;white-space:nowrap;box-shadow:var(--shadow)}
+.banner{margin:14px 0 10px;padding:16px 20px;border-radius:14px;background:var(--banner);color:var(--banner-ink);font-size:17px}
+.note{color:var(--mute);margin:0 0 16px;font-size:16px}
+details.card{background:var(--card);border:1px solid var(--line);border-radius:14px;margin:12px 0;box-shadow:var(--shadow);overflow:hidden}
+details.fx{border-left:5px solid var(--accent)}
+details.card>summary{list-style:none;cursor:pointer;padding:18px 22px;display:flex;align-items:center;gap:14px}
+details.card>summary::-webkit-details-marker{display:none}
+details.card>summary::before{content:"";flex:none;border-left:9px solid var(--accent);border-top:6px solid transparent;
+border-bottom:6px solid transparent;transition:transform .15s}
+details.card[open]>summary::before{transform:rotate(90deg)}
+.ttl{font-size:22px;font-weight:800;line-height:1.2}
+.sub{display:block;font-size:13px;font-weight:500;color:var(--mute);margin-top:3px}
+.lg{font-weight:700;color:var(--accent)}
+.body{padding:2px 22px 18px;border-top:1px solid var(--line)}
+.grp{margin:16px 0 6px;font-size:12px;font-weight:800;color:var(--mute);text-transform:uppercase;letter-spacing:.06em}
+.bet{margin:8px 0 14px}.bl{font-weight:700;font-size:16px}
+.avg{font-weight:400;color:var(--mute);font-size:12px;margin-left:8px}
+.tr{display:flex;gap:10px;align-items:baseline;font-size:15px;margin:3px 0 0 2px}
+.hit{flex:none;min-width:48px;text-align:center;font-size:12px;font-weight:800;color:var(--accent);
+background:var(--chip);border-radius:7px;padding:1px 7px}
+.day{margin:22px 2px 4px;font-weight:800;color:var(--mute);font-size:13px;text-transform:uppercase;letter-spacing:.06em}
+.chips{display:flex;flex-wrap:wrap;gap:8px;padding:2px 22px 18px;border-top:1px solid var(--line)}
+.chips button{border:1px solid var(--line);background:var(--bg);color:var(--ink);padding:7px 14px;border-radius:999px;
+cursor:pointer;font:inherit;font-size:14px}
+.chips button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.chips input{flex:1 1 200px;border:1px solid var(--line);background:var(--bg);color:var(--ink);padding:8px 14px;
+border-radius:999px;font:inherit;font-size:14px}
+.empty{color:var(--mute);padding:14px 4px}
+.foot{color:var(--mute);font-size:13px;margin:26px 2px 8px}
+@media (max-width:520px){h1{font-size:28px}.ttl{font-size:19px}#theme{padding:8px 14px;font-size:14px}}
 """
 
+HEAD_JS = """(function(){try{var t=localStorage.getItem('op-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}})();"""
+
 JS = """
-const btns=document.querySelectorAll('.filters button');
-btns.forEach(b=>b.addEventListener('click',()=>{
-  btns.forEach(x=>x.classList.remove('on'));b.classList.add('on');
-  const l=b.dataset.l;
-  document.querySelectorAll('[data-league]').forEach(e=>{e.style.display=(l==='all'||e.dataset.league===l)?'':'none'});
-  document.querySelectorAll('.day').forEach(d=>{
-    let n=d.nextElementSibling,show=false;
-    while(n&&!n.classList.contains('day')){if(n.style.display!=='none')show=true;n=n.nextElementSibling}
-    d.style.display=show?'':'none'});
-}));
+(function(){
+var r=document.documentElement,b=document.getElementById('theme');
+function lab(){b.textContent=r.getAttribute('data-theme')==='dark'?'\\u2600 Light mode':'\\u263E Dark mode'}
+b.onclick=function(){var n=r.getAttribute('data-theme')==='dark'?'light':'dark';r.setAttribute('data-theme',n);
+try{localStorage.setItem('op-theme',n)}catch(e){}lab()};lab();
+var ago=document.getElementById('ago');
+if(ago){var h=Math.floor((Date.now()-Date.parse(ago.dataset.ts))/36e5);
+ago.textContent=h<1?'less than an hour ago':h===1?'1 hour ago':h<48?h+' hours ago':Math.floor(h/24)+' days ago'}
+var league='all',q='';
+function apply(){
+document.querySelectorAll('details.fx').forEach(function(e){
+var okL=league==='all'||e.dataset.league===league,okQ=!q||e.dataset.teams.indexOf(q)>-1;
+e.style.display=okL&&okQ?'':'none'});
+document.querySelectorAll('.day').forEach(function(d){var n=d.nextElementSibling,s=false;
+while(n&&!n.classList.contains('day')){if(n.style.display!=='none')s=true;n=n.nextElementSibling}
+d.style.display=s?'':'none'})}
+var btns=document.querySelectorAll('.chips button');
+btns.forEach(function(x){x.addEventListener('click',function(){btns.forEach(function(y){y.classList.remove('on')});
+x.classList.add('on');league=x.dataset.l;apply()})});
+var s=document.getElementById('search');
+if(s)s.addEventListener('input',function(){q=s.value.trim().toLowerCase();apply()});
+})();
 """
 
 
@@ -59,13 +96,14 @@ def _bet_html(b) -> str:
     avg = (f'<span class="avg" title="How often this happens in the league anyway">'
            f'league avg {b["base_rate"]:.0%}</span>') if b.get("base_rate") is not None else ""
     rows = "".join(
-        f'<div class="tr"><span class="hit">{t["hits"]}/{t["window"]}</span>'
-        f'<span>{escape(t["text"])}</span></div>' for t in b["trends"])
+        f'<div class="tr"><span class="hit" title="happened in {t["hits"]} of the last {t["window"]} games">'
+        f'{t["hits"]}/{t["window"]}</span><span>{escape(t["text"])}</span></div>' for t in b["trends"])
     return f'<div class="bet"><div class="bl">{escape(b["label"])}{avg}</div>{rows}</div>'
 
 
 def _fixture_html(f) -> str:
     k = _kick(f)
+    home, away = display(f["home"]), display(f["away"])
     by_group = {}
     for b in f["bets"]:
         by_group.setdefault(b["group"], []).append(b)
@@ -74,21 +112,22 @@ def _fixture_html(f) -> str:
         if g in by_group:
             body += f'<div class="grp">{escape(S.GROUP_LABELS[g])}</div>' + "".join(_bet_html(b) for b in by_group[g])
     if not body:
-        body = '<div class="none">No strong trends for this match.</div>'
+        body = '<div class="empty">No strong trends for this match.</div>'
     label = S.LEAGUE_LABELS.get(f["league"], f["league"])
     n = len(f["bets"])
-    ko = f"{k:%H:%M}" if k else "--:--"
-    return (f'<details class="fx" data-league="{escape(f["league"])}"><summary>'
-            f'<span class="lg">{escape(label)}</span><span class="ko">{ko}</span>'
-            f'<span class="teams">{escape(f["home"])} v {escape(f["away"])}</span>'
-            f'<span class="cnt">{n} bet{"s" if n != 1 else ""}</span></summary>'
+    ko = f"{k:%H:%M} &middot; " if k else ""
+    teams = escape(f"{home} {away} {f['home']} {f['away']}".lower())
+    return (f'<details class="card fx" data-league="{escape(f["league"])}" data-teams="{teams}"><summary>'
+            f'<div><span class="ttl">{escape(home)} v {escape(away)}</span>'
+            f'<span class="sub"><span class="lg">{escape(label)}</span> &middot; {ko}'
+            f'{n} bet{"s" if n != 1 else ""}</span></div></summary>'
             f'<div class="body">{body}</div></details>')
 
 
 def render_page(report: dict, generated_at: datetime, data_through: dict = None) -> str:
     fixtures = report["fixtures"]
     leagues = [l for l in S.LEAGUE_LABELS if any(f["league"] == l for f in fixtures)]
-    filters = '<button class="on" data-l="all">All</button>' + "".join(
+    chips = '<button class="on" data-l="all">All</button>' + "".join(
         f'<button data-l="{l}">{escape(S.LEAGUE_LABELS[l])}</button>' for l in leagues)
 
     parts, last_day = [], None
@@ -100,24 +139,35 @@ def render_page(report: dict, generated_at: datetime, data_through: dict = None)
             last_day = day
         parts.append(_fixture_html(f))
     if not parts:
-        parts.append('<div class="none">No fixtures in the next few days (international break?).</div>')
+        parts.append('<div class="empty">No fixtures in the next few days (international break?).</div>')
 
-    through = ""
-    if data_through:
-        through = " &middot; data up to " + ", ".join(
-            f"{escape(S.LEAGUE_LABELS.get(l, l))} {d}" for l, d in data_through.items() if d)
     gen = generated_at.astimezone(TZ)
+    played = ""
+    if data_through:
+        latest = max((d for d in data_through.values() if d), default=None)
+        if latest:
+            played = f" &middot; matches played up to {datetime.fromisoformat(latest):%d/%m/%Y}"
+    skipped = report.get("skipped") or []
+    skipped_html = ""
+    if skipped:
+        names = ", ".join(escape(f"{s['home']} v {s['away']}") for s in skipped)
+        skipped_html = f'<div class="foot">Not shown (team name not matched): {names}.</div>'
+    n_fx = len(fixtures)
     return f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>OraclePitch - football trends</title><style>{CSS}</style></head>
+<title>OraclePitch - football trends</title>
+<script>{HEAD_JS}</script><style>{CSS}</style></head>
 <body><div class="wrap">
-<h1>OraclePitch</h1>
-<div class="sub">Statistical streaks for upcoming top-5-league matches. Not predictions or betting advice.
-Updated {gen:%d %b %Y %H:%M} GMT+8{through}.</div>
-<div class="filters">{filters}</div>
+<div class="top"><h1>OraclePitch</h1><button id="theme" type="button">&#9790; Dark mode</button></div>
+<div class="banner">Trends built {gen:%d/%m/%Y %H:%M} (GMT+8){played}. Updated <span id="ago" data-ts="{generated_at.astimezone(timezone.utc).isoformat()}"></span>.</div>
+<p class="note">Streaks from league games only, for the next few days of EPL, La Liga, Bundesliga, Serie A and Ligue 1.
+Not predictions or betting advice.</p>
+<details class="card"><summary><span class="ttl">Filters &middot; {n_fx} match{"es" if n_fx != 1 else ""}</span></summary>
+<div class="chips">{chips}<input id="search" type="search" placeholder="Search team"></div></details>
 {''.join(parts)}
-<div class="foot">Each line reads "hits/games": e.g. 15/16 = happened in 15 of the last 16 qualifying games
-(league games only). "League avg" is how often it happens in that league anyway - a streak
-means more when that number is low. Streaks can occur by chance; use your own judgment.</div>
+{skipped_html}
+<div class="foot">Each line reads "hits/games": 15/16 means it happened in 15 of the last 16 qualifying games.
+"League avg" is how often it happens in that league anyway - a streak means more when that number is low.
+Streaks can happen by chance; use your own judgment.</div>
 </div><script>{JS}</script></body></html>"""
