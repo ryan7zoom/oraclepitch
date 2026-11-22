@@ -296,7 +296,7 @@ class TestSelection(unittest.TestCase):
         self.assertEqual(select_bets(both), [])
 
     def test_the_cutoff_is_inclusive_and_just_under_is_kept(self):
-        for p, kept in ((S.CHALK_MAX_P, True), (S.CHALK_MAX_P + 0.01, False)):
+        for p, kept in ((S.CHALK_MAX_P_BY_MARKET[("shots", "over", "team")], True), (S.CHALK_MAX_P_BY_MARKET[("shots", "over", "team")] + 0.01, False)):
             self.assertEqual(bool(select_bets([tr(17.5, 9, 12, role="for", model_p=p),
                                                tr(17.5, 9, 12, role="against", scope="form_away", model_p=p)])), kept)
 
@@ -358,8 +358,8 @@ class TestSelection(unittest.TestCase):
 
     def test_bets_in_a_category_run_from_most_to_least_relevant(self):
         # same hit rate, but the model likes 14.5 more than 16.5 -> 14.5 first
-        a = self.ladder([(16.5, 9, 12)], about="home", subject="A", model_p=0.55)
-        b = self.ladder([(14.5, 9, 12)], about="away", subject="B", model_p=0.80)
+        a = self.ladder([(16.5, 9, 12)], about="home", subject="A", model_p=0.45)
+        b = self.ladder([(14.5, 9, 12)], about="away", subject="B", model_p=0.68)
         got = [x.line for x in select_bets(a + b)]
         self.assertEqual(got, [14.5, 16.5])
         # a big sample beats a tiny perfect one when the model agrees
@@ -380,26 +380,22 @@ class TestSelection(unittest.TestCase):
                 self.assertEqual(mk.direction, "over", mk.key)
         self.assertTrue(any(mk.key == "team:corners:under:4.5" for mk in build_catalog()))   # other stats keep unders
 
-    def test_line_band_around_the_standard_number(self):
-        from engine.trends.standard import line_in_band
-        self.assertTrue(line_in_band("corners", 8.5, 6.3))       # Juventus under 8.5: fine
-        self.assertFalse(line_in_band("corners", 11.5, 6.3))     # far above the standard: dropped
-        self.assertFalse(line_in_band("corners", 15.5, 9.9))
-        self.assertTrue(line_in_band("corners", 14.5, 9.9))
-        self.assertFalse(line_in_band("corners", 2.5, 6.3))      # too low: no bookmaker line
-        self.assertTrue(line_in_band("corners", 3.5, 6.3))
-        self.assertTrue(line_in_band("goals", 0.5, 1.6))         # "to score" is always a normal market
-        self.assertTrue(line_in_band("corners", 30.5, None))     # no standard number: not filtered
-
-    def test_select_drops_lines_outside_the_band(self):
-        far = self.ladder([(11.5, 9, 12)], direction="under", stat="corners", group="corners")
-        for t in far:
-            t.std = 6.3
-        self.assertEqual(select_bets(far), [])
-        near = self.ladder([(8.5, 9, 12)], direction="under", stat="corners", group="corners")
-        for t in near:
-            t.std = 6.3
-        self.assertEqual(len(select_bets(near)), 1)
+    def test_chalk_cap_is_per_market(self):
+        from engine.trends.select import chalk_cap
+        self.assertEqual(chalk_cap("shots", "over", "home"), 0.70)
+        self.assertEqual(chalk_cap("corners", "under", "home"), 0.70)     # a team's corners under: tight
+        self.assertEqual(chalk_cap("corners", "under", "total"), 0.83)    # match total under: looser
+        self.assertEqual(chalk_cap("goals", "over", "home"), S.CHALK_MAX_P)
+        # the cases the bookmaker does not offer (model chance 81-89%) are dropped
+        for stat, p, d in (("shots", 0.89, "over"), ("sot", 0.89, "over"), ("corners", 0.87, "over"), ("corners", 0.81, "under")):
+            t = [tr(11.5, 9, 12, role="for", stat=stat, direction=d, model_p=p),
+                 tr(11.5, 9, 12, role="against", scope="form_away", stat=stat, direction=d, model_p=p)]
+            self.assertEqual(select_bets(t), [], f"{stat} {d} {p}")
+        # lines the bookmaker does offer stay: shots over 56%, a team's corners under 66%
+        for stat, p, d in (("shots", 0.56, "over"), ("corners", 0.66, "under")):
+            ok = [tr(8.5, 9, 12, role="for", stat=stat, direction=d, model_p=p),
+                  tr(8.5, 9, 12, role="against", scope="form_away", stat=stat, direction=d, model_p=p)]
+            self.assertEqual(len(select_bets(ok)), 1, f"{stat} {d}")
 
     def test_the_kept_line_is_the_best_hit_rate_not_the_highest_line(self):
         odd = select_bets(self.ladder([(15.5, 9, 12), (16.5, 8, 12), (17.5, 7, 10)]))
