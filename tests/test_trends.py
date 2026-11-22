@@ -16,7 +16,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from engine.data.model import Match
 from engine.trends import rules
 from datetime import datetime, timezone
-from engine.trends.engine import Fixture, TrendEngine, build_report
+from engine.trends.engine import Fixture, Trend, TrendEngine, build_report
 from engine.trends.select import Bet, conflicts, select_bets
 from engine.trends import settings as S
 from engine.trends.markets import SeqData, build_catalog, market_flags
@@ -294,7 +294,91 @@ class TestSelection(unittest.TestCase):
         self.assertEqual(len(f["bets"]), len(self.bets))
         self.assertGreater(f["raw_trend_count"], len(f["bets"]))
         self.assertEqual(set(f["bets"][0]), {"group", "label", "about", "stat", "direction", "line",
-                                             "p", "base_rate", "trends"})
+                                             "matching", "p", "base_rate", "trends"})
+
+
+def matching_history():
+    """A wins every home game; B loses every away game; A has 6 shots on target at home."""
+    ms = season_history()
+    d = date(2026, 9, 1)
+    for i in range(8):
+        d += timedelta(days=5)
+        ms.append(mk(d, "C", "B", ft=(2, 0), ht=(1, 0), co_h=6, co_a=3, yc_h=1, yc_a=2, sot_h=7, sot_a=2))
+    for m in ms:
+        if m.home == "A":
+            m.sot_h, m.sot_a = 6, 2
+        elif m.sot_h is None:
+            m.sot_h, m.sot_a = 3, 3
+    return ms
+
+
+class TestMatching(unittest.TestCase):
+    def setUp(self):
+        from unittest.mock import patch
+        for name, value in (("MIN_BASE_SAMPLE", 10_000),     # no league rates in this tiny league ...
+                            ("MATCH_MAX", 1000)):            # ... so everything ties: lift the display cap
+            patcher = patch.object(S, name, value)
+            patcher.start()
+            self.addCleanup(patcher.stop)
+        self.engine = TrendEngine({"la_liga": matching_history()})
+        self.raw = self.engine.trends_for_fixture(fx())
+
+    def test_allowed_trends_exist_for_every_stat_and_results(self):
+        keys = {t.market for t in self.raw if t.kind == "against"}
+        self.assertIn("against:win:goals", keys)                          # B lost
+        self.assertIn("against:goals:over:0.5", keys)                     # B conceded
+        self.assertTrue(any(k.startswith("against:sot:over") for k in keys))   # B allowed shots on target
+
+    def test_allowed_trend_text_and_merge_with_the_other_teams_bet(self):
+        lost = find(self.raw, market="against:win:goals", subject="B", scope="form_away")[0]
+        self.assertEqual(lost.text, "B lost in last 8 away games (La Liga)")
+        own = find(self.raw, market="win:goals", subject="A", scope="form_home")[0]
+        self.assertEqual(lost.bet_key, own.bet_key)                       # the same bet: "A to win"
+        self.assertEqual((lost.about, lost.bet, lost.role, own.role), ("home", "A to win", "against", "for"))
+
+    def test_result_bet_is_matching_when_both_sides_agree(self):
+        bets = select_bets(self.raw)
+        win = [b for b in bets if b.label == "A to win"][0]
+        self.assertTrue(win.matching)
+        self.assertEqual({t.role for t in win.trends[:2]}, {"for", "against"})
+        flags = [b.matching for b in bets]
+        self.assertTrue(flags[0])
+        self.assertEqual(flags, sorted(flags, reverse=True))              # matching bets come first
+
+    def test_shots_on_target_matching(self):
+        sot = [b for b in select_bets(self.raw) if b.stat == "sot" and b.matching and b.about == "home"]
+        self.assertTrue(sot, "A's own SOT streak + B allowing SOT should match")
+        self.assertEqual({t.role for t in sot[0].trends if t.scope.startswith("form")}, {"for", "against"})
+
+    def test_only_one_strong_side_is_not_matching(self):
+        ms = season_history()                                              # B now WINS its away games
+        d = date(2026, 9, 1)
+        for i in range(8):
+            d += timedelta(days=5)
+            ms.append(mk(d, "C", "B", ft=(0, 3), ht=(0, 1)))
+        win = [b for b in select_bets(TrendEngine({"la_liga": ms}).trends_for_fixture(fx()))
+               if b.label == "A to win"]
+        self.assertTrue(win and not win[0].matching)
+
+    def test_head_to_head_alone_cannot_make_a_match_and_joint_cap(self):
+        def t(role, scope, p):
+            return Trend(league="la_liga", home="A", away="B", group="result", market="win:goals",
+                         bet="A to win", about="home", subject="A", scope=scope, stat="goals",
+                         kind="result", direction="win", line=None, hits=8, window=8, misses=0,
+                         base_rate=None, skipped_unknown=0, text="x", p=p, bet_key="win:goals|home",
+                         role=role, target_kind="result")
+        from engine.trends.select import _matching_bets
+        self.assertEqual(_matching_bets([t("for", "h2h_all", 0.001), t("against", "h2h_all", 0.001)]), [])
+        self.assertEqual(len(_matching_bets([t("for", "form_home", 0.01), t("against", "form_away", 0.01)])), 1)
+        self.assertEqual(len(_matching_bets([t("for", "form_home", 0.05), t("against", "form_away", 0.05)])), 1)
+        self.assertEqual(_matching_bets([t("for", "form_home", 0.05), t("against", "form_away", 0.20)]), [])
+
+    def test_totals_match_when_both_teams_form_agree(self):
+        ms = matching_history()                      # A home games: 11 corners; C-B games: 9 corners
+        tr = TrendEngine({"la_liga": ms}).trends_for_fixture(fx())
+        tot = [b for b in select_bets(tr) if b.about == "total" and b.matching]
+        for b in tot:
+            self.assertEqual({t.role for t in b.trends[:2]}, {"home", "away"})
 
 
 def _espn_event(i, home, away, when, state="pre", completed=False):
@@ -396,6 +480,21 @@ class TestFixturesAndPage(unittest.TestCase):
         self.assertNotIn("prefers-color-scheme", html)            # light unless the button is clicked
         self.assertIn("21/11/2026", html)
         self.assertIn("Not shown (team name not matched): X v Y", html)
+
+    def test_page_has_matching_section_first_then_general(self):
+        from engine.trends.page import render_page
+        def bet(label, matching):
+            return {"group": "goals", "label": label, "about": "home", "stat": "goals", "direction": "over",
+                    "line": 0.5, "matching": matching, "p": 0.001, "base_rate": 0.7,
+                    "trends": [{"text": "X scored in last 8 games (La Liga)", "hits": 8, "window": 8,
+                                "scope": "form_all", "subject": "X", "role": "for"}]}
+        f = {"league": "serie_a", "date": "2026-11-22", "kickoff": None, "home": "Juventus", "away": "Venezia",
+             "raw_trend_count": 9, "bets": [bet("Juventus to score", True), bet("Venezia goals Under 2.5", False)]}
+        html = render_page({"fixtures": [f], "skipped": []}, self.NOW)
+        self.assertLess(html.index("Highest matching trends"), html.index("General trends"))
+        self.assertLess(html.index("Juventus to score"), html.index("General trends"))
+        self.assertGreater(html.index("Venezia goals Under 2.5"), html.index("General trends"))
+        self.assertIn("1 matching", html)
 
     def test_page_escapes_and_handles_no_fixtures(self):
         from engine.trends.page import render_page
