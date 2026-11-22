@@ -1,5 +1,5 @@
 {
-  "run_at": "2026-11-22T08:18:26.472878+00:00",
+  "run_at": "2026-11-22T12:48:05.730023+00:00",
   "epl": {
     "errors": [],
     "espn_filled": 0,
@@ -22,7 +22,7 @@
   "la_liga": {
     "errors": [],
     "espn_filled": 0,
-    "espn_created": 1,
+    "espn_created": 0,
     "unmatched_espn_names": [],
     "rows_total": 2024,
     "latest_match": "2026-11-21",
@@ -40,8 +40,8 @@
   },
   "bundesliga": {
     "errors": [],
-    "espn_filled": 43,
-    "espn_created": 1,
+    "espn_filled": 0,
+    "espn_created": 0,
     "unmatched_espn_names": [],
     "rows_total": 1618,
     "latest_match": "2026-11-21",
@@ -95,5 +95,5 @@
     },
     "offsides_missing_last_2_seasons": 1
   },
-  "_espn_requests_used": 139
+  "_espn_requests_used": 50
 }
