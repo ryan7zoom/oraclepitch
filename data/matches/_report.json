@@ -1,5 +1,5 @@
 {
-  "run_at": "2026-11-22T08:00:17.743403+00:00",
+  "run_at": "2026-11-22T08:18:26.472878+00:00",
   "epl": {
     "errors": [],
     "espn_filled": 0,
@@ -21,12 +21,10 @@
   },
   "la_liga": {
     "errors": [],
-    "espn_filled": 109,
-    "espn_created": 0,
-    "unmatched_espn_names": [
-      "Deportivo"
-    ],
-    "rows_total": 2023,
+    "espn_filled": 0,
+    "espn_created": 1,
+    "unmatched_espn_names": [],
+    "rows_total": 2024,
     "latest_match": "2026-11-21",
     "coverage_last_2_seasons_pct": {
       "ft_h": 100.0,
@@ -42,12 +40,10 @@
   },
   "bundesliga": {
     "errors": [],
-    "espn_filled": 344,
-    "espn_created": 6,
-    "unmatched_espn_names": [
-      "FC Cologne"
-    ],
-    "rows_total": 1617,
+    "espn_filled": 43,
+    "espn_created": 1,
+    "unmatched_espn_names": [],
+    "rows_total": 1618,
     "latest_match": "2026-11-21",
     "coverage_last_2_seasons_pct": {
       "ft_h": 100.0,
@@ -57,14 +53,14 @@
       "co_h": 100.0,
       "yc_h": 100.0,
       "rc_h": 100.0,
-      "of_h": 89.1
+      "of_h": 100.0
     },
-    "offsides_missing_last_2_seasons": 43
+    "offsides_missing_last_2_seasons": 0
   },
   "serie_a": {
     "errors": [],
-    "espn_filled": 490,
-    "espn_created": 4,
+    "espn_filled": 0,
+    "espn_created": 0,
     "unmatched_espn_names": [],
     "rows_total": 2014,
     "latest_match": "2026-11-21",
@@ -82,8 +78,8 @@
   },
   "ligue_1": {
     "errors": [],
-    "espn_filled": 395,
-    "espn_created": 6,
+    "espn_filled": 0,
+    "espn_created": 0,
     "unmatched_espn_names": [],
     "rows_total": 1774,
     "latest_match": "2026-11-21",
@@ -99,5 +95,5 @@
     },
     "offsides_missing_last_2_seasons": 1
   },
-  "_espn_requests_used": 1884
+  "_espn_requests_used": 139
 }

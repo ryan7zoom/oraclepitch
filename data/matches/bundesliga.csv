@@ -1231,7 +1231,7 @@ bundesliga,2025,2025-08-23,Leverkusen,Hoffenheim,1,2,1,1,7,10,2,5,6,4,0,4,0,0,1,
 bundesliga,2025,2025-08-23,St Pauli,Dortmund,3,3,0,1,11,8,7,7,5,2,2,3,0,1,4,3,746725,fd+espn,0
 bundesliga,2025,2025-08-23,Union Berlin,Stuttgart,2,1,2,0,8,21,2,6,5,11,4,4,0,0,2,1,746720,fd+espn,0
 bundesliga,2025,2025-08-24,M'gladbach,Hamburg,0,0,0,0,17,7,4,2,7,6,2,1,0,0,1,4,746723,fd+espn,0
-bundesliga,2025,2025-08-24,Mainz,FC Koln,0,1,0,0,19,12,2,2,8,3,0,2,1,0,,,,fd,1
+bundesliga,2025,2025-08-24,Mainz,FC Koln,0,1,0,0,19,12,2,2,8,3,0,2,1,0,5,0,746721,fd+espn,1
 bundesliga,2025,2025-08-29,Hamburg,St Pauli,0,2,0,1,5,17,2,6,2,5,3,3,1,0,1,2,746730,fd+espn,0
 bundesliga,2025,2025-08-30,Augsburg,Bayern Munich,2,3,0,2,10,20,3,10,7,5,3,4,0,0,4,3,746729,fd+espn,0
 bundesliga,2025,2025-08-30,Hoffenheim,Ein Frankfurt,1,3,0,2,17,9,5,6,4,5,2,3,0,0,3,1,746733,fd+espn,0
@@ -1239,7 +1239,7 @@ bundesliga,2025,2025-08-30,RB Leipzig,Heidenheim,2,0,0,0,19,5,5,3,4,3,2,5,0,0,1,
 bundesliga,2025,2025-08-30,Stuttgart,M'gladbach,1,0,0,0,13,15,5,6,6,10,2,1,0,0,2,4,746734,fd+espn,0
 bundesliga,2025,2025-08-30,Werder Bremen,Leverkusen,3,3,1,2,12,10,5,4,3,7,4,3,1,0,1,1,746732,fd+espn,0
 bundesliga,2025,2025-08-31,Dortmund,Union Berlin,3,0,1,0,11,12,6,3,4,6,0,0,0,0,1,1,746728,fd+espn,0
-bundesliga,2025,2025-08-31,FC Koln,Freiburg,4,1,1,0,18,12,6,2,3,5,2,1,0,0,,,,fd,1
+bundesliga,2025,2025-08-31,FC Koln,Freiburg,4,1,1,0,18,12,6,2,3,5,2,1,0,0,1,2,746727,fd+espn,1
 bundesliga,2025,2025-08-31,Wolfsburg,Mainz,1,1,1,0,11,17,3,3,3,10,3,5,1,0,0,0,746735,fd+espn,0
 bundesliga,2025,2025-09-12,Leverkusen,Ein Frankfurt,3,1,2,0,18,13,8,2,4,8,5,3,2,0,3,0,746739,fd+espn,0
 bundesliga,2025,2025-09-13,Bayern Munich,Hamburg,5,0,4,0,22,9,12,2,5,3,2,2,0,0,1,2,746741,fd+espn,0
@@ -1247,14 +1247,14 @@ bundesliga,2025,2025-09-13,Freiburg,Stuttgart,3,1,0,1,14,7,6,2,7,1,1,1,1,0,0,2,7
 bundesliga,2025,2025-09-13,Heidenheim,Dortmund,0,2,0,2,6,17,1,8,5,4,2,3,1,0,2,2,746736,fd+espn,0
 bundesliga,2025,2025-09-13,Mainz,RB Leipzig,0,1,0,1,13,19,2,3,3,5,1,0,0,0,4,1,746738,fd+espn,0
 bundesliga,2025,2025-09-13,Union Berlin,Hoffenheim,2,4,0,2,20,9,7,8,9,2,1,1,1,0,2,0,746737,fd+espn,0
-bundesliga,2025,2025-09-13,Wolfsburg,FC Koln,3,3,1,1,14,14,6,8,7,4,2,3,0,0,,,,fd,1
+bundesliga,2025,2025-09-13,Wolfsburg,FC Koln,3,3,1,1,14,14,6,8,7,4,2,3,0,0,0,1,746744,fd+espn,1
 bundesliga,2025,2025-09-14,M'gladbach,Werder Bremen,0,4,0,2,19,12,3,7,9,4,1,0,0,0,0,1,746740,fd+espn,0
 bundesliga,2025,2025-09-14,St Pauli,Augsburg,2,1,1,1,13,10,7,5,3,1,1,4,0,0,0,3,746742,fd+espn,0
 bundesliga,2025,2025-09-19,Stuttgart,St Pauli,2,0,1,0,17,9,8,2,8,4,0,2,0,0,2,0,746753,fd+espn,0
 bundesliga,2025,2025-09-20,Augsburg,Mainz,1,4,0,2,18,12,5,4,6,6,1,2,0,1,2,2,746748,fd+espn,0
 bundesliga,2025,2025-09-20,Hamburg,Heidenheim,2,1,1,0,22,20,9,8,1,12,5,1,0,0,1,2,746749,fd+espn,0
 bundesliga,2025,2025-09-20,Hoffenheim,Bayern Munich,1,4,0,1,12,18,4,10,5,5,1,2,0,0,2,1,746752,fd+espn,0
-bundesliga,2025,2025-09-20,RB Leipzig,FC Koln,3,1,3,1,18,13,8,2,9,5,1,1,0,0,,,,fd,1
+bundesliga,2025,2025-09-20,RB Leipzig,FC Koln,3,1,3,1,18,13,8,2,9,5,1,1,0,0,3,0,746750,fd+espn,1
 bundesliga,2025,2025-09-20,Werder Bremen,Freiburg,0,3,0,1,12,10,5,5,2,0,5,2,0,0,1,2,746751,fd+espn,0
 bundesliga,2025,2025-09-21,Dortmund,Wolfsburg,1,0,1,0,12,10,4,1,9,3,1,0,0,0,2,0,746746,fd+espn,0
 bundesliga,2025,2025-09-21,Ein Frankfurt,Union Berlin,3,4,1,2,19,11,10,5,5,1,3,2,0,0,2,5,746747,fd+espn,0
@@ -1265,10 +1265,10 @@ bundesliga,2025,2025-09-27,M'gladbach,Ein Frankfurt,4,6,0,5,11,21,8,7,4,6,1,2,0,
 bundesliga,2025,2025-09-27,Mainz,Dortmund,0,2,0,2,8,10,2,4,7,5,2,1,1,0,5,2,746757,fd+espn,0
 bundesliga,2025,2025-09-27,St Pauli,Leverkusen,1,2,1,1,13,5,6,4,13,1,3,5,0,0,2,0,746760,fd+espn,0
 bundesliga,2025,2025-09-27,Wolfsburg,RB Leipzig,0,1,0,1,22,20,4,6,6,11,2,2,0,0,0,5,746761,fd+espn,0
-bundesliga,2025,2025-09-28,FC Koln,Stuttgart,1,2,1,1,14,15,6,5,8,8,2,2,0,0,,,,fd,1
+bundesliga,2025,2025-09-28,FC Koln,Stuttgart,1,2,1,1,14,15,6,5,8,8,2,2,0,0,4,1,746755,fd+espn,1
 bundesliga,2025,2025-09-28,Freiburg,Hoffenheim,1,1,1,1,6,15,1,4,6,8,3,1,0,0,1,2,746758,fd+espn,0
 bundesliga,2025,2025-09-28,Union Berlin,Hamburg,0,0,0,0,11,16,2,6,5,3,2,2,0,1,1,3,746756,fd+espn,0
-bundesliga,2025,2025-10-03,Hoffenheim,FC Koln,0,1,0,1,15,10,4,4,11,6,3,1,0,0,,,,fd,1
+bundesliga,2025,2025-10-03,Hoffenheim,FC Koln,0,1,0,1,15,10,4,4,11,6,3,1,0,0,1,2,746771,fd+espn,1
 bundesliga,2025,2025-10-04,Augsburg,Wolfsburg,3,1,1,0,10,14,5,4,10,5,2,1,0,0,5,2,746767,fd+espn,0
 bundesliga,2025,2025-10-04,Dortmund,RB Leipzig,1,1,1,1,15,13,3,3,7,7,1,3,0,0,2,3,746765,fd+espn,0
 bundesliga,2025,2025-10-04,Ein Frankfurt,Bayern Munich,0,3,0,2,6,12,1,3,4,3,1,2,0,0,0,5,746763,fd+espn,0
@@ -1279,7 +1279,7 @@ bundesliga,2025,2025-10-05,M'gladbach,Freiburg,0,0,0,0,9,12,5,1,4,1,3,1,0,0,0,3,
 bundesliga,2025,2025-10-05,Stuttgart,Heidenheim,1,0,0,0,18,5,6,1,1,1,1,1,0,0,2,3,746770,fd+espn,0
 bundesliga,2025,2025-10-17,Union Berlin,M'gladbach,3,1,2,1,16,8,5,2,6,6,5,3,0,0,1,2,746779,fd+espn,0
 bundesliga,2025,2025-10-18,Bayern Munich,Dortmund,2,1,1,0,15,8,7,1,4,3,1,3,0,0,2,1,746776,fd+espn,0
-bundesliga,2025,2025-10-18,FC Koln,Augsburg,1,1,0,0,9,10,2,4,5,2,2,2,0,0,,,,fd,1
+bundesliga,2025,2025-10-18,FC Koln,Augsburg,1,1,0,0,9,10,2,4,5,2,2,2,0,0,6,0,746780,fd+espn,1
 bundesliga,2025,2025-10-18,Heidenheim,Werder Bremen,2,2,0,0,31,11,11,4,12,2,1,3,0,0,2,0,746777,fd+espn,0
 bundesliga,2025,2025-10-18,Mainz,Leverkusen,3,4,1,3,12,20,4,8,2,3,4,4,0,0,2,0,746778,fd+espn,0
 bundesliga,2025,2025-10-18,RB Leipzig,Hamburg,2,1,1,0,10,15,4,3,3,5,3,1,0,0,0,1,746773,fd+espn,0
@@ -1288,7 +1288,7 @@ bundesliga,2025,2025-10-19,Freiburg,Ein Frankfurt,2,2,1,2,12,8,5,3,3,1,2,3,0,0,4
 bundesliga,2025,2025-10-19,St Pauli,Hoffenheim,0,3,0,0,10,14,2,5,9,7,1,3,0,0,4,2,746772,fd+espn,0
 bundesliga,2025,2025-10-24,Werder Bremen,Union Berlin,1,0,0,0,16,12,3,2,5,6,4,0,0,0,0,2,746781,fd+espn,0
 bundesliga,2025,2025-10-25,Augsburg,RB Leipzig,0,6,0,4,15,15,2,8,2,3,3,1,0,0,2,0,746783,fd+espn,0
-bundesliga,2025,2025-10-25,Dortmund,FC Koln,1,0,0,0,27,5,9,0,17,2,2,2,0,0,,,,fd,1
+bundesliga,2025,2025-10-25,Dortmund,FC Koln,1,0,0,0,27,5,9,0,17,2,2,2,0,0,0,2,746787,fd+espn,1
 bundesliga,2025,2025-10-25,Ein Frankfurt,St Pauli,2,0,1,0,10,9,6,1,1,3,0,1,0,0,2,4,746784,fd+espn,0
 bundesliga,2025,2025-10-25,Hamburg,Wolfsburg,0,1,0,1,27,6,6,2,11,1,1,5,0,0,2,1,746782,fd+espn,0
 bundesliga,2025,2025-10-25,Hoffenheim,Heidenheim,3,1,2,0,14,12,7,3,7,5,1,1,0,0,0,0,746789,fd+espn,0
@@ -1302,13 +1302,13 @@ bundesliga,2025,2025-11-01,Mainz,Werder Bremen,1,1,1,0,10,5,5,3,2,0,1,3,0,0,4,1,
 bundesliga,2025,2025-11-01,RB Leipzig,Stuttgart,3,1,1,0,16,14,9,4,5,5,1,2,0,0,0,7,746798,fd+espn,0
 bundesliga,2025,2025-11-01,St Pauli,M'gladbach,0,4,0,2,16,15,4,11,8,1,4,0,0,0,2,1,746793,fd+espn,0
 bundesliga,2025,2025-11-01,Union Berlin,Freiburg,0,0,0,0,11,13,2,4,5,5,6,1,0,0,4,1,746794,fd+espn,0
-bundesliga,2025,2025-11-02,FC Koln,Hamburg,4,1,1,0,23,11,10,5,2,3,1,6,0,2,,,,fd,1
+bundesliga,2025,2025-11-02,FC Koln,Hamburg,4,1,1,0,23,11,10,5,2,3,1,6,0,2,1,4,746796,fd+espn,1
 bundesliga,2025,2025-11-02,Wolfsburg,Hoffenheim,2,3,1,1,12,10,6,4,2,2,0,2,0,0,3,4,746795,fd+espn,0
 bundesliga,2025,2025-11-07,Werder Bremen,Wolfsburg,2,1,0,1,20,7,7,4,13,3,2,0,0,0,2,2,746804,fd+espn,0
 bundesliga,2025,2025-11-08,Hamburg,Dortmund,1,1,0,0,9,17,3,1,2,6,1,1,0,0,3,0,746807,fd+espn,0
 bundesliga,2025,2025-11-08,Hoffenheim,RB Leipzig,3,1,2,1,12,17,4,5,5,5,3,2,0,0,4,2,746805,fd+espn,0
 bundesliga,2025,2025-11-08,Leverkusen,Heidenheim,6,0,5,0,25,1,10,0,11,1,0,1,0,0,0,0,746799,fd+espn,0
-bundesliga,2025,2025-11-08,M'gladbach,FC Koln,3,1,1,0,9,19,4,5,2,6,2,3,0,0,,,,fd,1
+bundesliga,2025,2025-11-08,M'gladbach,FC Koln,3,1,1,0,9,19,4,5,2,6,2,3,0,0,3,2,746800,fd+espn,1
 bundesliga,2025,2025-11-08,Union Berlin,Bayern Munich,2,2,1,1,12,12,4,4,6,5,2,4,0,0,1,5,746806,fd+espn,0
 bundesliga,2025,2025-11-09,Ein Frankfurt,Mainz,1,0,0,0,14,3,4,0,4,3,0,5,0,0,1,1,746801,fd+espn,0
 bundesliga,2025,2025-11-09,Freiburg,St Pauli,2,1,1,0,8,7,4,2,9,3,2,2,0,0,2,4,746803,fd+espn,0
@@ -1317,7 +1317,7 @@ bundesliga,2025,2025-11-21,Mainz,Hoffenheim,1,1,0,1,17,19,3,5,7,4,3,2,1,0,2,2,74
 bundesliga,2025,2025-11-22,Augsburg,Hamburg,1,0,0,0,13,15,6,6,4,3,2,3,1,0,2,7,746814,fd+espn,0
 bundesliga,2025,2025-11-22,Bayern Munich,Freiburg,6,2,2,2,22,8,8,2,3,5,1,0,0,0,1,3,746813,fd+espn,0
 bundesliga,2025,2025-11-22,Dortmund,Stuttgart,3,3,2,0,14,16,6,6,2,4,1,1,0,0,3,1,746815,fd+espn,0
-bundesliga,2025,2025-11-22,FC Koln,Ein Frankfurt,3,4,1,2,11,11,5,7,3,3,0,0,0,0,,,,fd,1
+bundesliga,2025,2025-11-22,FC Koln,Ein Frankfurt,3,4,1,2,11,11,5,7,3,3,0,0,0,0,4,3,746809,fd+espn,1
 bundesliga,2025,2025-11-22,Heidenheim,M'gladbach,0,3,0,1,7,16,2,4,4,5,2,0,0,0,3,1,746808,fd+espn,0
 bundesliga,2025,2025-11-22,Wolfsburg,Leverkusen,1,3,0,3,21,7,10,3,9,1,2,1,0,0,1,0,746810,fd+espn,0
 bundesliga,2025,2025-11-23,RB Leipzig,Werder Bremen,2,0,0,0,22,15,13,6,13,7,1,2,0,0,1,2,746811,fd+espn,0
@@ -1327,13 +1327,13 @@ bundesliga,2025,2025-11-29,Bayern Munich,St Pauli,3,1,1,1,19,10,4,1,10,2,1,1,0,0
 bundesliga,2025,2025-11-29,Hoffenheim,Augsburg,3,0,3,0,17,14,3,4,7,2,1,0,0,0,2,3,746821,fd+espn,0
 bundesliga,2025,2025-11-29,Leverkusen,Dortmund,1,2,0,1,14,7,4,4,10,3,3,4,0,0,3,1,746824,fd+espn,0
 bundesliga,2025,2025-11-29,Union Berlin,Heidenheim,1,2,1,0,9,10,2,2,5,5,3,2,0,0,3,2,746823,fd+espn,0
-bundesliga,2025,2025-11-29,Werder Bremen,FC Koln,1,1,1,0,17,10,4,2,4,0,2,4,1,0,,,,fd,1
+bundesliga,2025,2025-11-29,Werder Bremen,FC Koln,1,1,1,0,17,10,4,2,4,0,2,4,1,0,2,0,746820,fd+espn,1
 bundesliga,2025,2025-11-30,Ein Frankfurt,Wolfsburg,1,1,0,0,15,10,3,3,14,1,1,4,0,0,2,3,746822,fd+espn,0
 bundesliga,2025,2025-11-30,Freiburg,Mainz,4,0,2,0,23,1,10,1,6,2,0,2,0,1,4,0,746819,fd+espn,0
 bundesliga,2025,2025-11-30,Hamburg,Stuttgart,2,1,1,0,9,14,2,3,4,6,2,4,1,0,0,1,746825,fd+espn,0
 bundesliga,2025,2025-12-05,Mainz,M'gladbach,0,1,0,0,8,14,2,5,8,6,2,1,0,0,1,2,746832,fd+espn,0
 bundesliga,2025,2025-12-06,Augsburg,Leverkusen,2,0,2,0,13,20,6,2,5,7,4,3,0,0,1,1,746834,fd+espn,0
-bundesliga,2025,2025-12-06,FC Koln,St Pauli,1,1,0,0,11,5,8,1,5,4,0,1,0,0,,,,fd,1
+bundesliga,2025,2025-12-06,FC Koln,St Pauli,1,1,0,0,11,5,8,1,5,4,0,1,0,0,2,3,746833,fd+espn,1
 bundesliga,2025,2025-12-06,Heidenheim,Freiburg,2,1,0,1,16,16,3,2,8,6,2,1,0,0,1,1,746830,fd+espn,0
 bundesliga,2025,2025-12-06,RB Leipzig,Ein Frankfurt,6,0,2,0,16,8,7,2,4,0,1,2,0,0,1,1,746829,fd+espn,0
 bundesliga,2025,2025-12-06,Stuttgart,Bayern Munich,0,5,0,1,13,19,1,11,3,4,2,4,1,0,5,5,746828,fd+espn,0
@@ -1343,7 +1343,7 @@ bundesliga,2025,2025-12-07,Hamburg,Werder Bremen,3,2,0,1,12,10,6,3,5,3,1,6,0,0,1
 bundesliga,2025,2025-12-12,Union Berlin,RB Leipzig,3,1,0,0,12,9,6,3,4,6,2,2,0,0,1,0,746838,fd+espn,0
 bundesliga,2025,2025-12-13,Ein Frankfurt,Augsburg,1,0,0,0,11,12,4,1,2,6,2,3,0,0,3,5,746841,fd+espn,0
 bundesliga,2025,2025-12-13,Hoffenheim,Hamburg,4,1,2,0,10,14,6,5,3,3,1,3,0,0,2,1,746839,fd+espn,0
-bundesliga,2025,2025-12-13,Leverkusen,FC Koln,2,0,0,0,17,6,6,4,8,3,2,1,0,0,,,,fd,1
+bundesliga,2025,2025-12-13,Leverkusen,FC Koln,2,0,0,0,17,6,6,4,8,3,2,1,0,0,1,1,746837,fd+espn,1
 bundesliga,2025,2025-12-13,M'gladbach,Wolfsburg,1,3,1,3,14,11,4,6,6,3,0,1,0,0,4,4,746836,fd+espn,0
 bundesliga,2025,2025-12-13,St Pauli,Heidenheim,2,1,1,0,8,20,5,7,4,11,2,3,1,0,0,5,746835,fd+espn,0
 bundesliga,2025,2025-12-14,Bayern Munich,Mainz,2,2,1,1,24,5,11,2,7,0,2,2,0,0,6,1,746840,fd+espn,0
@@ -1351,7 +1351,7 @@ bundesliga,2025,2025-12-14,Freiburg,Dortmund,1,1,0,1,21,9,6,4,6,0,3,2,0,1,5,0,74
 bundesliga,2025,2025-12-14,Werder Bremen,Stuttgart,0,4,0,2,9,24,3,12,0,9,2,0,1,0,0,2,746843,fd+espn,0
 bundesliga,2025,2025-12-19,Dortmund,M'gladbach,2,0,1,0,10,6,4,1,6,4,2,1,0,0,2,1,746848,fd+espn,0
 bundesliga,2025,2025-12-20,Augsburg,Werder Bremen,0,0,0,0,14,9,6,0,6,11,3,4,0,0,2,2,746851,fd+espn,0
-bundesliga,2025,2025-12-20,FC Koln,Union Berlin,0,1,0,0,13,11,2,3,3,6,2,5,1,0,,,,fd,1
+bundesliga,2025,2025-12-20,FC Koln,Union Berlin,0,1,0,0,13,11,2,3,3,6,2,5,1,0,1,2,746847,fd+espn,1
 bundesliga,2025,2025-12-20,Hamburg,Ein Frankfurt,1,1,1,1,9,9,3,3,5,5,0,0,0,0,3,0,746852,fd+espn,0
 bundesliga,2025,2025-12-20,RB Leipzig,Leverkusen,1,3,1,2,19,15,7,8,2,8,1,2,0,0,1,1,746845,fd+espn,0
 bundesliga,2025,2025-12-20,Stuttgart,Hoffenheim,0,0,0,0,10,4,3,1,4,2,3,2,0,0,1,2,746844,fd+espn,0
@@ -1360,7 +1360,7 @@ bundesliga,2025,2025-12-21,Heidenheim,Bayern Munich,0,4,0,2,8,23,1,11,0,6,0,0,0,
 bundesliga,2025,2025-12-21,Mainz,St Pauli,0,0,0,0,13,5,1,1,9,5,1,1,0,0,1,0,746849,fd+espn,0
 bundesliga,2025,2026-01-09,Ein Frankfurt,Dortmund,3,3,1,1,12,16,6,6,2,5,3,3,0,0,0,2,746859,fd+espn,0
 bundesliga,2025,2026-01-10,Freiburg,Hamburg,2,1,0,0,20,10,7,5,0,3,3,5,0,1,1,0,746854,fd+espn,0
-bundesliga,2025,2026-01-10,Heidenheim,FC Koln,2,2,2,1,14,21,6,9,5,4,2,1,0,0,,,,fd,1
+bundesliga,2025,2026-01-10,Heidenheim,FC Koln,2,2,2,1,14,21,6,9,5,4,2,1,0,0,1,1,746853,fd+espn,1
 bundesliga,2025,2026-01-10,Leverkusen,Stuttgart,1,4,0,4,16,10,4,7,5,3,4,2,0,0,2,2,746861,fd+espn,0
 bundesliga,2025,2026-01-10,Union Berlin,Mainz,2,2,0,1,17,9,5,6,2,1,2,0,0,0,0,1,746856,fd+espn,0
 bundesliga,2025,2026-01-11,Bayern Munich,Wolfsburg,8,1,2,1,16,8,10,3,6,2,0,1,0,0,1,0,746858,fd+espn,0
@@ -1368,14 +1368,14 @@ bundesliga,2025,2026-01-11,M'gladbach,Augsburg,4,0,3,0,12,17,7,2,2,2,0,1,0,0,0,2
 bundesliga,2025,2026-01-13,Dortmund,Werder Bremen,3,0,1,0,18,6,8,3,3,3,2,0,0,0,1,0,746868,fd+espn,0
 bundesliga,2025,2026-01-13,Mainz,Heidenheim,2,1,1,0,13,15,6,4,4,1,2,2,0,0,0,2,746869,fd+espn,0
 bundesliga,2025,2026-01-13,Stuttgart,Ein Frankfurt,3,2,2,1,20,12,11,5,10,2,2,2,0,0,6,1,746863,fd+espn,0
-bundesliga,2025,2026-01-14,FC Koln,Bayern Munich,1,3,1,1,8,19,3,8,4,6,0,0,0,0,,,,fd,1
+bundesliga,2025,2026-01-14,FC Koln,Bayern Munich,1,3,1,1,8,19,3,8,4,6,0,0,0,0,3,5,746864,fd+espn,1
 bundesliga,2025,2026-01-14,Hoffenheim,M'gladbach,5,1,4,0,18,7,10,5,6,2,1,1,0,0,0,1,746862,fd+espn,0
 bundesliga,2025,2026-01-14,RB Leipzig,Freiburg,2,0,0,0,21,3,7,1,7,2,0,4,0,0,0,2,746865,fd+espn,0
 bundesliga,2025,2026-01-14,Wolfsburg,St Pauli,2,1,1,1,13,9,5,4,7,4,1,2,0,0,4,2,746870,fd+espn,0
 bundesliga,2025,2026-01-15,Augsburg,Union Berlin,1,1,1,0,9,16,5,3,3,3,1,0,0,1,1,0,746867,fd+espn,0
 bundesliga,2025,2026-01-16,Werder Bremen,Ein Frankfurt,3,3,1,1,13,8,4,4,4,1,1,4,0,0,2,1,746872,fd+espn,0
 bundesliga,2025,2026-01-17,Dortmund,St Pauli,3,2,1,0,10,9,6,5,5,5,3,1,0,0,1,2,746878,fd+espn,0
-bundesliga,2025,2026-01-17,FC Koln,Mainz,2,1,0,1,20,11,6,7,9,5,4,4,0,0,,,,fd,1
+bundesliga,2025,2026-01-17,FC Koln,Mainz,2,1,0,1,20,11,6,7,9,5,4,4,0,0,0,4,746879,fd+espn,1
 bundesliga,2025,2026-01-17,Hamburg,M'gladbach,0,0,0,0,25,6,12,0,2,5,1,2,0,0,2,0,746876,fd+espn,0
 bundesliga,2025,2026-01-17,Hoffenheim,Leverkusen,1,0,1,0,19,8,8,2,3,5,2,1,0,0,3,1,746873,fd+espn,0
 bundesliga,2025,2026-01-17,RB Leipzig,Bayern Munich,1,5,1,0,17,19,4,12,5,9,1,0,0,0,0,2,746875,fd+espn,0
@@ -1389,11 +1389,11 @@ bundesliga,2025,2026-01-24,Heidenheim,RB Leipzig,0,3,0,0,7,11,2,8,4,0,1,0,0,0,1,
 bundesliga,2025,2026-01-24,Leverkusen,Werder Bremen,1,0,1,0,13,17,4,3,5,5,2,3,0,0,1,1,746883,fd+espn,0
 bundesliga,2025,2026-01-24,Mainz,Wolfsburg,3,1,0,1,20,7,9,2,15,1,3,2,0,0,2,0,746888,fd+espn,0
 bundesliga,2025,2026-01-24,Union Berlin,Dortmund,0,3,0,1,10,15,3,5,7,2,0,1,0,0,2,0,746886,fd+espn,0
-bundesliga,2025,2026-01-25,Freiburg,FC Koln,2,1,2,1,13,19,5,4,5,5,1,2,0,0,,,,fd,1
+bundesliga,2025,2026-01-25,Freiburg,FC Koln,2,1,2,1,13,19,5,4,5,5,1,2,0,0,0,0,746887,fd+espn,1
 bundesliga,2025,2026-01-25,M'gladbach,Stuttgart,0,3,0,1,12,17,3,8,1,4,1,1,0,0,0,0,746882,fd+espn,0
 bundesliga,2025,2026-01-27,St Pauli,RB Leipzig,1,1,0,0,7,12,2,5,4,3,0,1,0,0,5,3,746857,fd+espn,0
 bundesliga,2025,2026-01-27,Werder Bremen,Hoffenheim,0,2,0,1,26,12,3,3,6,7,2,2,0,1,2,1,746855,fd+espn,0
-bundesliga,2025,2026-01-30,FC Koln,Wolfsburg,1,0,1,0,15,14,3,3,3,4,1,4,0,0,,,,fd,1
+bundesliga,2025,2026-01-30,FC Koln,Wolfsburg,1,0,1,0,15,14,3,3,3,4,1,4,0,0,2,3,746894,fd+espn,1
 bundesliga,2025,2026-01-31,Augsburg,St Pauli,2,1,1,1,12,17,6,5,5,5,3,1,0,0,1,1,746891,fd+espn,0
 bundesliga,2025,2026-01-31,Ein Frankfurt,Leverkusen,1,3,0,2,11,11,4,4,8,3,3,1,1,0,0,3,746890,fd+espn,0
 bundesliga,2025,2026-01-31,Hamburg,Bayern Munich,2,2,1,1,14,13,4,7,3,9,6,4,0,0,3,1,746895,fd+espn,0
@@ -1410,26 +1410,26 @@ bundesliga,2025,2026-02-07,Mainz,Augsburg,2,0,1,0,10,14,6,6,6,4,2,2,0,0,2,1,7469
 bundesliga,2025,2026-02-07,St Pauli,Stuttgart,2,1,1,0,15,7,7,3,5,5,0,2,0,0,0,2,746904,fd+espn,0
 bundesliga,2025,2026-02-07,Wolfsburg,Dortmund,1,2,0,1,12,21,2,4,4,8,1,1,0,0,0,2,746901,fd+espn,0
 bundesliga,2025,2026-02-08,Bayern Munich,Hoffenheim,5,1,3,1,27,9,14,4,8,3,2,2,0,1,3,0,746903,fd+espn,0
-bundesliga,2025,2026-02-08,FC Koln,RB Leipzig,1,2,0,1,10,19,3,4,4,3,1,4,0,0,,,,fd,1
+bundesliga,2025,2026-02-08,FC Koln,RB Leipzig,1,2,0,1,10,19,3,4,4,3,1,4,0,0,5,3,746899,fd+espn,1
 bundesliga,2025,2026-02-13,Dortmund,Mainz,4,0,3,0,14,10,8,5,7,2,3,2,0,0,0,5,746908,fd+espn,0
 bundesliga,2025,2026-02-14,Ein Frankfurt,M'gladbach,3,0,2,0,12,20,9,3,2,8,3,2,0,0,4,1,746909,fd+espn,0
 bundesliga,2025,2026-02-14,Hamburg,Union Berlin,3,2,2,1,13,12,4,5,6,3,3,0,0,0,2,3,746911,fd+espn,0
 bundesliga,2025,2026-02-14,Hoffenheim,Freiburg,3,0,0,0,25,13,7,3,6,6,3,1,0,0,2,2,746914,fd+espn,0
 bundesliga,2025,2026-02-14,Leverkusen,St Pauli,4,0,2,0,12,11,7,1,8,3,0,1,0,0,2,3,746907,fd+espn,0
-bundesliga,2025,2026-02-14,Stuttgart,FC Koln,3,1,1,0,13,10,4,3,2,5,4,1,0,0,,,,fd,1
+bundesliga,2025,2026-02-14,Stuttgart,FC Koln,3,1,1,0,13,10,4,3,2,5,4,1,0,0,1,2,746915,fd+espn,1
 bundesliga,2025,2026-02-14,Werder Bremen,Bayern Munich,0,3,0,2,14,11,3,8,2,4,3,1,0,0,2,3,746913,fd+espn,0
 bundesliga,2025,2026-02-15,Augsburg,Heidenheim,1,0,0,0,12,16,4,2,4,5,1,2,0,0,0,0,746910,fd+espn,0
 bundesliga,2025,2026-02-15,RB Leipzig,Wolfsburg,2,2,0,0,20,10,10,3,6,2,1,2,0,0,0,0,746912,fd+espn,0
 bundesliga,2025,2026-02-20,Mainz,Hamburg,1,1,1,0,17,14,3,5,7,2,3,2,0,0,2,1,746919,fd+espn,0
 bundesliga,2025,2026-02-21,Bayern Munich,Ein Frankfurt,3,2,2,0,24,9,11,3,8,2,0,3,0,0,1,0,746920,fd+espn,0
-bundesliga,2025,2026-02-21,FC Koln,Hoffenheim,2,2,1,1,9,18,4,6,3,10,1,3,0,0,,,,fd,1
+bundesliga,2025,2026-02-21,FC Koln,Hoffenheim,2,2,1,1,9,18,4,6,3,10,1,3,0,0,4,0,746917,fd+espn,1
 bundesliga,2025,2026-02-21,RB Leipzig,Dortmund,2,2,2,0,13,11,3,5,6,2,3,4,0,0,0,4,746922,fd+espn,0
 bundesliga,2025,2026-02-21,Union Berlin,Leverkusen,1,0,1,0,8,16,4,1,4,5,5,2,0,0,1,1,746918,fd+espn,0
 bundesliga,2025,2026-02-21,Wolfsburg,Augsburg,2,3,1,0,10,15,4,6,4,10,3,4,0,0,1,1,746924,fd+espn,0
 bundesliga,2025,2026-02-22,Freiburg,M'gladbach,2,1,1,0,10,12,6,2,3,3,1,2,0,0,4,3,746923,fd+espn,0
 bundesliga,2025,2026-02-22,Heidenheim,Stuttgart,3,3,2,2,10,12,6,8,3,4,1,2,0,0,3,2,746916,fd+espn,0
 bundesliga,2025,2026-02-22,St Pauli,Werder Bremen,2,1,0,0,5,13,4,4,1,5,2,6,0,0,5,1,746921,fd+espn,0
-bundesliga,2025,2026-02-27,Augsburg,FC Koln,2,0,0,0,14,10,4,3,6,9,4,1,0,0,,,,fd,1
+bundesliga,2025,2026-02-27,Augsburg,FC Koln,2,0,0,0,14,10,4,3,6,9,4,1,0,0,3,0,746929,fd+espn,1
 bundesliga,2025,2026-02-28,Dortmund,Bayern Munich,2,3,1,0,10,14,2,6,5,2,1,0,0,0,3,1,746926,fd+espn,0
 bundesliga,2025,2026-02-28,Hoffenheim,St Pauli,0,1,0,1,20,11,11,3,10,3,1,2,0,0,4,1,746932,fd+espn,0
 bundesliga,2025,2026-02-28,Leverkusen,Mainz,1,1,0,0,12,8,5,4,6,2,1,2,0,0,2,0,746925,fd+espn,0
@@ -1440,7 +1440,7 @@ bundesliga,2025,2026-03-01,Hamburg,RB Leipzig,1,2,1,1,7,13,3,5,4,9,3,2,0,0,1,0,7
 bundesliga,2025,2026-03-01,Stuttgart,Wolfsburg,4,0,3,0,24,10,11,3,7,3,1,0,0,0,1,1,746933,fd+espn,0
 bundesliga,2025,2026-03-04,Hamburg,Leverkusen,0,1,0,0,10,14,3,4,2,7,0,2,0,0,0,2,746866,fd+espn,0
 bundesliga,2025,2026-03-06,Bayern Munich,M'gladbach,4,1,2,0,18,10,9,5,7,1,1,0,0,1,2,3,746935,fd+espn,0
-bundesliga,2025,2026-03-07,FC Koln,Dortmund,1,2,0,1,14,13,4,5,9,4,1,1,1,0,,,,fd,1
+bundesliga,2025,2026-03-07,FC Koln,Dortmund,1,2,0,1,14,13,4,5,9,4,1,1,1,0,5,2,746938,fd+espn,1
 bundesliga,2025,2026-03-07,Freiburg,Leverkusen,3,3,2,2,21,17,9,5,5,2,3,3,0,0,1,1,746934,fd+espn,0
 bundesliga,2025,2026-03-07,Heidenheim,Hoffenheim,2,4,0,2,8,16,2,7,4,3,0,0,0,0,4,1,746939,fd+espn,0
 bundesliga,2025,2026-03-07,Mainz,Stuttgart,2,2,1,0,18,11,6,4,5,6,0,2,0,0,2,0,746936,fd+espn,0
@@ -1451,7 +1451,7 @@ bundesliga,2025,2026-03-08,Union Berlin,Werder Bremen,1,4,1,2,9,15,2,5,1,3,1,3,1
 bundesliga,2025,2026-03-13,M'gladbach,St Pauli,2,0,1,0,10,8,4,1,2,2,1,2,0,0,3,1,746944,fd+espn,0
 bundesliga,2025,2026-03-14,Dortmund,Augsburg,2,0,1,0,16,7,5,3,12,2,0,0,0,0,0,3,746951,fd+espn,0
 bundesliga,2025,2026-03-14,Ein Frankfurt,Heidenheim,1,0,0,0,12,3,4,1,5,4,3,2,1,0,0,2,746943,fd+espn,0
-bundesliga,2025,2026-03-14,Hamburg,FC Koln,1,1,1,1,5,10,1,2,1,8,2,4,0,0,,,,fd,1
+bundesliga,2025,2026-03-14,Hamburg,FC Koln,1,1,1,1,5,10,1,2,1,8,2,4,0,0,0,0,746949,fd+espn,1
 bundesliga,2025,2026-03-14,Hoffenheim,Wolfsburg,1,1,0,0,21,4,6,2,16,4,0,3,0,0,2,1,746947,fd+espn,0
 bundesliga,2025,2026-03-14,Leverkusen,Bayern Munich,1,1,1,0,21,11,7,5,4,1,3,4,0,2,2,1,746950,fd+espn,0
 bundesliga,2025,2026-03-15,Freiburg,Union Berlin,0,1,0,0,19,9,6,4,6,2,0,2,0,0,2,4,746945,fd+espn,0
@@ -1460,7 +1460,7 @@ bundesliga,2025,2026-03-15,Werder Bremen,Mainz,0,2,0,1,16,11,3,2,9,4,2,1,0,0,2,2
 bundesliga,2025,2026-03-20,RB Leipzig,Hoffenheim,5,0,4,0,14,8,9,2,1,3,1,1,0,0,5,1,746956,fd+espn,0
 bundesliga,2025,2026-03-21,Bayern Munich,Union Berlin,4,0,2,0,31,5,9,1,12,1,1,2,0,0,1,4,746954,fd+espn,0
 bundesliga,2025,2026-03-21,Dortmund,Hamburg,3,2,0,2,24,4,8,4,11,3,2,3,0,0,1,2,746957,fd+espn,0
-bundesliga,2025,2026-03-21,FC Koln,M'gladbach,3,3,2,2,12,9,5,3,5,3,8,2,1,0,,,,fd,1
+bundesliga,2025,2026-03-21,FC Koln,M'gladbach,3,3,2,2,12,9,5,3,5,3,8,2,1,0,0,4,746959,fd+espn,1
 bundesliga,2025,2026-03-21,Heidenheim,Leverkusen,3,3,0,2,9,14,5,5,2,5,4,4,0,0,1,0,746952,fd+espn,0
 bundesliga,2025,2026-03-21,Wolfsburg,Werder Bremen,0,1,0,0,11,8,4,3,8,4,3,0,1,0,1,4,746960,fd+espn,0
 bundesliga,2025,2026-03-22,Augsburg,Stuttgart,2,5,0,3,13,13,7,8,2,5,1,3,0,0,2,1,746953,fd+espn,0
@@ -1473,7 +1473,7 @@ bundesliga,2025,2026-04-04,Leverkusen,Wolfsburg,6,3,2,3,25,11,11,5,12,2,1,3,0,0,
 bundesliga,2025,2026-04-04,M'gladbach,Heidenheim,2,2,1,1,15,15,7,7,2,3,4,0,0,0,1,1,746963,fd+espn,0
 bundesliga,2025,2026-04-04,Stuttgart,Dortmund,0,2,0,0,13,5,3,3,5,2,2,4,0,0,3,0,746964,fd+espn,0
 bundesliga,2025,2026-04-04,Werder Bremen,RB Leipzig,1,2,0,1,13,7,5,2,1,0,2,1,0,0,5,1,746967,fd+espn,0
-bundesliga,2025,2026-04-05,Ein Frankfurt,FC Koln,2,2,0,0,20,14,7,9,8,0,1,2,0,0,,,,fd,1
+bundesliga,2025,2026-04-05,Ein Frankfurt,FC Koln,2,2,0,0,20,14,7,9,8,0,1,2,0,0,0,4,746965,fd+espn,1
 bundesliga,2025,2026-04-05,Union Berlin,St Pauli,1,1,0,1,16,9,8,2,7,2,0,2,0,1,3,0,746961,fd+espn,0
 bundesliga,2025,2026-04-10,Augsburg,Hoffenheim,2,2,2,2,17,13,8,4,4,4,5,3,0,0,2,1,746974,fd+espn,0
 bundesliga,2025,2026-04-11,Dortmund,Leverkusen,0,1,0,1,14,11,1,4,5,5,3,0,0,0,2,1,746973,fd+espn,0
@@ -1481,10 +1481,10 @@ bundesliga,2025,2026-04-11,Heidenheim,Union Berlin,3,1,2,0,7,10,3,3,3,5,0,2,0,0,
 bundesliga,2025,2026-04-11,RB Leipzig,M'gladbach,1,0,0,0,24,15,11,3,11,4,4,1,0,0,3,1,746976,fd+espn,0
 bundesliga,2025,2026-04-11,St Pauli,Bayern Munich,0,5,0,1,6,20,3,8,3,4,1,2,0,0,2,3,746975,fd+espn,0
 bundesliga,2025,2026-04-11,Wolfsburg,Ein Frankfurt,1,2,0,2,22,10,7,4,7,7,2,1,0,0,1,2,746978,fd+espn,0
-bundesliga,2025,2026-04-12,FC Koln,Werder Bremen,3,1,1,0,25,6,8,2,8,5,3,2,0,1,,,,fd,1
+bundesliga,2025,2026-04-12,FC Koln,Werder Bremen,3,1,1,0,25,6,8,2,8,5,3,2,0,1,2,3,746971,fd+espn,1
 bundesliga,2025,2026-04-12,Mainz,Freiburg,0,1,0,0,10,8,3,3,6,4,1,3,0,0,3,2,746972,fd+espn,0
 bundesliga,2025,2026-04-12,Stuttgart,Hamburg,4,0,2,0,23,9,11,5,8,2,2,1,0,0,5,1,746977,fd+espn,0
-bundesliga,2025,2026-04-17,St Pauli,FC Koln,1,1,0,0,14,10,6,1,8,5,4,1,0,0,,,,fd,1
+bundesliga,2025,2026-04-17,St Pauli,FC Koln,1,1,0,0,14,10,6,1,8,5,4,1,0,0,3,1,746984,fd+espn,1
 bundesliga,2025,2026-04-18,Ein Frankfurt,RB Leipzig,1,3,1,1,16,19,5,8,4,6,0,1,0,0,3,0,746982,fd+espn,0
 bundesliga,2025,2026-04-18,Hoffenheim,Dortmund,2,1,1,0,13,8,4,3,4,3,2,3,0,0,6,3,746987,fd+espn,0
 bundesliga,2025,2026-04-18,Leverkusen,Augsburg,1,2,1,1,35,11,10,5,11,4,2,1,0,0,1,0,746980,fd+espn,0
@@ -1495,7 +1495,7 @@ bundesliga,2025,2026-04-19,Freiburg,Heidenheim,2,1,1,0,17,13,4,2,5,4,1,0,0,0,1,1
 bundesliga,2025,2026-04-19,M'gladbach,Mainz,1,1,1,0,9,17,4,7,0,6,5,2,0,0,0,2,746981,fd+espn,0
 bundesliga,2025,2026-04-24,RB Leipzig,Union Berlin,3,1,2,0,20,5,10,1,10,4,1,1,0,0,1,3,746994,fd+espn,0
 bundesliga,2025,2026-04-25,Augsburg,Ein Frankfurt,1,1,1,0,17,19,3,7,9,7,1,2,0,0,1,1,746992,fd+espn,0
-bundesliga,2025,2026-04-25,FC Koln,Leverkusen,1,2,0,1,25,8,10,3,2,5,1,2,0,0,,,,fd,1
+bundesliga,2025,2026-04-25,FC Koln,Leverkusen,1,2,0,1,25,8,10,3,2,5,1,2,0,0,1,2,746989,fd+espn,1
 bundesliga,2025,2026-04-25,Hamburg,Hoffenheim,1,2,1,2,12,15,4,6,4,9,2,4,0,0,1,1,746993,fd+espn,0
 bundesliga,2025,2026-04-25,Heidenheim,St Pauli,2,0,1,0,12,11,5,2,6,6,0,1,0,0,1,3,746988,fd+espn,0
 bundesliga,2025,2026-04-25,Mainz,Bayern Munich,3,4,3,0,21,11,8,6,4,4,1,2,0,0,1,0,746990,fd+espn,0
@@ -1506,7 +1506,7 @@ bundesliga,2025,2026-05-02,Bayern Munich,Heidenheim,3,3,1,2,23,12,7,5,13,5,3,2,0
 bundesliga,2025,2026-05-02,Ein Frankfurt,Hamburg,1,2,0,0,8,9,5,4,9,4,6,1,1,0,0,2,747000,fd+espn,0
 bundesliga,2025,2026-05-02,Hoffenheim,Stuttgart,3,3,2,1,22,14,9,5,4,5,3,1,0,1,2,3,747005,fd+espn,0
 bundesliga,2025,2026-05-02,Leverkusen,RB Leipzig,4,1,2,0,23,14,8,5,7,3,1,3,0,0,0,0,746998,fd+espn,0
-bundesliga,2025,2026-05-02,Union Berlin,FC Koln,2,2,0,1,13,8,3,4,2,5,2,3,0,0,,,,fd,1
+bundesliga,2025,2026-05-02,Union Berlin,FC Koln,2,2,0,1,13,8,3,4,2,5,2,3,0,0,0,2,746997,fd+espn,1
 bundesliga,2025,2026-05-02,Werder Bremen,Augsburg,1,3,0,2,15,14,4,7,8,2,1,1,0,0,4,1,747004,fd+espn,0
 bundesliga,2025,2026-05-03,Freiburg,Wolfsburg,1,1,0,0,11,13,3,4,1,7,1,1,0,0,2,1,747003,fd+espn,0
 bundesliga,2025,2026-05-03,M'gladbach,Dortmund,1,0,0,0,12,6,4,1,1,1,3,1,0,0,1,0,746999,fd+espn,0
@@ -1517,10 +1517,10 @@ bundesliga,2025,2026-05-09,Hoffenheim,Werder Bremen,1,0,1,0,15,11,4,2,8,3,1,2,0,
 bundesliga,2025,2026-05-09,RB Leipzig,St Pauli,2,1,1,0,13,7,5,3,3,5,2,0,0,0,2,0,747011,fd+espn,0
 bundesliga,2025,2026-05-09,Stuttgart,Leverkusen,3,1,2,1,20,6,9,5,7,6,2,1,0,0,3,0,747013,fd+espn,0
 bundesliga,2025,2026-05-09,Wolfsburg,Bayern Munich,0,1,0,0,17,16,5,9,6,3,1,0,0,0,2,4,747014,fd+espn,0
-bundesliga,2025,2026-05-10,FC Koln,Heidenheim,1,3,1,2,18,11,7,5,6,4,2,2,0,0,,,,fd,1
+bundesliga,2025,2026-05-10,FC Koln,Heidenheim,1,3,1,2,18,11,7,5,6,4,2,2,0,0,0,3,747006,fd+espn,1
 bundesliga,2025,2026-05-10,Hamburg,Freiburg,3,2,1,1,14,5,5,3,2,4,2,2,0,0,1,1,747010,fd+espn,0
 bundesliga,2025,2026-05-10,Mainz,Union Berlin,1,3,0,1,14,16,3,9,7,8,2,1,0,0,2,0,747007,fd+espn,0
-bundesliga,2025,2026-05-16,Bayern Munich,FC Koln,5,1,3,1,19,9,7,2,5,5,1,1,0,0,,,,fd,1
+bundesliga,2025,2026-05-16,Bayern Munich,FC Koln,5,1,3,1,19,9,7,2,5,5,1,1,0,0,5,1,747020,fd+espn,1
 bundesliga,2025,2026-05-16,Ein Frankfurt,Stuttgart,2,2,0,2,16,13,7,7,6,6,2,3,0,0,2,1,747023,fd+espn,0
 bundesliga,2025,2026-05-16,Freiburg,RB Leipzig,4,1,2,1,11,14,5,6,1,2,0,1,0,0,1,1,747019,fd+espn,0
 bundesliga,2025,2026-05-16,Heidenheim,Mainz,0,2,0,2,15,15,5,9,6,3,1,1,0,0,3,1,747015,fd+espn,0
@@ -1532,13 +1532,13 @@ bundesliga,2025,2026-05-16,Werder Bremen,Dortmund,0,2,0,0,9,17,3,9,4,5,0,0,0,0,4
 bundesliga,2026,2026-08-28,Bayern Munich,Stuttgart,5,1,1,0,21,11,9,4,9,3,1,3,0,0,3,1,401884817,fd+espn,0
 bundesliga,2026,2026-08-29,Dortmund,Hamburg,2,0,2,0,20,8,6,3,3,1,2,1,1,0,1,1,401884816,fd+espn,0
 bundesliga,2026,2026-08-29,Elversberg,Leverkusen,3,2,2,0,11,21,6,4,4,3,3,2,0,0,1,1,401884809,fd+espn,0
-bundesliga,2026,2026-08-29,FC Koln,Hoffenheim,3,2,0,1,18,15,6,4,6,7,0,2,0,0,,,,fd,1
+bundesliga,2026,2026-08-29,FC Koln,Hoffenheim,3,2,0,1,18,15,6,4,6,7,0,2,0,0,0,0,401884810,fd+espn,1
 bundesliga,2026,2026-08-29,Mainz,Paderborn,0,0,0,0,21,10,4,0,11,2,1,2,0,0,1,1,401884812,fd+espn,0
 bundesliga,2026,2026-08-29,RB Leipzig,M'gladbach,3,0,1,0,25,15,11,4,7,6,1,0,0,0,0,5,401884815,fd+espn,0
 bundesliga,2026,2026-08-29,Union Berlin,Ein Frankfurt,3,3,1,2,19,12,10,3,5,2,2,4,0,0,2,2,401884811,fd+espn,0
 bundesliga,2026,2026-08-30,Augsburg,Schalke 04,3,0,1,0,24,11,13,5,11,3,1,0,0,1,3,2,401884813,fd+espn,0
 bundesliga,2026,2026-08-30,Freiburg,Werder Bremen,4,1,2,0,19,9,5,3,6,5,1,1,0,0,0,1,401884814,fd+espn,0
-bundesliga,2026,2026-09-04,Stuttgart,FC Koln,4,1,1,0,22,18,8,5,10,8,1,3,0,0,,,,fd,1
+bundesliga,2026,2026-09-04,Stuttgart,FC Koln,4,1,1,0,22,18,8,5,10,8,1,3,0,0,1,0,401884808,fd+espn,1
 bundesliga,2026,2026-09-05,Hoffenheim,Dortmund,2,3,1,0,18,11,6,4,10,3,4,2,0,0,1,2,401884807,fd+espn,0
 bundesliga,2026,2026-09-05,Leverkusen,Union Berlin,4,0,2,0,21,5,10,0,11,1,2,2,0,0,3,3,401884806,fd+espn,0
 bundesliga,2026,2026-09-05,M'gladbach,Elversberg,3,4,2,1,25,14,6,10,13,4,3,1,0,0,5,0,401884804,fd+espn,0
@@ -1550,7 +1550,7 @@ bundesliga,2026,2026-09-06,Hamburg,Mainz,0,5,0,2,8,17,1,8,4,5,1,3,0,0,2,1,401884
 bundesliga,2026,2026-09-11,Union Berlin,Schalke 04,1,3,0,1,20,19,8,10,4,5,3,1,0,0,3,3,401884793,fd+espn,0
 bundesliga,2026,2026-09-12,Augsburg,Leverkusen,2,2,0,1,8,30,5,5,2,14,1,1,0,0,0,1,401884795,fd+espn,0
 bundesliga,2026,2026-09-12,Dortmund,Paderborn,3,0,1,0,14,10,8,0,7,3,1,1,0,0,3,2,401884799,fd+espn,0
-bundesliga,2026,2026-09-12,FC Koln,Werder Bremen,1,1,1,0,15,14,6,5,8,5,2,1,0,0,,,,fd,1
+bundesliga,2026,2026-09-12,FC Koln,Werder Bremen,1,1,1,0,15,14,6,5,8,5,2,1,0,0,1,1,401884792,fd+espn,1
 bundesliga,2026,2026-09-12,Freiburg,M'gladbach,5,0,2,0,19,5,9,0,6,2,1,4,0,1,1,1,401884796,fd+espn,0
 bundesliga,2026,2026-09-12,Hoffenheim,Stuttgart,2,1,1,0,20,16,8,5,5,7,1,0,0,0,2,1,401884797,fd+espn,0
 bundesliga,2026,2026-09-12,Mainz,Ein Frankfurt,1,3,0,2,18,11,5,5,4,5,0,2,0,0,1,3,401884794,fd+espn,0
@@ -1558,7 +1558,7 @@ bundesliga,2026,2026-09-13,Elversberg,Bayern Munich,1,2,0,1,5,28,1,6,3,9,2,0,0,0
 bundesliga,2026,2026-09-13,RB Leipzig,Hamburg,5,0,2,0,19,10,6,4,7,7,1,2,0,0,0,3,401884798,fd+espn,0
 bundesliga,2026,2026-09-18,Bayern Munich,Union Berlin,7,0,3,0,23,3,15,2,9,2,1,3,0,0,2,2,401884790,fd+espn,0
 bundesliga,2026,2026-09-19,Ein Frankfurt,Freiburg,2,2,2,1,10,22,3,7,3,5,2,2,0,0,1,2,401884787,fd+espn,0
-bundesliga,2026,2026-09-19,Hamburg,FC Koln,2,1,1,0,12,18,7,5,3,5,1,3,0,0,,,,fd,1
+bundesliga,2026,2026-09-19,Hamburg,FC Koln,2,1,1,0,12,18,7,5,3,5,1,3,0,0,2,1,401884785,fd+espn,1
 bundesliga,2026,2026-09-19,M'gladbach,Mainz,3,4,1,2,21,17,7,8,6,4,6,5,0,0,0,2,401884786,fd+espn,0
 bundesliga,2026,2026-09-19,Stuttgart,Dortmund,0,1,0,0,12,13,5,2,6,2,2,5,0,0,4,1,401884789,fd+espn,0
 bundesliga,2026,2026-09-19,Werder Bremen,Augsburg,3,2,0,1,20,7,11,4,2,2,2,2,0,0,2,1,401884784,fd+espn,0
@@ -1572,9 +1572,9 @@ bundesliga,2026,2026-10-10,Mainz,Leverkusen,3,4,2,2,23,16,5,7,4,3,3,1,0,0,0,1,40
 bundesliga,2026,2026-10-10,Paderborn,Stuttgart,0,2,0,1,24,18,6,8,7,5,1,0,0,0,1,1,401884773,fd+espn,0
 bundesliga,2026,2026-10-10,RB Leipzig,Ein Frankfurt,6,0,4,0,20,18,10,9,3,6,1,3,0,0,1,2,401884780,fd+espn,0
 bundesliga,2026,2026-10-10,Union Berlin,Elversberg,1,0,0,0,19,7,6,2,7,3,2,1,0,0,3,7,401884775,fd+espn,0
-bundesliga,2026,2026-10-11,FC Koln,M'gladbach,2,1,1,1,19,16,7,7,6,6,1,3,0,0,,,,fd,1
+bundesliga,2026,2026-10-11,FC Koln,M'gladbach,2,1,1,1,19,16,7,7,6,6,1,3,0,0,1,1,401884774,fd+espn,1
 bundesliga,2026,2026-10-11,Freiburg,Schalke 04,2,1,1,1,10,5,4,1,7,2,1,1,1,0,0,5,401884778,fd+espn,0
-bundesliga,2026,2026-10-16,Ein Frankfurt,FC Koln,1,0,0,0,15,9,7,3,7,3,2,2,0,0,,,,fd,1
+bundesliga,2026,2026-10-16,Ein Frankfurt,FC Koln,1,0,0,0,15,9,7,3,7,3,2,2,0,0,1,0,401884770,fd+espn,1
 bundesliga,2026,2026-10-17,Bayern Munich,RB Leipzig,6,1,3,0,29,12,17,4,11,3,1,0,0,0,4,2,401884772,fd+espn,0
 bundesliga,2026,2026-10-17,Elversberg,Augsburg,4,3,3,1,19,29,8,8,4,12,4,3,0,0,3,2,401884764,fd+espn,0
 bundesliga,2026,2026-10-17,Hamburg,Stuttgart,1,0,0,0,14,24,3,5,5,9,3,0,0,0,0,0,401884767,fd+espn,0
@@ -1586,7 +1586,7 @@ bundesliga,2026,2026-10-18,M'gladbach,Hoffenheim,1,2,0,1,9,14,3,8,3,6,3,2,0,0,3,
 bundesliga,2026,2026-10-23,Stuttgart,M'gladbach,2,3,1,1,15,16,5,6,6,5,2,4,0,0,2,2,401884761,fd+espn,0
 bundesliga,2026,2026-10-24,Augsburg,Union Berlin,1,1,0,0,27,6,5,1,5,1,0,3,1,1,0,2,401884758,fd+espn,0
 bundesliga,2026,2026-10-24,Dortmund,Ein Frankfurt,1,0,0,0,18,8,5,3,13,1,0,2,0,0,1,4,401884763,fd+espn,0
-bundesliga,2026,2026-10-24,FC Koln,Schalke 04,0,0,0,0,14,9,5,1,6,5,2,3,0,0,,,,fd,1
+bundesliga,2026,2026-10-24,FC Koln,Schalke 04,0,0,0,0,14,9,5,1,6,5,2,3,0,0,4,1,401884756,fd+espn,1
 bundesliga,2026,2026-10-24,Mainz,Werder Bremen,2,3,1,2,18,17,8,8,6,6,2,1,0,0,2,0,401884757,fd+espn,0
 bundesliga,2026,2026-10-24,Paderborn,Hamburg,1,0,0,0,16,8,6,1,6,3,1,2,0,0,2,0,401884755,fd+espn,0
 bundesliga,2026,2026-10-24,RB Leipzig,Elversberg,4,0,0,0,13,5,6,1,4,6,1,1,0,0,0,1,401884762,fd+espn,0
@@ -1600,16 +1600,17 @@ bundesliga,2026,2026-10-31,M'gladbach,Paderborn,0,0,0,0,12,13,4,4,4,7,2,3,0,0,1,
 bundesliga,2026,2026-10-31,Schalke 04,RB Leipzig,0,2,0,1,6,18,1,10,3,7,2,0,0,0,1,4,401884747,fd+espn,0
 bundesliga,2026,2026-10-31,Werder Bremen,Hoffenheim,2,0,0,0,17,16,4,2,8,4,3,0,0,0,0,1,401884748,fd+espn,0
 bundesliga,2026,2026-11-01,Ein Frankfurt,Hamburg,3,1,1,1,15,12,10,3,6,6,2,4,0,0,2,3,401884752,fd+espn,0
-bundesliga,2026,2026-11-01,Union Berlin,FC Koln,1,1,1,0,5,14,2,2,2,6,4,3,0,0,,,,fd,1
+bundesliga,2026,2026-11-01,Union Berlin,FC Koln,1,1,1,0,5,14,2,2,2,6,4,3,0,0,1,2,401884750,fd+espn,1
 bundesliga,2026,2026-11-06,Hamburg,M'gladbach,3,1,1,1,18,19,9,6,5,3,1,3,0,1,1,1,401884739,fd+espn,0
 bundesliga,2026,2026-11-07,Dortmund,Elversberg,2,1,0,0,19,16,6,7,6,6,1,2,0,0,2,4,401884745,fd+espn,0
 bundesliga,2026,2026-11-07,Mainz,Bayern Munich,1,2,0,1,10,26,1,9,7,8,3,1,0,0,3,1,401884740,fd+espn,0
 bundesliga,2026,2026-11-07,Paderborn,Ein Frankfurt,2,2,1,1,11,16,3,3,2,6,0,1,0,0,2,0,401884737,fd+espn,0
 bundesliga,2026,2026-11-07,RB Leipzig,Augsburg,5,2,3,1,17,13,7,8,2,2,1,3,0,1,3,4,401884744,fd+espn,0
 bundesliga,2026,2026-11-07,Stuttgart,Werder Bremen,1,0,1,0,13,23,5,5,4,4,1,2,0,0,0,2,401884743,fd+espn,0
-bundesliga,2026,2026-11-08,FC Koln,Leverkusen,1,2,0,1,12,14,6,8,2,6,6,5,0,0,,,,fd,1
+bundesliga,2026,2026-11-08,FC Koln,Leverkusen,1,2,0,1,12,14,6,8,2,6,6,5,0,0,1,0,401884738,fd+espn,1
 bundesliga,2026,2026-11-08,Freiburg,Union Berlin,2,0,0,0,20,4,9,0,5,1,2,2,0,0,0,3,401884741,fd+espn,0
 bundesliga,2026,2026-11-08,Hoffenheim,Schalke 04,2,1,2,0,15,23,7,6,6,4,0,2,0,0,6,2,401884742,fd+espn,0
+bundesliga,2026,2026-11-20,Bayern Munich,FC Koln,1,1,1,1,17,7,1,4,5,0,1,2,0,0,5,2,401884736,espn,0
 bundesliga,2026,2026-11-21,Ein Frankfurt,Hoffenheim,1,0,1,0,21,16,6,4,9,5,2,2,0,1,4,2,401884734,espn,0
 bundesliga,2026,2026-11-21,Elversberg,Freiburg,0,1,0,0,10,9,2,1,5,3,0,3,0,0,1,2,401884728,espn,0
 bundesliga,2026,2026-11-21,Leverkusen,Paderborn,4,0,1,0,20,8,10,1,8,3,2,0,0,0,1,0,401884735,espn,0
