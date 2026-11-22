@@ -96,20 +96,20 @@ FAIR_USE_TIER = False
 #   above CHALK_MAX_P  -> chalk (a bookmaker will not offer it / prices it at nothing): dropped
 #   below MIN_MODEL_P  -> the matchup says it is a long shot, so a streak is probably a fluke
 #                         (e.g. "Barcelona under 9.5 shots" when they are expected to have ~18)
-CHALK_MAX_P = 0.90
+CHALK_MAX_P = 0.85               # default cap on how likely a bet may be (by the model)
+# Tighter caps per market, set from real bookmaker lines (Juventus v Venezia), where a bookmaker's
+# lowest over / highest under sits at these model chances:
+#   shots over ~50-70%, shots on target over ~50-75%, corners over ~65-80%,
+#   a team's corners under up to ~66%, match-total corners under up to ~82%.
+# Key: (stat, direction, "team" or "total"). Anything not listed uses CHALK_MAX_P.
+CHALK_MAX_P_BY_MARKET = {
+    ("shots", "over", "team"): 0.70, ("shots", "over", "total"): 0.70,
+    ("sot", "over", "team"): 0.75, ("sot", "over", "total"): 0.75,
+    ("corners", "over", "team"): 0.80, ("corners", "over", "total"): 0.80,
+    ("corners", "under", "team"): 0.70, ("corners", "under", "total"): 0.83,
+}
 MIN_MODEL_P = 0.25
 
-# STANDARD NUMBER + LINE BAND (engine/trends/standard.py)
-# For every team, stat and match we work out the team's "standard number": the average of
-#   its own average at this venue, its own average over all games,
-#   what the opponent allows at ITS venue, and what the opponent allows over all games
-# (last STD_GAMES games each). A bet is only shown when its line is one a bookmaker would really
-# offer: not more than BAND_UP above the standard number, not more than BAND_DOWN below it.
-#   Juventus corners, standard 6.3  ->  lines from 2.5 (over) up to 9.5 (under).
-STD_GAMES = 30
-BAND_UP = 0.50                   # highest line = standard x 1.50
-BAND_DOWN = 0.60                 # lowest line  = standard x 0.40
-BAND_EXEMPT = {("goals", 0.5)}   # (stat, line) always allowed: "to score" is a normal market
 # Stats where the bookmaker has no Under market: never shown as an under.
 NO_UNDER_STATS = ("shots", "sot")
 

@@ -3,9 +3,6 @@ engine/trends/select.py
 
 Turns the raw trend list of a fixture into the BETS worth showing.
 
-  0. LINES A BOOKMAKER WOULD NOT OFFER ARE REMOVED. Each trend carries the standard number of the
-     team (engine/trends/standard.py); a line too far above or below it is dropped.
-
   1. CHALK IS REMOVED. Every trend carries the fair-line model's chance for the bet it
      supports (engine/trends/fair.py). Above settings.CHALK_MAX_P the bet is dropped: a
      line that lands that often is one a bookmaker will not offer or prices at nothing.
@@ -41,7 +38,6 @@ from typing import List, Optional
 
 from engine.trends import settings as S
 from engine.trends.engine import Trend
-from engine.trends.standard import line_in_band
 
 
 @dataclass
@@ -94,6 +90,12 @@ def conflicts(a: Bet, b: Bet) -> bool:
     return False
 
 
+def chalk_cap(stat: str, direction: str = "over", about: str = "home") -> float:
+    """Highest chance (by the model) a bet may have before it counts as chalk, for this market."""
+    scope = "total" if about == "total" else "team"
+    return S.CHALK_MAX_P_BY_MARKET.get((stat, direction, scope), S.CHALK_MAX_P)
+
+
 def rate(t: Trend) -> float:
     return t.hits / t.window
 
@@ -144,8 +146,7 @@ def _ladder_key(t: Trend) -> str:
 def _candidates(trends: List[Trend]):
     """(matching bets, general bets) after the chalk filter."""
     kept = [t for t in trends
-            if (t.model_p is None or S.MIN_MODEL_P <= t.model_p <= S.CHALK_MAX_P)
-            and line_in_band(t.stat, t.line, t.std)]
+            if t.model_p is None or S.MIN_MODEL_P <= t.model_p <= chalk_cap(t.stat, t.direction, t.about)]
     by_key = defaultdict(list)
     for t in kept:
         by_key[t.bet_key].append(t)
