@@ -47,9 +47,10 @@ class TestRule(unittest.TestCase):
         w = rules.pick_window([True] * 9 + [False] * 3, S.FORM_WINDOWS)       # 12 games, 9 hits
         self.assertEqual((w.size, w.hits), (12, 9))
 
-    def test_falls_back_to_the_five_of_eight_floor(self):
-        w = rules.pick_window([True] * 5 + [False] * 3, S.FORM_WINDOWS)       # 62.5%: not "good", still allowed
-        self.assertEqual((w.size, w.hits), (8, 5))
+    def test_five_of_eight_is_no_longer_shown(self):
+        self.assertIsNone(rules.pick_window([True] * 5 + [False] * 3, S.FORM_WINDOWS))     # 62.5%: below the 70% floor
+        w = rules.pick_window([True] * 7 + [False] * 3, S.FORM_WINDOWS)                    # 7/10 = 70%: fine
+        self.assertEqual((w.size, w.hits), (10, 7))
 
     def test_a_good_window_beats_a_longer_weaker_one(self):
         flags = [True] * 8 + [False] * 2 + [False] * 10       # 8/8, 8/10 (80%), 8/12 (67%), 8/15 ...
@@ -340,26 +341,35 @@ class TestSelection(unittest.TestCase):
                     tr(line, hits, window, direction=direction, role="against", scope="form_away", **kw)]
         return out
 
-    def test_only_the_most_aggressive_lines_of_a_ladder_are_kept(self):
+    def test_a_ladder_shows_only_its_best_line(self):
         lines = [(13.5, 11, 12), (14.5, 10, 12), (15.5, 9, 12), (16.5, 8, 12), (17.5, 7, 12)]
         got = [b.line for b in select_bets(self.ladder(lines))]
-        self.assertEqual(sorted(got), [15.5, 16.5, 17.5])     # overs: the highest three
+        self.assertEqual(got, [13.5])                         # the best hit rate, nothing else
         self.assertEqual(len(got), S.LADDER_MAX_LINES)
 
-    def test_unders_keep_the_lowest_lines(self):
+    def test_unders_also_show_one_line(self):
         lines = [(18.5, 7, 10), (19.5, 8, 10), (20.5, 9, 10), (21.5, 10, 10)]
         got = [b.line for b in select_bets(self.ladder(lines, direction="under"))]
-        self.assertEqual(sorted(got), [18.5, 19.5, 20.5])
+        self.assertEqual(got, [21.5])
 
-    def test_ladder_is_listed_best_hit_rate_first(self):
-        lines = [(15.5, 11, 12), (16.5, 9, 12), (17.5, 7, 10)]
-        bets = select_bets(self.ladder(lines))
-        rates = [b.strength for b in bets]
-        self.assertEqual(rates, sorted(rates, reverse=True))
-        self.assertEqual([b.line for b in bets], [15.5, 16.5, 17.5])
-        # an uneven ladder is ordered by hit rate, not by line
+    def test_equal_hit_rates_pick_the_more_aggressive_line(self):
+        got = [b.line for b in select_bets(self.ladder([(15.5, 9, 12), (16.5, 9, 12)]))]
+        self.assertEqual(got, [16.5])
+
+    def test_bets_in_a_category_run_from_most_to_least_relevant(self):
+        # same hit rate, but the model likes 14.5 more than 16.5 -> 14.5 first
+        a = self.ladder([(16.5, 9, 12)], about="home", subject="A", model_p=0.55)
+        b = self.ladder([(14.5, 9, 12)], about="away", subject="B", model_p=0.80)
+        got = [x.line for x in select_bets(a + b)]
+        self.assertEqual(got, [14.5, 16.5])
+        # a big sample beats a tiny perfect one when the model agrees
+        big = self.ladder([(16.5, 28, 30)], about="home", subject="A")
+        small = self.ladder([(14.5, 8, 8)], about="away", subject="B")
+        self.assertEqual([x.line for x in select_bets(big + small)], [16.5, 14.5])
+
+    def test_the_kept_line_is_the_best_hit_rate_not_the_highest_line(self):
         odd = select_bets(self.ladder([(15.5, 9, 12), (16.5, 8, 12), (17.5, 7, 10)]))
-        self.assertEqual([b.line for b in odd], [15.5, 17.5, 16.5])
+        self.assertEqual([b.line for b in odd], [15.5])
 
     def test_counts_not_percentages(self):
         d = select_bets(self.ladder([(16.5, 9, 12)]))[0].to_dict()
