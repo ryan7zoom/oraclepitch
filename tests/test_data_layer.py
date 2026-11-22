@@ -227,6 +227,31 @@ class TestUpdate(unittest.TestCase):
             self.assertTrue(rep.get("budget_exhausted"))
             self.assertTrue(os.path.exists(os.path.join(tmp, "epl.csv")))     # progress still saved
 
+    def test_budget_is_shared_fairly_between_leagues(self):
+        """EPL must not use up the whole budget before the other leagues get any."""
+        today = date(2026, 11, 22)
+        epl_dates = [date(2026, 10, d) for d in (1, 5, 9, 13, 17, 21)]
+        ll_dates = [date(2026, 10, 3), date(2026, 10, 12)]
+        rows = {
+            "epl": [Match("epl", 2026, d, "Arsenal", "Chelsea", ft_h=1, ft_a=0) for d in epl_dates],
+            "la_liga": [Match("la_liga", 2026, d, "Barcelona", "Villarreal", ft_h=2, ft_a=0) for d in ll_dates],
+        }
+        boards = {d: [EspnEvent(f"e{d}", d, True, "Arsenal", "Chelsea", 1, 0, None)] for d in epl_dates}
+        for d in ll_dates:
+            boards[d] = [EspnEvent(f"l{d}", d, True, "Barcelona", "Villarreal", 2, 0, None)]
+        # a match played yesterday that football-data has not posted (La Liga only)
+        boards[date(2026, 11, 21)] = [EspnEvent("new1", date(2026, 11, 21), True, "Villarreal", "Barcelona", 0, 1, None)]
+        with tempfile.TemporaryDirectory() as tmp:
+            with patch.object(config, "MATCH_DATA_DIR", tmp), \
+                 patch.object(config, "ESPN_RECENT_DAYS", 2), \
+                 patch.object(football_data, "fetch_season",
+                              side_effect=lambda lg, season, session: rows[lg] if season == 2026 else []):
+                rep = update.run(today, ["epl", "la_liga"], budget=14, full=False,
+                                 use_espn=True, espn=FakeEspn(boards, budget=14))
+            self.assertEqual(rep["la_liga"]["espn_created"], 1)        # recent pass reached La Liga
+            self.assertEqual(rep["la_liga"]["espn_filled"], 2)         # and La Liga's backfill got a share
+            self.assertEqual(rep["epl"]["espn_filled"], 2)             # EPL only got its own share
+
 
 if __name__ == "__main__":
     unittest.main()
