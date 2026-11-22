@@ -97,7 +97,7 @@ FAIR_USE_TIER = False
 #   above CHALK_MAX_P  -> chalk (a bookmaker will not offer it / prices it at nothing): dropped
 #   below MIN_MODEL_P  -> the matchup says it is a long shot, so a streak is probably a fluke
 #                         (e.g. "Barcelona under 9.5 shots" when they are expected to have ~18)
-CHALK_MAX_P = 0.70
+CHALK_MAX_P = 0.90
 MIN_MODEL_P = 0.25
 
 # MATCHING bets: both sides back the same line (Team A does it, the opponent allows it; or
