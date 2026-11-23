@@ -93,3 +93,8 @@ ESPN_MAX_TRIES = 2
 # Days back from today always re-checked on ESPN (catches matches that
 # football-data.co.uk has not posted yet).
 ESPN_RECENT_DAYS = 10
+
+# Offsides/cards are not modelled any more, so by default ESPN is only used to
+# add matches football-data.co.uk has not posted yet (a few requests a day).
+# Set True to resume the offsides backfill.
+ESPN_FILL_OFFSIDES = False
