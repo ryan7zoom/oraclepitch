@@ -1,9 +1,9 @@
 {
-  "run_at": "2026-11-23T00:27:14.727986+00:00",
+  "run_at": "2026-11-23T00:34:45.687930+00:00",
   "epl": {
     "errors": [],
     "espn_filled": 0,
-    "espn_created": 2,
+    "espn_created": 0,
     "unmatched_espn_names": [],
     "rows_total": 2009,
     "latest_match": "2026-11-22",
@@ -22,7 +22,7 @@
   "la_liga": {
     "errors": [],
     "espn_filled": 0,
-    "espn_created": 4,
+    "espn_created": 0,
     "unmatched_espn_names": [],
     "rows_total": 2028,
     "latest_match": "2026-11-22",
@@ -41,7 +41,7 @@
   "bundesliga": {
     "errors": [],
     "espn_filled": 0,
-    "espn_created": 2,
+    "espn_created": 0,
     "unmatched_espn_names": [],
     "rows_total": 1620,
     "latest_match": "2026-11-22",
@@ -60,7 +60,7 @@
   "serie_a": {
     "errors": [],
     "espn_filled": 0,
-    "espn_created": 5,
+    "espn_created": 0,
     "unmatched_espn_names": [],
     "rows_total": 2019,
     "latest_match": "2026-11-22",
@@ -79,7 +79,7 @@
   "ligue_1": {
     "errors": [],
     "espn_filled": 0,
-    "espn_created": 3,
+    "espn_created": 0,
     "unmatched_espn_names": [],
     "rows_total": 1777,
     "latest_match": "2026-11-22",
@@ -95,5 +95,5 @@
     },
     "offsides_missing_last_2_seasons": 1
   },
-  "_espn_requests_used": 66
+  "_espn_requests_used": 50
 }
