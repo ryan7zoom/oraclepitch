@@ -154,7 +154,7 @@ class TestSim(unittest.TestCase):
         keys = ["res:H", "dc:X2", "h1:D", "h2:A", "btts:Y", "g:tot:O2.5", "g1:h:O0.5", "g2:a:U1.5",
                 "c:tot:O9.5", "s:h:U14.5", "t:a:O2.5"]
         script = ("const atob=b=>Buffer.from(b,'base64').toString('binary');"
-                  "const document={addEventListener(){},querySelector:()=>({dataset:{sim:process.argv[1]}})};"
+                  "const document={addEventListener(){},getElementById:()=>null,documentElement:{getAttribute:()=>null},querySelector:()=>({dataset:{sim:process.argv[1]}})};"
                   + render.JS + "const keys=JSON.parse(process.argv[2]);"
                   "console.log(JSON.stringify(keys.map(k=>joint(0,[k])).concat([joint(0,keys.slice(0,3))])));")
         r = subprocess.run(["node", "-e", script, sim.encode(s), json.dumps(keys)], capture_output=True, text=True)
