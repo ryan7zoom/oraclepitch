@@ -1,37 +1,24 @@
-name: Daily trends dashboard
-
-# Rebuilds docs/index.html from data/matches/*.csv.
-# Runs right after "Update match data" finishes, with timed backups
-# (40 min after each data run) in case the chained trigger is missed.
+name: Daily dashboard
 
 on:
-  workflow_run:
-    workflows: ["Update match data"]
-    types: [completed]
   schedule:
-    - cron: '10 0 * * *'
-    - cron: '10 5 * * *'
-    - cron: '10 13 * * *'
+    - cron: '0 4 * * *'      # UTC 04:00
+    - cron: '0 12 * * *'     # UTC 12:00
+    - cron: '30 23 * * *'    # UTC 23:30 (picks up the evening's results)
   workflow_dispatch:
-    inputs:
-      today:
-        description: 'Pretend today is YYYY-MM-DD (testing only). Leave empty for the real date.'
-        required: false
-        default: ''
 
 permissions:
   contents: write
 
-# One job at a time may write to the repo (shared with update_data.yml).
+# One job at a time may write to the repo.
 concurrency:
   group: repo-write
   cancel-in-progress: false
 
 jobs:
-  dashboard:
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+  build:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
@@ -41,20 +28,19 @@ jobs:
 
       - run: pip install -r requirements.txt
 
-      - name: Build trends dashboard
-        env:
-          TODAY: ${{ github.event.inputs.today }}
-        run: |
-          ARGS=()
-          if [ -n "$TODAY" ]; then ARGS+=(--today "$TODAY"); fi
-          python -m engine.trends.run "${ARGS[@]}" | tee run_summary.txt
-          echo '```' >> "$GITHUB_STEP_SUMMARY"; cat run_summary.txt >> "$GITHUB_STEP_SUMMARY"; echo '```' >> "$GITHUB_STEP_SUMMARY"
+      - name: 1. Update match data (football-data.co.uk + recent ESPN results)
+        run: python -m engine.data.update --espn-budget 150
 
-      - name: Save dashboard to repo
+      - name: 2. Run the model, grade past predictions, build the page
+        run: python -m engine.model.run
+
+      - name: Save to repo
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/index.html data/trends/latest.json
-          git diff --staged --quiet || git commit -m "Update dashboard [skip ci]"
-          git pull --rebase origin "${GITHUB_REF_NAME}"
-          git push
+          git add data docs
+          if ! git diff --staged --quiet; then
+            git commit -m "Daily update [skip ci]"
+            git pull --rebase origin "${GITHUB_REF_NAME}"
+            git push
+          fi

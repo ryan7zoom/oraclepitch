@@ -1,8 +1,6 @@
-name: Update match data
+name: Update match data (manual)
 
 on:
-  schedule:
-    - cron: '30 4,12,23 * * *'   # UTC: 04:30, 12:30, 23:30 (the last catches late evening kickoffs)
   workflow_dispatch:
     inputs:
       espn_budget:
@@ -35,7 +33,7 @@ jobs:
 
       - run: pip install -r requirements.txt
 
-      - name: Update match data
+      - name: Update match data (manual)
         run: |
           ARGS="--espn-budget ${{ github.event.inputs.espn_budget || '600' }}"
           if [ "${{ github.event.inputs.full }}" = "true" ]; then ARGS="$ARGS --full"; fi
