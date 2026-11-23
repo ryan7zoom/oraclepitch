@@ -19,11 +19,9 @@ import config
 from engine.data.store import Store
 from engine.data.espn import EspnClient
 from engine.data.teams import TeamResolver
-from engine.kickoff import kickoff_gmt8
 from engine.model import backtest, ledger, markets, render, sim
 from engine.model.model_io import base_rates
 from engine.model.ratings import LeagueModel, promoted_priors
-from engine.sources.openfootball_source import OpenFootballSource
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 log = logging.getLogger("engine.model.run")
@@ -47,20 +45,19 @@ def scorecard(data_dir, path, now):
 
 
 def collect_fixtures(models, stores, now, today_local, espn=None):
-    """Upcoming matches (today..+2 in GMT+8), exact kickoff times, from ESPN's
-    scoreboard; openfootball is the fallback if ESPN gives nothing for a league."""
+    """Upcoming matches (today..+2 in GMT+8) with exact kickoff times, from ESPN's scoreboard."""
     fixtures, warnings = [], []
     espn = espn or EspnClient(budget=60)
     days = [today_local + timedelta(days=k) for k in range(-1, WINDOW_DAYS + 2)]
     for lg, model in models.items():
         resolver = TeamResolver(lg, stores[lg].names())
-        got = []
+        got, failed = [], False
         try:
             for d in days:
                 got += espn.scoreboard(lg, d)
         except Exception as e:                      # budget / network: fall back below
             log.warning(f"[{lg}] ESPN fixtures failed: {e}")
-            got = []
+            got, failed = [], True
         seen = set()
         for ev in got:
             if ev.completed or ev.kickoff is None or ev.id in seen:
@@ -75,14 +72,8 @@ def collect_fixtures(models, stores, now, today_local, espn=None):
                 continue
             fixtures.append({"league": lg, "date": ko.date(), "home": home, "away": away,
                              "home_name": ev.home_name, "away_name": ev.away_name, "ko_dt": ko})
-        if not got:
-            for fx in OpenFootballSource().get_fixtures_for_date(today_local, league=lg, window_days=WINDOW_DAYS):
-                cur = stores[lg].find(fx.home_team, fx.away_team, fx.date)
-                if (cur is not None and cur.finished) or fx.home_team not in model.count or fx.away_team not in model.count:
-                    continue
-                fixtures.append({"league": lg, "date": fx.date, "home": fx.home_team, "away": fx.away_team,
-                                 "home_name": fx.raw.get("team1") or fx.home_team,
-                                 "away_name": fx.raw.get("team2") or fx.away_team, "ko_dt": kickoff_gmt8(fx, lg)})
+        if failed:
+            warnings.append(f"{LEAGUE_NAMES[lg]}: fixtures unavailable right now (ESPN) - will retry next run")
     return fixtures, warnings
 
 

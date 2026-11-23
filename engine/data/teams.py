@@ -23,7 +23,10 @@ import re
 import unicodedata
 from typing import Optional
 
-from engine.sources.openfootball_source import _TEAM_NAME_MAPPINGS
+try:                                  # optional: older name table, if that file still exists
+    from engine.sources.openfootball_source import _TEAM_NAME_MAPPINGS
+except ImportError:
+    _TEAM_NAME_MAPPINGS = {}
 
 
 def norm(s: str) -> str:
@@ -56,6 +59,8 @@ ALIASES = {
         "espanyol": "Espanol",
         "sporting gijon": "Sp Gijon",
         "deportivo alaves": "Alaves",
+        "deportivo": "La Coruna",
+        "deportivo la coruna": "La Coruna",
     },
     "bundesliga": {
         "eintracht frankfurt": "Ein Frankfurt",
@@ -64,6 +69,8 @@ ALIASES = {
         "fc bayern munchen": "Bayern Munich",
         "1 fc koln": "FC Koln",
         "koln": "FC Koln",
+        "fc cologne": "FC Koln",
+        "cologne": "FC Koln",
         "fc st pauli": "St Pauli",
         "bayer leverkusen": "Leverkusen",
         "bayer 04 leverkusen": "Leverkusen",

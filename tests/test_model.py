@@ -232,3 +232,23 @@ class TestFixturesAndRender(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestSelfContained(unittest.TestCase):
+    def test_new_code_does_not_import_old_modules(self):
+        """The new system must keep working after the old engine files are deleted."""
+        code = ("import sys\n"
+                "for m in ('engine.kickoff','engine.sources','engine.sources.openfootball_source','engine.sources.base',"
+                "'engine.streaks','engine.output','engine.main'): sys.modules[m]=None\n"
+                "import engine.model.run, engine.model.backtest, engine.data.update, engine.data.teams\n"
+                "print('ok')")
+        r = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True,
+                           cwd=os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        self.assertEqual(r.stdout.strip(), "ok", r.stderr)
+
+
+class TestNewAliases(unittest.TestCase):
+    def test_names_from_the_first_live_run(self):
+        from engine.data.teams import TeamResolver
+        self.assertEqual(TeamResolver("la_liga", {"La Coruna", "Celta"}).resolve("Deportivo"), "La Coruna")
+        self.assertEqual(TeamResolver("bundesliga", {"FC Koln", "Stuttgart"}).resolve("FC Cologne"), "FC Koln")
