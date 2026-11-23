@@ -33,33 +33,42 @@ function evalKey(key, v) {
 """
 
 CSS = """
-:root{--bg:#f6f7f9;--card:#fff;--text:#1a1d21;--dim:#6b7280;--line:#e5e7eb;--accent:#2563eb;--fill:#bfdbfe;--good:#15803d;--warn:#b45309}
-:root:not([data-theme=light]){color-scheme:light dark}
-@media (prefers-color-scheme:dark){:root{--bg:#0f1216;--card:#171b21;--text:#e8eaed;--dim:#9aa3af;--line:#262c35;--accent:#60a5fa;--fill:#1e3a5f;--good:#4ade80;--warn:#fbbf24}}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding:12px 12px 120px}
-h1{font-size:20px;margin:4px 0}h2.day{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--dim);margin:20px 4px 8px}
-.sub{color:var(--dim);font-size:12px;margin:0 0 10px}
-.card,.match{background:var(--card);border:1px solid var(--line);border-radius:12px;margin:0 0 10px;overflow:hidden}
-summary{cursor:pointer;padding:12px;list-style:none}summary::-webkit-details-marker{display:none}
-.top{display:flex;gap:8px;font-size:12px;color:var(--dim)}.ko{font-weight:700;color:var(--accent)}
-.teams{font-size:16px;margin:3px 0}.exp{font-size:12px;color:var(--dim)}
-.bar{display:flex;height:6px;border-radius:3px;overflow:hidden;margin:6px 0 2px}.bar i{display:block}
-.chip{display:inline-block;font-size:11px;padding:1px 6px;border-radius:8px;background:var(--line);margin:4px 4px 0 0}.chip.warn{color:var(--warn)}
-.body{padding:0 12px 12px;border-top:1px solid var(--line)}
-.sec{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--dim);margin:14px 0 4px}
-.lh{font-size:12px;color:var(--dim);margin:8px 0 3px}
-.r{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:0 0 5px}.r3{grid-template-columns:repeat(3,1fr)}
-.pb{font:inherit;font-size:14px;color:var(--text);text-align:left;border:1px solid var(--line);border-radius:8px;padding:6px 8px;background:linear-gradient(90deg,var(--fill) calc(var(--p)*1%),transparent 0);cursor:pointer;display:grid;grid-template-columns:1fr auto;column-gap:6px;align-items:baseline;min-width:0}
-.pb span{overflow-wrap:anywhere}.pb b{font-variant-numeric:tabular-nums;white-space:nowrap}.pb i{grid-column:1/-1;font-style:normal;font-size:11px;color:var(--dim)}
-.pb.on{outline:2px solid var(--accent)}.pb.lift b::after{content:" \\25B2";color:var(--good);font-size:10px;white-space:nowrap}
-table{width:100%;border-collapse:collapse;font-size:12px}td,th{padding:4px 6px;text-align:right;border-bottom:1px solid var(--line)}td:first-child,th:first-child{text-align:left}
-.note{font-size:12px;color:var(--dim);margin:8px 12px}.scbody{padding:0 12px 12px}
-#combo{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:10px 12px;display:none;box-shadow:0 -4px 16px rgba(0,0,0,.15)}
-#combo .res{font-size:18px;font-weight:700}#combo .legs{font-size:12px;color:var(--dim);max-height:64px;overflow:auto}
-#combo button{font:inherit;border:1px solid var(--line);background:none;color:var(--text);border-radius:8px;padding:4px 10px;float:right}
+:root{--bg:#f5f5f7;--card:#fff;--text:#1d1d1f;--dim:#6e6e73;--line:#e8e8ed;--accent:#0071e3;--fill:#dbeafe;--good:#248a3d;--warn:#bf4800;--shadow:0 1px 2px rgba(0,0,0,.04),0 6px 24px rgba(0,0,0,.05)}
+:root[data-theme=dark]{--bg:#000;--card:#1c1c1e;--text:#f5f5f7;--dim:#98989d;--line:#2c2c2e;--accent:#0a84ff;--fill:#12304f;--good:#30d158;--warn:#ff9f0a;--shadow:none;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;padding:20px 16px 140px}
+.wrap{max-width:820px;margin:0 auto}
+.head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin:8px 4px 18px}
+h1{font-size:32px;font-weight:700;letter-spacing:-.02em;margin:0}
+.sub{color:var(--dim);font-size:13px;margin:4px 0 0}
+#theme{font:inherit;font-size:13px;color:var(--text);background:var(--card);border:1px solid var(--line);border-radius:980px;padding:7px 14px;cursor:pointer;box-shadow:var(--shadow);white-space:nowrap}
+h2.day{font-size:22px;font-weight:700;letter-spacing:-.01em;margin:34px 4px 12px}
+.card,.match{background:var(--card);border-radius:20px;margin:0 0 16px;overflow:hidden;box-shadow:var(--shadow)}
+:root[data-theme=dark] .card,:root[data-theme=dark] .match{border:1px solid var(--line)}
+summary{cursor:pointer;padding:20px 22px;list-style:none}summary::-webkit-details-marker{display:none}
+.top{display:flex;gap:10px;font-size:13px;color:var(--dim);align-items:center}.ko{font-weight:600;color:var(--accent)}
+.teams{font-size:21px;font-weight:600;letter-spacing:-.01em;margin:6px 0 4px}.teams b{font-weight:600}
+.exp{font-size:13px;color:var(--dim)}
+.bar{display:flex;height:6px;border-radius:3px;overflow:hidden;margin:12px 0 4px;gap:2px}.bar i{display:block;border-radius:3px}
+.chip{display:inline-block;font-size:12px;padding:3px 10px;border-radius:980px;background:var(--bg);margin:8px 6px 0 0}.chip.warn{color:var(--warn)}
+.body{padding:2px 22px 22px;border-top:1px solid var(--line)}
+.sec{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--dim);margin:28px 0 8px}
+.lh{font-size:14px;font-weight:500;margin:16px 0 8px}
+.r{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 10px}.r3{grid-template-columns:repeat(3,1fr)}
+.pb{font:inherit;font-size:15px;color:var(--text);text-align:left;border:1px solid var(--line);border-radius:14px;padding:11px 14px;background:linear-gradient(90deg,var(--fill) calc(var(--p)*1%),var(--card) 0);cursor:pointer;display:grid;grid-template-columns:1fr auto;column-gap:8px;align-items:baseline;min-width:0;transition:transform .08s}
+.pb:active{transform:scale(.98)}
+.pb span{overflow-wrap:anywhere}.pb b{font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:600}.pb i{grid-column:1/-1;font-style:normal;font-size:12px;color:var(--dim);margin-top:2px}
+.pb.on{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}.pb.lift b::after{content:" \\25B2";color:var(--good);font-size:10px;white-space:nowrap}
+table{width:100%;border-collapse:collapse;font-size:14px}td,th{padding:8px 6px;text-align:right;border-bottom:1px solid var(--line)}td:first-child,th:first-child{text-align:left}th{color:var(--dim);font-weight:500;font-size:12px}
+.note{font-size:13px;color:var(--dim);margin:12px 4px}.scbody{padding:0 22px 22px}
+#combo{position:fixed;left:12px;right:12px;bottom:12px;max-width:796px;margin:0 auto;background:var(--card);border-radius:20px;padding:16px 18px;display:none;box-shadow:0 8px 40px rgba(0,0,0,.18);border:1px solid var(--line)}
+#combo .res{font-size:20px;font-weight:700;letter-spacing:-.01em}#combo .legs{font-size:13px;color:var(--dim);max-height:64px;overflow:auto;margin-top:4px}
+#combo button{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--bg);color:var(--text);border-radius:980px;padding:6px 14px;float:right;cursor:pointer}
+@media (max-width:520px){body{padding:14px 10px 140px}h1{font-size:28px}summary{padding:16px}.body{padding:2px 16px 18px}.teams{font-size:19px}.r3{grid-template-columns:1fr}}
 """
 
 JS = JS_EVAL + r"""
+(function(){const b=document.getElementById('theme');if(b)b.textContent=document.documentElement.getAttribute('data-theme')==='dark'?'Light mode':'Dark mode';})();
 const COLS = ['g_h','g_a','c_h','c_a','s_h','s_a','t_h','t_a','g1_h','g1_a'];
 const sims = {}; const legs = {};
 function simOf(i){
@@ -83,6 +92,10 @@ function refresh(){
   bar.querySelector('.legs').textContent=txt.join('  |  ');
 }
 document.addEventListener('click',e=>{
+  if(e.target.id==='theme'){const r=document.documentElement;const d=r.getAttribute('data-theme')==='dark';
+    if(d){r.removeAttribute('data-theme');}else{r.setAttribute('data-theme','dark');}
+    try{localStorage.setItem('op-theme',d?'light':'dark');}catch(x){}
+    e.target.textContent=d?'Dark mode':'Light mode';return;}
   const b=e.target.closest('.pb');if(b){const i=b.closest('.match').dataset.i;legs[i]=legs[i]||new Set();
     const k=b.dataset.k;if(legs[i].has(k)){legs[i].delete(k);b.classList.remove('on');}else{legs[i].add(k);b.classList.add('on');}refresh();}
   if(e.target.id==='clear'){Object.keys(legs).forEach(i=>legs[i].clear());document.querySelectorAll('.pb.on').forEach(x=>x.classList.remove('on'));refresh();}
@@ -186,9 +199,8 @@ def scorecard_html(card, live, data_through):
 
 def render(preds, card, live, updated, data_through, warnings) -> str:
     out = [f"<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1,viewport-fit=cover'>"
-           f"<title>OraclePitch</title><style>{CSS}</style></head><body>",
-           "<h1>OraclePitch</h1>",
-           f"<p class='sub'>Updated {esc(updated)} (GMT+8) &middot; match data through {esc(data_through)}</p>",
+           f"<title>OraclePitch</title><script>try{{var t=localStorage.getItem('op-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}}catch(e){{}}</script><style>{CSS}</style></head><body><div class='wrap'>",
+           f"<div class='head'><div><h1>OraclePitch</h1><p class='sub'>Updated {esc(updated)} (GMT+8) &middot; match data through {esc(data_through)}</p></div><button id='theme'>Dark mode</button></div>",
            scorecard_html(card, live, data_through)]
     day = None
     for i, p in enumerate(preds):
@@ -211,6 +223,6 @@ def render(preds, card, live, updated, data_through, warnings) -> str:
     if warnings:
         out.append("<p class='note'>" + esc(" | ".join(warnings)) + "</p>")
     out.append("<p class='note'>Percentages are the model's chance. &ldquo;league avg&rdquo; is how often that line hit across recent league matches; &#9650; marks lines this matchup makes clearly likelier. Tap any lines to see their combined chance.</p>")
-    out.append("<div id='combo'><button id='clear'>Clear</button><div class='res'></div><div class='sub2 sub'></div><div class='legs'></div></div>")
+    out.append("</div><div id='combo'><button id='clear'>Clear</button><div class='res'></div><div class='sub2 sub'></div><div class='legs'></div></div>")
     out.append(f"<script>{JS}</script></body></html>")
     return "".join(out)
