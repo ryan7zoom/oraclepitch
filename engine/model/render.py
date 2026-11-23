@@ -57,9 +57,18 @@ summary{cursor:pointer;padding:20px 22px;list-style:none}summary::-webkit-detail
 .r{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 10px}.r3{grid-template-columns:repeat(3,1fr)}
 .pb{font:inherit;font-size:15px;color:var(--text);text-align:left;border:1px solid var(--line);border-radius:14px;padding:11px 14px;background:linear-gradient(90deg,var(--fill) calc(var(--p)*1%),var(--card) 0);cursor:pointer;display:grid;grid-template-columns:1fr auto;column-gap:8px;align-items:baseline;min-width:0;transition:transform .08s}
 .pb:active{transform:scale(.98)}
-.pb span{overflow-wrap:anywhere}.pb b{font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:600}.pb i{grid-column:1/-1;font-style:normal;font-size:12px;color:var(--dim);margin-top:2px}
+.pb span{overflow-wrap:anywhere}.pb b{font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:600}.pb b .od{font-size:13px}.pb i{grid-column:1/-1;font-style:normal;font-size:12px;color:var(--dim);margin-top:2px}
 .pb.on{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}.pb.lift b::after{content:" \\25B2";color:var(--good);font-size:10px;white-space:nowrap}
 table{width:100%;border-collapse:collapse;font-size:14px}td,th{padding:8px 6px;text-align:right;border-bottom:1px solid var(--line)}td:first-child,th:first-child{text-align:left}th{color:var(--dim);font-weight:500;font-size:12px}
+.sect{border-bottom:1px solid var(--line)}.sect:last-child{border-bottom:0}
+.sect>summary{padding:15px 2px;display:flex;align-items:center;gap:10px;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--dim)}
+.sect>summary::before{content:"";flex:none;border-left:7px solid var(--accent);border-top:5px solid transparent;border-bottom:5px solid transparent;transition:transform .15s}
+.sect[open]>summary::before{transform:rotate(90deg)}
+.sect[open]>summary{color:var(--text)}
+.sect .hl{margin-left:auto;text-align:right;text-transform:none;letter-spacing:0;font-weight:500;font-size:13px;color:var(--dim)}
+.sect[open] .hl{display:none}
+.sect .inner{padding:0 0 12px}
+.od{font-weight:700;color:var(--accent);margin-left:4px}
 .note{font-size:13px;color:var(--dim);margin:12px 4px}.scbody{padding:0 22px 22px}
 #combo{position:fixed;left:12px;right:12px;bottom:12px;max-width:796px;margin:0 auto;background:var(--card);border-radius:20px;padding:16px 18px;display:none;box-shadow:0 8px 40px rgba(0,0,0,.18);border:1px solid var(--line)}
 #combo .res{font-size:20px;font-weight:700;letter-spacing:-.01em}#combo .legs{font-size:13px;color:var(--dim);max-height:64px;overflow:auto;margin-top:4px}
@@ -69,6 +78,7 @@ table{width:100%;border-collapse:collapse;font-size:14px}td,th{padding:8px 6px;t
 
 JS = JS_EVAL + r"""
 (function(){const b=document.getElementById('theme');if(b)b.textContent=document.documentElement.getAttribute('data-theme')==='dark'?'Light mode':'Dark mode';})();
+const odds=p=>p>0?Math.min(1/p,100).toFixed(2):'100.00';
 const COLS = ['g_h','g_a','c_h','c_a','s_h','s_a','t_h','t_a','g1_h','g1_a'];
 const sims = {}; const legs = {};
 function simOf(i){
@@ -87,8 +97,8 @@ function refresh(){
     keys.forEach(k=>{const b=document.querySelector('.match[data-i="'+i+'"] .pb[data-k="'+k+'"]');
       naive*=parseFloat(b.dataset.p);txt.push(b.dataset.label);});});
   bar.style.display='block';
-  bar.querySelector('.res').textContent=n+' leg'+(n>1?'s':'')+': '+(p*100).toFixed(1)+'% together';
-  bar.querySelector('.sub2').textContent=n>1?('(multiplying them as if independent: '+(naive*100).toFixed(1)+'%)'):'';
+  bar.querySelector('.res').textContent=n+' leg'+(n>1?'s':'')+': '+(p*100).toFixed(1)+'% @'+odds(p)+' together';
+  bar.querySelector('.sub2').textContent=n>1?('(multiplying them as if independent: '+(naive*100).toFixed(1)+'% @'+odds(naive)+')'):'';
   bar.querySelector('.legs').textContent=txt.join('  |  ');
 }
 document.addEventListener('click',e=>{
@@ -111,12 +121,34 @@ def pct(x):
     return f"{x * 100:.0f}"
 
 
+def odds(p):
+    """Fair decimal odds (1 / probability, no bookmaker margin), capped at 100."""
+    return f"{min(1 / p, 100.0):.2f}" if p > 0 else "100.00"
+
+
+def pick(pr, items):
+    """Likeliest of (key, label) items -> '<label> 55% @1.82' for a section header."""
+    k, lab = max(items, key=lambda t: pr[t[0]])
+    return f"{lab} {pct(pr[k])}% <span class='od'>@{odds(pr[k])}</span>"
+
+
+def mid_line(pr, scope):
+    """Total line of a scope whose Over is closest to 50% (the 'main' line)."""
+    lines = markets.LINES[scope]["tot"]
+    return min(lines, key=lambda ln: abs(pr[f"{scope}:tot:O{ln}"] - 0.5))
+
+
+def sect(title, headline, inner):
+    return (f"<details class='sect'><summary><span>{esc(title)}</span><span class='hl'>{headline}</span></summary>"
+            f"<div class='inner'>{inner}</div></details>")
+
+
 def btn(i, key, label, p, base, full_label):
     lift = base is not None and p - base >= 0.08
     lg = f"<i>league avg {pct(base)}%</i>" if base is not None else ""
     return (f'<button class="pb{" lift" if lift else ""}" data-k="{esc(key)}" data-p="{p:.4f}" '
             f'data-label="{esc(full_label)}" style="--p:{p * 100:.0f}">'
-            f"<span>{esc(label)}</span><b>{pct(p)}%</b>{lg}</button>")
+            f"<span>{esc(label)}</span><b>{pct(p)}% <span class='od'>@{odds(p)}</span></b>{lg}</button>")
 
 
 def ladder(i, scope, who, title, probs, base, home, away):
@@ -138,36 +170,49 @@ def ladder(i, scope, who, title, probs, base, home, away):
 
 
 def match_body(i, pr, base, home, away):
-    h = []
+    sections = []
+
     def trio(prefix, items):
         cells = "".join(btn(i, f"{prefix}:{k}", lab, pr[f"{prefix}:{k}"], base.get(f"{prefix}:{k}"), full)
                         for k, lab, full in items)
         return f'<div class="r r3">{cells}</div>'
-    h.append('<div class="sec">Result</div>')
-    h.append(trio("res", [("H", home, f"{home} to win"), ("D", "Draw", "draw"), ("A", away, f"{away} to win")]))
-    h.append(trio("dc", [("1X", f"{home} or draw", f"{home} or draw"), ("X2", f"{away} or draw", f"{away} or draw"), ("12", "No draw", "no draw")]))
-    h.append('<div class="sec">Goals</div>')
-    h.append(ladder(i, "g", "tot", "Total goals", pr, base, home, away))
-    h.append(ladder(i, "g", "h", f"{home} goals", pr, base, home, away))
-    h.append(ladder(i, "g", "a", f"{away} goals", pr, base, home, away))
-    h.append('<div class="r">' + btn(i, "btts:Y", "Both teams score", pr["btts:Y"], base.get("btts:Y"), "both teams to score")
+
+    def result_pick(prefix, what=""):
+        return pick(pr, [(f"{prefix}:H", f"{home}{what}"), (f"{prefix}:D", "Draw"), (f"{prefix}:A", f"{away}{what}")])
+
+    # Result
+    inner = trio("res", [("H", home, f"{home} to win"), ("D", "Draw", "draw"), ("A", away, f"{away} to win")])
+    inner += trio("dc", [("1X", f"{home} or draw", f"{home} or draw"), ("X2", f"{away} or draw", f"{away} or draw"), ("12", "No draw", "no draw")])
+    sections.append(sect("Result", result_pick("res", " to win"), inner))
+
+    # Goals
+    inner = (ladder(i, "g", "tot", "Total goals", pr, base, home, away)
+             + ladder(i, "g", "h", f"{home} goals", pr, base, home, away)
+             + ladder(i, "g", "a", f"{away} goals", pr, base, home, away)
+             + '<div class="r">' + btn(i, "btts:Y", "Both teams score", pr["btts:Y"], base.get("btts:Y"), "both teams to score")
              + btn(i, "btts:N", "Not both", pr["btts:N"], base.get("btts:N"), "not both teams to score") + "</div>")
+    sections.append(sect("Goals", pick(pr, [("g:tot:O2.5", "Over 2.5"), ("g:tot:U2.5", "Under 2.5")]), inner))
+
+    # Halves
     for hk, name in (("h1", "1st half"), ("h2", "2nd half")):
         sc = "g1" if hk == "h1" else "g2"
-        h.append(f'<div class="sec">{name}</div>')
-        h.append(trio(hk, [("H", home, f"{home} to win the {name}"), ("D", "Draw", f"{name} draw"), ("A", away, f"{away} to win the {name}")]))
-        h.append(ladder(i, sc, "tot", f"{name} total goals", pr, base, home, away))
-        h.append(ladder(i, sc, "h", f"{home} {name} goals", pr, base, home, away))
-        h.append(ladder(i, sc, "a", f"{away} {name} goals", pr, base, home, away))
+        inner = (trio(hk, [("H", home, f"{home} to win the {name}"), ("D", "Draw", f"{name} draw"), ("A", away, f"{away} to win the {name}")])
+                 + ladder(i, sc, "tot", f"{name} total goals", pr, base, home, away)
+                 + ladder(i, sc, "h", f"{home} {name} goals", pr, base, home, away)
+                 + ladder(i, sc, "a", f"{away} {name} goals", pr, base, home, away))
+        sections.append(sect(name, result_pick(hk), inner))
+
+    # Corners / shots / shots on target
     for sc in ("c", "s", "t"):
         if f"{sc}:tot:O{markets.LINES[sc]['tot'][0]}" not in pr:
             continue
         name = markets.SCOPE_NAME[sc]
-        h.append(f'<div class="sec">{name}</div>')
-        h.append(ladder(i, sc, "tot", f"Total {name.lower()}", pr, base, home, away))
-        h.append(ladder(i, sc, "h", f"{home} {name.lower()}", pr, base, home, away))
-        h.append(ladder(i, sc, "a", f"{away} {name.lower()}", pr, base, home, away))
-    return "".join(h)
+        inner = (ladder(i, sc, "tot", f"Total {name.lower()}", pr, base, home, away)
+                 + ladder(i, sc, "h", f"{home} {name.lower()}", pr, base, home, away)
+                 + ladder(i, sc, "a", f"{away} {name.lower()}", pr, base, home, away))
+        ln = mid_line(pr, sc)
+        sections.append(sect(name, pick(pr, [(f"{sc}:tot:O{ln}", f"Over {ln}"), (f"{sc}:tot:U{ln}", f"Under {ln}")]), inner))
+    return "".join(sections)
 
 
 def scorecard_html(card, live, data_through):
@@ -215,14 +260,14 @@ def render(preds, card, live, updated, data_through, warnings) -> str:
             f"<section class='match' data-i='{i}' data-sim='{p['sim']}'><details><summary>"
             f"<div class='top'><span class='lg'>{esc(p['league_name'])}</span><span class='ko'>{esc(p['kickoff'])}</span></div>"
             f"<div class='teams'><b>{esc(home)}</b> vs <b>{esc(away)}</b></div>"
-            f"<div class='exp'>Expected goals {eh:.1f} &ndash; {ea:.1f} &middot; Home {pct(hw)}% &middot; Draw {pct(dr)}% &middot; Away {pct(aw)}%</div>"
+            f"<div class='exp'>Expected goals {eh:.1f} &ndash; {ea:.1f} &middot; Home {pct(hw)}% <span class='od'>@{odds(hw)}</span> &middot; Draw {pct(dr)}% <span class='od'>@{odds(dr)}</span> &middot; Away {pct(aw)}% <span class='od'>@{odds(aw)}</span></div>"
             f"<div class='bar'><i style='width:{hw * 100:.0f}%;background:var(--accent)'></i><i style='width:{dr * 100:.0f}%;background:var(--dim)'></i><i style='width:{aw * 100:.0f}%;background:var(--warn)'></i></div>"
             f"{chips}</summary><div class='body'>{match_body(i, pr, p['base'], home, away)}</div></details></section>")
     if not preds:
         out.append("<p class='note'>No fixtures found in the next 3 days.</p>")
     if warnings:
         out.append("<p class='note'>" + esc(" | ".join(warnings)) + "</p>")
-    out.append("<p class='note'>Percentages are the model's chance. &ldquo;league avg&rdquo; is how often that line hit across recent league matches; &#9650; marks lines this matchup makes clearly likelier. Tap any lines to see their combined chance.</p>")
+    out.append("<p class='note'>Percentages are the model's chance; the @ figure is the fair decimal price for that chance (1 &divide; probability, no bookmaker margin), so a bookmaker price above it is value in the model's eyes. Tap a section to open it. &ldquo;league avg&rdquo; is how often that line hit across recent league matches; &#9650; marks lines this matchup makes clearly likelier. Tap any lines to see their combined chance.</p>")
     out.append("</div><div id='combo'><button id='clear'>Clear</button><div class='res'></div><div class='sub2 sub'></div><div class='legs'></div></div>")
     out.append(f"<script>{JS}</script></body></html>")
     return "".join(out)
