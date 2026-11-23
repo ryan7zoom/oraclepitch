@@ -6,10 +6,10 @@ Daily match-data update:  python -m engine.data.update
 For each of the five leagues:
   1. football-data.co.uk: refetch the current season (older seasons only the
      first time, or with --full) and merge into data/matches/<league>.csv.
-  2. ESPN: pass 1 (every league first): add matches finished in the last few
-     days that football-data has not posted yet. Pass 2: fill OFFSIDES for older
-     matches, newest first, with what is left of the budget split EQUALLY
-     across leagues. Later runs continue where it stopped.
+  2. ESPN: (a) add matches finished in the last few days that football-data
+     has not posted yet, and (b) fill OFFSIDES for recent matches, newest
+     first, until the per-run request budget is used up. The first run does
+     not finish the offsides backfill - later runs continue where it stopped.
   3. Write data/matches/_report.json and print a summary (coverage per stat,
      latest date, ESPN team names that could not be matched).
 
@@ -55,22 +55,19 @@ def update_football_data(store: Store, league: str, today, session, full: bool, 
         logger.info(f"[{league}] football-data {season}: {len(matches)} matches")
 
 
-def update_espn(store: Store, league: str, today, espn, report: dict, phase: str = "recent") -> None:
-    """phase "recent": the last ESPN_RECENT_DAYS days (new matches + their stats).
-    phase "backfill": older matches that still lack offsides. Run "recent" for ALL
-    leagues first, so no league is starved by another one's backfill."""
+def update_espn(store: Store, league: str, today, espn, report: dict) -> None:
     resolver = TeamResolver(league, store.names())
     first_season = season_of(today) - (config.OFFSIDES_SEASONS - 1)
-    recent = {today - timedelta(days=k) for k in range(config.ESPN_RECENT_DAYS)}
 
+    fill = config.ESPN_FILL_OFFSIDES
     need_by_date = defaultdict(list)
     for m in store.rows:
-        if (m.season >= first_season and m.needs_offsides
-                and m.espn_tried < config.ESPN_MAX_TRIES
-                and ((m.date in recent) == (phase == "recent"))):
+        if (fill and m.season >= first_season and m.needs_offsides
+                and m.espn_tried < config.ESPN_MAX_TRIES):
             need_by_date[m.date].append(m)
 
-    dates = sorted(recent if phase == "recent" else set(need_by_date), reverse=True)
+    recent = {today - timedelta(days=k) for k in range(config.ESPN_RECENT_DAYS)}
+    dates = sorted(set(need_by_date) | recent, reverse=True)
     created = filled = 0
 
     try:
@@ -86,7 +83,7 @@ def update_espn(store: Store, league: str, today, espn, report: dict, phase: str
                 row = store.find(home, away, ev.date)
                 if row is not None:
                     touched.add(id(row))
-                    if not row.needs_offsides:
+                    if not fill or not row.needs_offsides:
                         continue
                 stats = espn.summary(league, ev.id)
                 if stats is None:
@@ -114,9 +111,8 @@ def update_espn(store: Store, league: str, today, espn, report: dict, phase: str
         logger.info(f"[{league}] ESPN request budget used up - will continue next run")
         report["budget_exhausted"] = True
 
-    report["espn_filled"] = report.get("espn_filled", 0) + filled
-    report["espn_created"] = report.get("espn_created", 0) + created
-    report["unmatched_espn_names"] = sorted(set(report.get("unmatched_espn_names", [])) | resolver.unmatched)
+    report["espn_filled"], report["espn_created"] = filled, created
+    report["unmatched_espn_names"] = sorted(resolver.unmatched)
     if resolver.unmatched:
         logger.warning(f"[{league}] ESPN names not matched: {sorted(resolver.unmatched)}")
 
@@ -136,28 +132,17 @@ def run(today, leagues, budget: int, full: bool, use_espn: bool, espn=None) -> d
     session = make_session()
     if use_espn and espn is None:
         espn = EspnClient(budget=budget, session=session)
-    stores, reports = {}, {}
-    for league in leagues:
-        reports[league] = {"errors": []}
-        stores[league] = Store(league, os.path.join(config.MATCH_DATA_DIR, f"{league}.csv"))
-        stores[league].load()
-        update_football_data(stores[league], league, today, session, full, reports[league])
-
-    if use_espn:
-        total = espn.budget
-        for league in leagues:                       # pass 1: recent days, every league
-            update_espn(stores[league], league, today, espn, reports[league], "recent")
-        for i, league in enumerate(leagues):         # pass 2: offsides backfill, equal shares
-            share = max(0, (total - espn.used) // (len(leagues) - i))
-            espn.budget = espn.used + share
-            update_espn(stores[league], league, today, espn, reports[league], "backfill")
-        espn.budget = total
-
     full_report = {}
     for league in leagues:
-        build_report(stores[league], today, reports[league])
-        stores[league].save()
-        full_report[league] = reports[league]
+        report = {"errors": []}
+        store = Store(league, os.path.join(config.MATCH_DATA_DIR, f"{league}.csv"))
+        store.load()
+        update_football_data(store, league, today, session, full, report)
+        if use_espn:
+            update_espn(store, league, today, espn, report)
+        build_report(store, today, report)
+        store.save()
+        full_report[league] = report
     if use_espn:
         full_report["_espn_requests_used"] = espn.used
     return full_report

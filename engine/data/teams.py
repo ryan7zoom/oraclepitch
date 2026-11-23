@@ -23,10 +23,7 @@ import re
 import unicodedata
 from typing import Optional
 
-try:                                    # old table: optional, used only if still present
-    from engine.sources.openfootball_source import _TEAM_NAME_MAPPINGS
-except Exception:                       # pragma: no cover
-    _TEAM_NAME_MAPPINGS = {}
+from engine.sources.openfootball_source import _TEAM_NAME_MAPPINGS
 
 
 def norm(s: str) -> str:
@@ -59,10 +56,6 @@ ALIASES = {
         "espanyol": "Espanol",
         "sporting gijon": "Sp Gijon",
         "deportivo alaves": "Alaves",
-        # football-data spells A Coruna's club "La Coruna"; first spelling present in the data wins
-        "deportivo": ("La Coruna", "Deportivo", "Deportivo La Coruna"),
-        "deportivo la coruna": ("La Coruna", "Deportivo", "Deportivo La Coruna"),
-        "racing santander": ("Santander", "Racing Santander"),
     },
     "bundesliga": {
         "eintracht frankfurt": "Ein Frankfurt",
@@ -74,11 +67,6 @@ ALIASES = {
         "fc st pauli": "St Pauli",
         "bayer leverkusen": "Leverkusen",
         "bayer 04 leverkusen": "Leverkusen",
-        "fc cologne": "FC Koln",
-        "cologne": "FC Koln",
-        "1 fc cologne": "FC Koln",
-        "hamburger sv": "Hamburg",
-        "hamburg sv": "Hamburg",
     },
     "serie_a": {
         "inter milan": "Inter",
@@ -95,7 +83,6 @@ ALIASES = {
         "stade brestois": "Brest",
         "saint etienne": "St Etienne",
         "as saint etienne": "St Etienne",
-        "stade brestois 29": "Brest",
     },
 }
 
@@ -118,10 +105,9 @@ class TeamResolver:
 
     def _resolve(self, name: str) -> Optional[str]:
         n = norm(name)
-        alias = ALIASES.get(self.league, {}).get(n) or ()
-        for cand in ((alias,) if isinstance(alias, str) else alias):
-            if cand in self.canon:
-                return cand
+        alias = ALIASES.get(self.league, {}).get(n)
+        if alias in self.canon:
+            return alias
         legacy = _TEAM_NAME_MAPPINGS.get(self.league, {}).get(name)
         if legacy in self.canon:
             return legacy

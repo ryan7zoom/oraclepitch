@@ -18,7 +18,7 @@ import logging
 import re
 import time
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Optional
 
 from engine.data import http
@@ -61,8 +61,7 @@ class EspnEvent:
     home_score: Optional[int]
     away_score: Optional[int]
     ht: Optional[tuple]     # (home, away) half-time goals, or None
-    kickoff: Optional[datetime] = None   # aware UTC datetime of kickoff, when ESPN gives it
-    state: str = ""                      # ESPN status: "pre" (not started), "in", "post"
+    kickoff: object = None  # timezone-aware UTC datetime
 
 
 class EspnClient:
@@ -144,6 +143,17 @@ def half_time_from_details(details: list, home_id: str, away_id: str,
     return None
 
 
+def _parse_kickoff(s: str):
+    """'2026-11-21T17:30Z' -> aware UTC datetime (None if unparseable)."""
+    from datetime import timezone
+    for fmt in ("%Y-%m-%dT%H:%MZ", "%Y-%m-%dT%H:%M:%SZ"):
+        try:
+            return datetime.strptime(s, fmt).replace(tzinfo=timezone.utc)
+        except ValueError:
+            pass
+    return None
+
+
 def parse_event(ev: dict) -> Optional[EspnEvent]:
     try:
         comp = ev["competitions"][0]
@@ -151,23 +161,16 @@ def parse_event(ev: dict) -> Optional[EspnEvent]:
         home, away = sides["home"], sides["away"]
         completed = bool(ev.get("status", {}).get("type", {}).get("completed"))
         d = datetime.strptime(ev["date"][:10], "%Y-%m-%d").date()
+        kickoff = _parse_kickoff(ev["date"])
         hs, as_ = _int(home.get("score")), _int(away.get("score"))
         ht = None
         if completed and hs is not None and as_ is not None:
             ht = half_time_from_details(
                 comp.get("details"), home["team"]["id"], away["team"]["id"], hs, as_)
-        kickoff = None
-        try:
-            kickoff = datetime.fromisoformat(str(ev["date"]).replace("Z", "+00:00"))
-            if kickoff.tzinfo is None:
-                kickoff = kickoff.replace(tzinfo=timezone.utc)
-        except ValueError:
-            pass
-        state = str(ev.get("status", {}).get("type", {}).get("state") or "")
         return EspnEvent(
             id=str(ev["id"]), date=d, completed=completed,
             home_name=home["team"]["displayName"], away_name=away["team"]["displayName"],
-            home_score=hs, away_score=as_, ht=ht, kickoff=kickoff, state=state,
+            home_score=hs, away_score=as_, ht=ht, kickoff=kickoff,
         )
     except (KeyError, IndexError, TypeError, ValueError):
         return None
