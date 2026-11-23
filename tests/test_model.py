@@ -229,6 +229,22 @@ class TestFixturesAndRender(unittest.TestCase):
         self.assertIn("only 12 league games", page)
         self.assertIn("Does it work?", page)
 
+    def test_sections_collapsed_and_odds_shown(self):
+        import re
+        p = params()
+        pred = {"league_name": "Premier League", "kickoff": "22:00", "day": "Sun 22 Nov", "home_name": "H",
+                "away_name": "A", "params": p, "probs": markets.probs(p), "base": {}, "thin": [],
+                "sim": sim.encode(sim.simulate(p, None, n=200))}
+        card = {"markets": {}, "pooled": {"buckets": []}, "matches_tested": 1, "period": "x",
+                "builder": {"n": 1, "avg_joint_model": .9, "avg_product_if_independent": .89, "actual_all_three_hit": .9}}
+        page = render.render([pred], card, ledger.new_live(), "22 Nov 10:00", "2026-11-21", [])
+        self.assertIsNone(re.search(r"<details[^>]*\bopen\b", page))        # nothing opens by default
+        self.assertGreaterEqual(page.count("<details class='sect'>"), 5)       # every section is collapsible
+        n_btn = page.count('class="pb')
+        self.assertEqual(len(re.findall(r"class='od'>@\d+\.\d\d", page)) >= n_btn, True)   # every option has odds
+        self.assertEqual(render.odds(0.8), "1.25")
+        self.assertEqual(render.odds(0.0), "100.00")
+
 
 if __name__ == "__main__":
     unittest.main()
