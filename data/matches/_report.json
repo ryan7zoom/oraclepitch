@@ -1,12 +1,12 @@
 {
-  "run_at": "2026-11-23T14:04:36.222212+00:00",
+  "run_at": "2026-11-23T23:21:06.434465+00:00",
   "epl": {
     "errors": [],
     "espn_filled": 0,
-    "espn_created": 0,
+    "espn_created": 1,
     "unmatched_espn_names": [],
-    "rows_total": 2009,
-    "latest_match": "2026-11-22",
+    "rows_total": 2010,
+    "latest_match": "2026-11-23",
     "coverage_last_2_seasons_pct": {
       "ft_h": 100.0,
       "ht_h": 100.0,
@@ -22,10 +22,10 @@
   "la_liga": {
     "errors": [],
     "espn_filled": 0,
-    "espn_created": 0,
+    "espn_created": 1,
     "unmatched_espn_names": [],
-    "rows_total": 2028,
-    "latest_match": "2026-11-22",
+    "rows_total": 2029,
+    "latest_match": "2026-11-23",
     "coverage_last_2_seasons_pct": {
       "ft_h": 100.0,
       "ht_h": 100.0,
@@ -60,10 +60,10 @@
   "serie_a": {
     "errors": [],
     "espn_filled": 0,
-    "espn_created": 0,
+    "espn_created": 1,
     "unmatched_espn_names": [],
-    "rows_total": 2019,
-    "latest_match": "2026-11-22",
+    "rows_total": 2020,
+    "latest_match": "2026-11-23",
     "coverage_last_2_seasons_pct": {
       "ft_h": 100.0,
       "ht_h": 100.0,
@@ -95,5 +95,5 @@
     },
     "offsides_missing_last_2_seasons": 1
   },
-  "_espn_requests_used": 50
+  "_espn_requests_used": 53
 }
